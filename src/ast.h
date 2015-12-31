@@ -1,9 +1,6 @@
 #ifndef __AST_H__
 #define __AST_H__
 
-#include "llvm/IR/Value.h"
-#include "llvm/IR/instruction.h"
-
 #include <string>
 #include <map>
 #include <vector>
@@ -11,7 +8,6 @@
 #include <sstream>
 
 //used forward-declaration to deal with cross-reference issue
-class CodeGenContext;
 
 // namespace ast start
 namespace ast {
@@ -70,23 +66,25 @@ public:
 
     virtual std::vector<Node *> getChildren() { return *(new std::vector<Node *>()); }
     virtual ~Node() {}
-    virtual std::string toString() = 0;
-    virtual llvm::Value *CodeGen(CodeGenContext& context) = 0;
+    virtual std::string toString(){
+        return "node";
+    };
+    virtual void run() = 0;
 };
 class Statement : public Node {
 public:
     Statement() {};
 
-    virtual llvm::Value *CodeGen(CodeGenContext& context) {}
+    virtual void run() {}
     virtual std::vector<Statement*> *getlist(){}
 };
 
 class StatementList : public Statement{
 public:
     std::vector<Statement*> list;
-    virtual llvm::Value *CodeGen(CodeGenContext& context) {
+    virtual void run() {
         for (auto stmt: list){
-            stmt->CodeGen(context);
+            stmt->run();
         }
     }
     virtual std::string toString(){ return "stmt_list";}
@@ -120,7 +118,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "Program start"; }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class Routine : public Program {
@@ -163,12 +161,12 @@ public:
         return list;
     }
     virtual std::string toString() { return routine_type == RoutineType::function ? "Function" : "Procedure"; }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class Expression : public Node {
 public:
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class LabelDecl : public Statement {
@@ -216,9 +214,8 @@ public:
         else                                throw std::logic_error("Unimplemented type");
     }
     
-    llvm::Type* toLLVMType();
     virtual std::string toString() { return raw_name; }
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class ArrayType: public Statement {
@@ -228,7 +225,7 @@ public:
 
     ArrayType(TypeDecl* ss, TypeDecl* at) : subscript(ss), array_type(at) {}
     virtual std::string toString() { return "Array of " + (array_type ? array_type->raw_name : "#error"); }
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class FieldDecl: public Statement {
@@ -237,7 +234,7 @@ public:
     TypeDecl*   second; 
     FieldDecl(Identifier* first, TypeDecl* second) : first(first), second(second) {}
     virtual std::string toString() { return "FieldDecl"; }
-    virtual llvm::Value* CodeGen(CodeGenContext& context) {}
+    virtual void run() {}
 };
 
 class RecordType: public Statement {
@@ -246,7 +243,7 @@ public:
 
     RecordType(FieldDeclList* list) : field_list(list)  {} 
     virtual std::string toString() { return "RecordType"; }
-    virtual llvm::Value* CodeGen(CodeGenContext& context) {}
+    virtual void run() {}
 };
 class Identifier : public Expression {
 public:
@@ -255,7 +252,7 @@ public:
     Identifier(const std::string& name) : name(name) {}
     Identifier(const char * ptr_s) : name(*(new std::string(ptr_s))) {}
     virtual std::string toString() { return "Identifier: " + name; }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class ArrayRef : public Expression {
@@ -264,9 +261,8 @@ public:
     Expression*     index = nullptr;
 
     ArrayRef(Identifier* array, Expression* index) : array(array), index(index) {}
-    llvm::Value* getRef(CodeGenContext& context);
     virtual std::string toString() { return "ArrayRef: " + array->name; }
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class RecordRef : public Expression {
@@ -276,7 +272,7 @@ public:
 
     RecordRef(Identifier* record, Identifier* field) : record(record), field(field) {}
     virtual std::string toString() { return "RecordRef"; }
-    virtual llvm::Value* CodeGen(CodeGenContext& context) {}
+    virtual void run() {}
 };
 
 
@@ -303,7 +299,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "TypeConst"; }
-    virtual llvm::Value* CodeGen(CodeGenContext& context) {}
+    virtual void run() {}
 };
 
 
@@ -327,7 +323,7 @@ public:
         return list;
     }
     virtual std::string toString() { std::stringstream oss; oss << "Const " << name->name << ":" << val->toRange(); return oss.str(); }
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 
@@ -345,7 +341,7 @@ public:
         return list;
     }
     std::string toString() { return "VarDecl"; }
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 class IntegerType : public ConstValue {
 public:
@@ -355,7 +351,7 @@ public:
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::integer; }
     virtual int toRange() { return val; }
     virtual std::string toString() { return [=]() {std::stringstream oss; oss << val; return oss.str(); }(); }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class RealType : public ConstValue {
@@ -368,7 +364,7 @@ public:
     virtual int toRange() { return 0; }
     virtual bool notRange() { return true; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class CharType : public ConstValue {
@@ -379,7 +375,7 @@ public:
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::character; }
     virtual int toRange() { return (int)val; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class BooleanType : public ConstValue {
@@ -390,7 +386,7 @@ public:
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::boolean; }
     virtual int toRange() { return val; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class RangeType : public Expression {
@@ -404,7 +400,7 @@ public:
     RangeType(std::string low_s, std::string high_s) : low_s(low_s), high_s(high_s), isNameRange(true) {}
     size_t size() { return high - low + 1; }
     virtual std::string toString() { std::stringstream oss; oss << "[" << low << "," << high << "]"; return oss.str(); }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class FuncCall : public Expression, public Statement {
@@ -426,7 +422,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "FuncCall " + id->name; }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class ProcCall : public Statement {
@@ -448,7 +444,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "ProcCall " + id->name; }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class SysProcCall : public ProcCall {
@@ -456,10 +452,9 @@ public:
     SysProcCall(Identifier* id) : ProcCall(id) {}
     SysProcCall(Identifier* id, ExpressionList* al) : ProcCall(id, al) {}
 
-    llvm::Value* SysProc_write(CodeGenContext& context, bool writeln);
     
     virtual std::string toString() { return "System Porcedure Call " + id->name; }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class SysFuncCall : public FuncCall {
@@ -468,7 +463,7 @@ public:
     SysFuncCall(Identifier* id, ExpressionList* al) : FuncCall(id, al) {}
 
     virtual std::string toString() { return "System Function Call " + id->name; }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class BinaryOperator : public Expression {
@@ -524,7 +519,7 @@ public:
             { OpType::ge, "ge" }
         }[op];
     }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class AssignmentStmt : public Statement {
@@ -547,7 +542,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "Assignment"; }
-    virtual llvm::Value *CodeGen(CodeGenContext& context);
+    virtual void run();
 };
 
 class IfStmt : public Statement {
@@ -558,7 +553,7 @@ public:
     Statement* thenStmt; 
     Statement* elseStmt;
     IfStmt(Expression* condition,Statement* thenStmt,Statement* elseStmt) : condition(condition),thenStmt(thenStmt),elseStmt(elseStmt) {};
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
     virtual std::string toString() { return "If"; }
 };
 class WhileStmt : public Statement {
@@ -566,7 +561,7 @@ public:
     Expression* condition;
     Statement* loopStmt;
     WhileStmt(Expression* condition,Statement* loopStmt):condition(condition),loopStmt(loopStmt){}
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
     virtual std::string toString() { return "while"; }
 
 
@@ -576,7 +571,7 @@ public:
     Expression* condition;
     Statement* loopStmt;
     RepeatStmt(Expression* condition,StatementList* loopStmt):condition(condition),loopStmt(loopStmt){}
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
     virtual std::string toString() { return "repeat"; }
 };
 // namespace ast end
@@ -593,24 +588,23 @@ public:
         endExp(endExp),
         loopStmt(loopStmt),
         direction(direction){}
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
     virtual std::string toString() { return "for"; }
 };
 class CaseStmt : public Statement {
 public:
     Expression* condition;
     Statement* thenStmt;
-    llvm::BasicBlock* bblock,*bexit;
     CaseStmt(Expression* condition,Statement* thenStmt):condition(condition),thenStmt(thenStmt){}
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
     virtual std::string toString() { return "case statement"; }
 };
 class SwitchStmt : public Statement {
 public:
     Expression* exp;
-    CaseList* list;
+    CaseList* list; 
     SwitchStmt(Expression* exp,CaseList* list):exp(exp),list(list){}
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
     virtual std::string toString() { return "switch statement"; }
 };
 class LabelStmt : public Statement {
@@ -618,7 +612,7 @@ public:
     int label;
     Statement* statement;
     LabelStmt(int label,Statement* statement):label(label),statement(statement){}
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
     virtual std::string toString() { return "label statement"; }
 
 };
@@ -626,7 +620,7 @@ class GotoStmt : public Statement {
 public:
     int label;
     GotoStmt(int label):label(label){}
-    virtual llvm::Value* CodeGen(CodeGenContext& context);
+    virtual void run();
     virtual std::string toString() { return "label statement"; }
 
 };

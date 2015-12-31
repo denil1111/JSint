@@ -8,7 +8,6 @@
 #include "utils.h"
 #include "parser.hpp"
 #include "ccalc.h"
-#include "CodeGenContext.h"
 using namespace std;
 
 int yydebug = 1;
@@ -251,7 +250,6 @@ stmt_list :
 stmt: 
 	non_label_stmt 								{ $$ = $1; }
 	| INTEGER  COLON  non_label_stmt { 
-		CodeGenContext::labels.push_back(atoi($1));
 		$$ = new ast::LabelStmt(atoi($1),$3);
 	}
 ;

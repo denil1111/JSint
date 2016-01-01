@@ -92,28 +92,58 @@ PrimaryExpression	:	"this"
 |	Literal
 Literal	:	<DECIMAL_LITERAL> | <HEX_INTEGER_LITERAL> | <STRING_LITERAL> | <BOOLEAN_LITERAL> | <NULL_LITERAL> | <REGULAR_EXPRESSION_LITERAL> 
 Identifier	:	<IDENTIFIER_NAME>
-ArrayLiteral	:	"[" ( ( Elision )? "]" | ElementList Elision "]" | ( ElementList )? "]" )
-ElementList	:	( Elision )? AssignmentExpression ( Elision AssignmentExpression )*
-Elision	:	( "," )+
-ObjectLiteral	:	"{" ( PropertyNameAndValueList )? "}"
-PropertyNameAndValueList	:	PropertyNameAndValue ( "," PropertyNameAndValue | "," )*
+ArrayLiteral    :  "[" Elision "]"
+|   "[" ElementList Elision "]"
+|   "[" ElementList "]"
+|   "[" "]"
+// example
+// old one->ElementList	:	( Elision )? AssignmentExpression ( Elision AssignmentExpression )*
+//new one
+ElementList	:	Elision AssignmentExpression 
+|   AssignmentExpression
+|   ElementList Elision AssignmentExpression
+Elision	:   ","
+|   Elision "," 
+ObjectLiteral	:	"{" PropertyNameAndValueList "}"
+|   "{" PropertyNameAndValueList "}"
+//here is an example
+//old one-->PropertyNameAndValueList	:	PropertyNameAndValue ( "," PropertyNameAndValue | "," )*
+//new one 
+PropertyNameAndValueList	:	PropertyNameAndValue 
+|   PropertyNameAndValueList "," PropertyNameAndValue 
+|   propertyNameAndValueList ","
+
 PropertyNameAndValue	:	PropertyName ":" AssignmentExpression
 PropertyName	:	Identifier
 |	<STRING_LITERAL>
 |	<DECIMAL_LITERAL>
-MemberExpression	:	( ( FunctionExpression | PrimaryExpression ) ( MemberExpressionPart )* )
+MemberExpression	:  MemberExpressionForIn
 |	AllocationExpression
-MemberExpressionForIn	:	( ( FunctionExpression | PrimaryExpression ) ( MemberExpressionPart )* )
-AllocationExpression	:	( "new" MemberExpression ( ( Arguments ( MemberExpressionPart )* )* ) )
-MemberExpressionPart	:	( "[" Expression "]" )
-|	( "." Identifier )
-CallExpression	:	MemberExpression Arguments ( CallExpressionPart )*
-CallExpressionForIn	:	MemberExpressionForIn Arguments ( CallExpressionPart )*
+MemberExpressionForIn	:	FunctionExpression 
+|   PrimaryExpression
+|   MemberExpressionForIn MemberExpressionPart
+//example 2
+//old one -->AllocationExpression	:	( "new" MemberExpression ( ( Arguments ( MemberExpressionPart )* )* ) )
+//new one
+AllocationExpression    :   "new" MemberExpression 
+|   AllocationExpression    AllocationExpressionPart
+AllocationExpressionPart    :   Arguments
+|   AllocationExpressionPart    MemberExpressionPart
+
+MemberExpressionPart    :   "[" Expression "]"
+|	"." Identifier
+CallExpression	:	MemberExpression Arguments 
+|   CallExpression  CallExpressionPart 
+
+CallExpressionForIn	:	MemberExpressionForIn Arguments 
+|   MemberExpressionForIn CallExpressionPart 
 CallExpressionPart	:	Arguments
-|	( "[" Expression "]" )
-|	( "." Identifier )
-Arguments	:	"(" ( ArgumentList )? ")"
-ArgumentList	:	AssignmentExpression ( "," AssignmentExpression )*
+|   "[" Expression "]"
+|	"." Identifier
+Arguments	:	"(" ArgumentList ")"
+|   "(" ")"
+ArgumentList	:	AssignmentExpression 
+|   AssignmentExpression "," AssignmentExpression
 LeftHandSideExpression	:	CallExpression
 |	MemberExpression
 LeftHandSideExpressionForIn	:	CallExpressionForIn

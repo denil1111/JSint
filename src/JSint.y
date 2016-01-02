@@ -90,8 +90,8 @@ PrimaryExpression	:	"this"
 |	Identifier
 |	ArrayLiteral
 |	Literal
-Literal	:	<DECIMAL_LITERAL> | <HEX_INTEGER_LITERAL> | <STRING_LITERAL> | <BOOLEAN_LITERAL> | <NULL_LITERAL>
-Identifier	:	<IDENTIFIER_NAME>
+Literal	:	DECIMAL_LITERAL | HEX_INTEGER_LITERAL | STRING_LITERAL | BOOLEAN_LITERAL | NULL_LITERAL
+Identifier	:	IDENTIFIER_NAME
 ArrayLiteral    :  "[" Elision "]"
 |   "[" ElementList Elision "]"
 |   "[" ElementList "]"
@@ -117,8 +117,8 @@ PropertyNameAndValueListPart    :   PropertyNameAndValueListPart ","
 
 PropertyNameAndValue	:	PropertyName ":" AssignmentExpression
 PropertyName	:	Identifier
-|	<STRING_LITERAL>
-|	<DECIMAL_LITERAL>
+|	STRING_LITERAL
+|	DECIMAL_LITERAL
 MemberExpression	:  MemberExpressionForIn
 |	AllocationExpression
 MemberExpressionForIn	:	FunctionExpression MemberExpressionParts
@@ -172,7 +172,7 @@ MultiplicativeExpression	:    UnaryExpression MultiplicativeExpressionPart
 MultiplicativeExpressionPart  : MultiplicativeExpressionPart MultiplicativeOperator UnaryExpression
 |
 MultiplicativeOperator	:	"*"
-| <SLASH>
+| SLASH
 | "%"
 AdditiveExpression	:	MultiplicativeExpression AdditiveExpressionPart
 AdditiveExpressionPart  :   AdditiveExpressionPart AdditiveOperator MultiplicativeExpression
@@ -257,7 +257,7 @@ AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentE
 | ConditionalExpressionNoIn
 AssignmentOperator	:	"="
 | "*="
-| <SLASHASSIGN>
+| SLASHASSIGN
 | "%="
 | "+="
 | "-="
@@ -362,19 +362,19 @@ FormalParameterList	:	Identifier
 | FormalParameterList "," Identifier
 FunctionBody	:	"{}"
 | "{" SourceElements "}"
-Program	:	<EOF>
-| SourceElements <EOF>
+Program	:	EOF
+| SourceElements EOF
 SourceElements	:	SourceElement
 | SourceElements SourceElement
 SourceElement	:	FunctionDeclaration
 |	Statement
 ImportStatement	:	"import" Name ";"
 | "import" Name "." "*"  ";"
-Name	:	<IDENTIFIER_NAME>
-| Name "." <IDENTIFIER_NAME>
+Name	:	IDENTIFIER_NAME
+| Name "." IDENTIFIER_NAME
 JScriptVarStatement	:	"var" JScriptVarDeclarationList
 | "var" JScriptVarDeclarationList ";"
 JScriptVarDeclarationList	:	JScriptVarDeclaration
 | JScriptVarDeclarationList "," JScriptVarDeclaration
-JScriptVarDeclaration	:	Identifier ":" <IDENTIFIER_NAME>
-| Identifier ":" <IDENTIFIER_NAME> Initialiser
+JScriptVarDeclaration	:	Identifier ":" IDENTIFIER_NAME
+| Identifier ":" IDENTIFIER_NAME Initialiser

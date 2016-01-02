@@ -149,47 +149,130 @@ ElAssignmentExpressions :  ElAssignmentExpressions "," AssignmentExpression
 LeftHandSideExpression	:	CallExpression
 |	MemberExpression
 LeftHandSideExpressionForIn	:	CallExpressionForIn
-//李逸婷
 |	MemberExpressionForIn
-PostfixExpression	:	LeftHandSideExpression ( PostfixOperator )?
-PostfixOperator	:	( "++" | "--" )
-UnaryExpression	:	( PostfixExpression | ( UnaryOperator UnaryExpression )+ )
-UnaryOperator	:	( "delete" | "void" | "typeof" | "++" | "--" | "+" | "-" | "~" | "!" )
-MultiplicativeExpression	:	UnaryExpression ( MultiplicativeOperator UnaryExpression )*
-MultiplicativeOperator	:	( "*" | <SLASH> | "%" )
-AdditiveExpression	:	MultiplicativeExpression ( AdditiveOperator MultiplicativeExpression )*
-AdditiveOperator	:	( "+" | "-" )
-ShiftExpression	:	AdditiveExpression ( ShiftOperator AdditiveExpression )*
-ShiftOperator	:	( "<<" | ">>" | ">>>" )
-RelationalExpression	:	ShiftExpression ( RelationalOperator ShiftExpression )*
-RelationalOperator	:	( "<" | ">" | "<=" | ">=" | "instanceof" | "in" )
-RelationalExpressionNoIn	:	ShiftExpression ( RelationalNoInOperator ShiftExpression )*
-RelationalNoInOperator	:	( "<" | ">" | "<=" | ">=" | "instanceof" )
-EqualityExpression	:	RelationalExpression ( EqualityOperator RelationalExpression )*
-EqualityExpressionNoIn	:	RelationalExpressionNoIn ( EqualityOperator RelationalExpressionNoIn )*
-EqualityOperator	:	( "==" | "!=" | "===" | "!==" )
-BitwiseANDExpression	:	EqualityExpression ( BitwiseANDOperator EqualityExpression )*
-BitwiseANDExpressionNoIn	:	EqualityExpressionNoIn ( BitwiseANDOperator EqualityExpressionNoIn )*
+//李逸婷
+PostfixExpression	:	LeftHandSideExpression
+| LeftHandSideExpression PostfixOperator
+PostfixOperator	:	 "++" 
+| "--" 
+UnaryExpression	:	PostfixExpression 
+| UnaryExpressionPart
+UnaryExpressionPart : UnaryOperator UnaryExpression
+| UnaryExpressionPart UnaryOperator UnaryExpression
+UnaryOperator	:	"delete" 
+| "void" 
+| "typeof" 
+| "++" 
+| "--" 
+| "+" 
+| "-" 
+| "~" 
+| "!" 
+MultiplicativeExpression	:    UnaryExpression MultiplicativeExpressionPart
+MultiplicativeExpressionPart  : MultiplicativeExpressionPart MultiplicativeOperator UnaryExpression
+|
+MultiplicativeOperator	:	"*" 
+| <SLASH> 
+| "%" 
+AdditiveExpression	:	MultiplicativeExpression AdditiveExpressionPart
+AdditiveExpressionPart  :   AdditiveExpressionPart AdditiveOperator MultiplicativeExpression
+|
+AdditiveOperator	:	"+" 
+| "-" 
+ShiftExpression	:	AdditiveExpression ShiftExpressionPart
+ShiftExpressionPart :   ShiftExpressionPart ShiftOperator AdditiveExpression
+|
+ShiftOperator	:	"<<" 
+| ">>" 
+| ">>>" 
+RelationalExpression	:	ShiftExpression RelationalExpressionPart
+RelationalExpressionPart  :   RelationalExpressionPart RelationalOperator ShiftExpression
+|
+RelationalOperator	:	"<" 
+| ">" 
+| "<=" 
+| ">=" 
+| "instanceof" 
+| "in" 
+RelationalExpressionNoIn	:	ShiftExpression RelationalExpressionNoInPart
+RelationalExpressionNoInPart  :   RelationalExpressionNoInPart RelationalNoInOperator ShiftExpression
+|
+RelationalNoInOperator	:	"<" 
+| ">" 
+| "<=" 
+| ">=" 
+| "instanceof" 
+EqualityExpression	:	RelationalExpression EqualityExpressionPart
+EqualityExpressionPart  :   EqualityExpressionPart EqualityOperator RelationalExpression
+|
+EqualityExpressionNoIn	:	RelationalExpressionNoIn EqualityExpressionNoInPart
+EqualityExpressionNoInPart  :   EqualityExpressionNoInPart EqualityOperator RelationalExpressionNoIn
+|
+EqualityOperator	:	"==" 
+| "!=" 
+| "===" 
+| "!==" 
+BitwiseANDExpression	:	EqualityExpression BitwiseANDExpressionPart
+BitwiseANDExpressionPart  :   BitwiseANDExpressionPart BitwiseANDOperator EqualityExpression
+|
+BitwiseANDExpressionNoIn	:	EqualityExpressionNoIn BitwiseANDExpressionNoInPart
+BitwiseANDExpressionNoInPart  :   BitwiseANDExpressionNoInPart BitwiseANDOperator EqualityExpressionNoIn
+|
 BitwiseANDOperator	:	"&"
-BitwiseXORExpression	:	BitwiseANDExpression ( BitwiseXOROperator BitwiseANDExpression )*
-BitwiseXORExpressionNoIn	:	BitwiseANDExpressionNoIn ( BitwiseXOROperator BitwiseANDExpressionNoIn )*
+BitwiseXORExpression	:	BitwiseANDExpression BitwiseXORExpressionPart
+BitwiseXORExpressionPart   :   BitwiseXORExpressionPart BitwiseXOROperator BitwiseANDExpression
+|
+BitwiseXORExpressionNoIn	:	BitwiseANDExpressionNoIn BitwiseXORExpressionNoInPart
+BitwiseXORExpressionNoInPart   :   BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseANDExpressionNoIn
+|
 BitwiseXOROperator	:	"^"
-BitwiseORExpression	:	BitwiseXORExpression ( BitwiseOROperator BitwiseXORExpression )*
-BitwiseORExpressionNoIn	:	BitwiseXORExpressionNoIn ( BitwiseOROperator BitwiseXORExpressionNoIn )*
+BitwiseORExpression	:	BitwiseXORExpression BitwiseORExpressionPart
+BitwiseORExpressionPart   :   BitwiseORExpressionPart BitwiseOROperator BitwiseXORExpression
+|
+BitwiseORExpressionNoIn	:	BitwiseXORExpressionNoIn BitwiseORExpressionNoInPart
+BitwiseORExpressionNoInPart   :   BitwiseORExpressionNoInPart BitwiseOROperator BitwiseXORExpressionNoIn
+|
 BitwiseOROperator	:	"|"
-LogicalANDExpression	:	BitwiseORExpression ( LogicalANDOperator BitwiseORExpression )*
-LogicalANDExpressionNoIn	:	BitwiseORExpressionNoIn ( LogicalANDOperator BitwiseORExpressionNoIn )*
+LogicalANDExpression	:	BitwiseORExpression LogicalANDExpressionPart
+LogicalANDExpressionPart   :   LogicalANDExpressionPart LogicalANDOperator BitwiseORExpression
+|
+LogicalANDExpressionNoIn	:	BitwiseORExpressionNoIn LogicalANDExpressionNoInPart
+LogicalANDExpressionNoInPart   :   LogicalANDExpressionNoInPart LogicalANDOperator BitwiseORExpressionNoIn
+|
 LogicalANDOperator	:	"&&"
-LogicalORExpression	:	LogicalANDExpression ( LogicalOROperator LogicalANDExpression )*
-LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn ( LogicalOROperator LogicalANDExpressionNoIn )*
+LogicalORExpression	:	LogicalANDExpression LogicalORExpressionPart
+LogicalORExpressionPart   :   LogicalORExpressionPart LogicalOROperator LogicalANDExpression
+|
+LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart
+LogicalORExpressionNoInPart   :   LogicalORExpressionNoInPart LogicalOROperator LogicalANDExpressionNoIn
+|
 LogicalOROperator	:	"||"
-ConditionalExpression	:	LogicalORExpression ( "?" AssignmentExpression ":" AssignmentExpression )?
-ConditionalExpressionNoIn	:	LogicalORExpressionNoIn ( "?" AssignmentExpression ":" AssignmentExpressionNoIn )?
-AssignmentExpression	:	( LeftHandSideExpression AssignmentOperator AssignmentExpression | ConditionalExpression )
-AssignmentExpressionNoIn	:	( LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn | ConditionalExpressionNoIn )
-AssignmentOperator	:	( "=" | "*=" | <SLASHASSIGN> | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=" )
-Expression	:	AssignmentExpression ( "," AssignmentExpression )*
-ExpressionNoIn	:	AssignmentExpressionNoIn ( "," AssignmentExpressionNoIn )*
+ConditionalExpression	:	LogicalORExpression
+|LogicalORExpression "?" AssignmentExpression ":" AssignmentExpression
+ConditionalExpressionNoIn	:	LogicalORExpressionNoIn
+|LogicalORExpressionNoIn "?" AssignmentExpression ":" AssignmentExpressionNoIn
+AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression 
+| ConditionalExpression
+AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn 
+| ConditionalExpressionNoIn
+AssignmentOperator	:	"=" 
+| "*=" 
+| <SLASHASSIGN> 
+| "%=" 
+| "+=" 
+| "-=" 
+| "<<=" 
+| ">>=" 
+| ">>>=" 
+| "&=" 
+| "^=" 
+| "|=" 
+Expression	:	AssignmentExpression ExpressionPart
+ExpressionPart   :   ExpressionPart "," AssignmentExpression
+|
+ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart
+ExpressionNoInPart   :   ExpressionNoInPart "," AssignmentExpressionNoIn
+|
 
 //陈睿
 Statement	:	Block

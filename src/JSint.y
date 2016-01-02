@@ -192,6 +192,7 @@ Expression	:	AssignmentExpression ( "," AssignmentExpression )*
 ExpressionNoIn	:	AssignmentExpressionNoIn ( "," AssignmentExpressionNoIn )*
 
 //陈睿
+ExpressionOrNull: | Expression
 Statement	:	Block
 |	JScriptVarStatement
 |	VariableStatement
@@ -208,48 +209,89 @@ Statement	:	Block
 |	SwitchStatement
 |	ThrowStatement
 |	TryStatement
-Block	:	"{" ( StatementList )? "}"
-StatementList	:	( Statement )+
-VariableStatement	:	"var" VariableDeclarationList ( ";" )?
-VariableDeclarationList	:	VariableDeclaration ( "," VariableDeclaration )*
-VariableDeclarationListNoIn	:	VariableDeclarationNoIn ( "," VariableDeclarationNoIn )*
-VariableDeclaration	:	Identifier ( Initialiser )?
-VariableDeclarationNoIn	:	Identifier ( InitialiserNoIn )?
+Block	:	"{}"
+|   "{" StatementList "}"
+StatementList	:	Statement
+|   Statement StatementList						
+VariableStatement	:	"var" VariableDeclarationList
+|   "var" VariableDeclarationList ";"
+VariableDeclarationList	:	VariableDeclaration VariableDeclarationListPart
+VariableDeclarationListPart : VariableDeclarationListPart  "," VariableDeclaration
+|
+VariableDeclarationListNoIn	:	VariableDeclarationNoIn VariableDeclarationNoInPart
+VariableDeclarationListNotInPart: VariableDeclarationListNotInPart  "," VariableDeclarationNoIn
+|
+VariableDeclaration	:	Identifier
+| Identifier Initialiser
+VariableDeclarationNoIn	:	Identifier
+| Identifier  InitialiserNoIn
 Initialiser	:	"=" AssignmentExpression
 InitialiserNoIn	:	"=" AssignmentExpressionNoIn
 EmptyStatement	:	";"
-ExpressionStatement	:	Expression ( ";" )?
-IfStatement	:	"if" "(" Expression ")" Statement ( "else" Statement )?
-IterationStatement	:	( "do" Statement "while" "(" Expression ")" ( ";" )? )
-|	( "while" "(" Expression ")" Statement )
-|	( "for" "(" ( ExpressionNoIn )? ";" ( Expression )? ";" ( Expression )? ")" Statement )
-|	( "for" "(" "var" VariableDeclarationList ";" ( Expression )? ";" ( Expression )? ")" Statement )
-|	( "for" "(" "var" VariableDeclarationNoIn "in" Expression ")" Statement )
-|	( "for" "(" LeftHandSideExpressionForIn "in" Expression ")" Statement )
-ContinueStatement	:	"continue" ( Identifier )? ( ";" )?
-BreakStatement	:	"break" ( Identifier )? ( ";" )?
-ReturnStatement	:	"return" ( Expression )? ( ";" )?
+ExpressionStatement	:	Expression
+| Expression ";"
+IfStatement	:	"if" "(" Expression ")" Statement
+| "if" "(" Expression ")" Statement "else" Statement
+IterationStatement	:	"do" Statement "while" "(" Expression ")"
+|   "do" Statement "while" "(" Expression ")" ";"
+|	"while" "(" Expression ")" Statement
+|	"for" "(" ";" ExpressionOrNull ";" ExpressionOrNull ")" Statement
+|	"for" "(" ExpressionNoIn ";" ExpressionOrNull ";" ExpressionOrNull ")" Statement
+|	"for" "(" "var" VariableDeclarationList ";" ExpressionOrNull ";" ExpressionOrNull ")" Statement
+|	"for" "(" "var" VariableDeclarationNoIn "in" Expression ")" Statement
+|	"for" "(" LeftHandSideExpressionForIn "in" Expression ")" Statement
+IdentifierComma  :
+| Identifier
+| ";"
+| Identifier ";"
+ContinueStatement	:	"continue" IdentifierComma
+BreakStatement	:	"break" IdentifierComma
+ReturnStatement	:	"return" ExpressionOrNull
+| "return" ExpressionOrNull ";"
 WithStatement	:	"with" "(" Expression ")" Statement
 SwitchStatement	:	"switch" "(" Expression ")" CaseBlock
-CaseBlock	:	"{" ( CaseClauses )? ( "}" | DefaultClause ( CaseClauses )? "}" )
-CaseClauses	:	( CaseClause )+
-CaseClause	:	( ( "case" Expression ":" ) ) ( StatementList )?
-DefaultClause	:	( ( "default" ":" ) ) ( StatementList )?
+CaseBlock	    :	"{"
+| "{" CaseClauses
+CaseBlockPart   :   "}"
+| DefaultClause "}"
+| CaseClauses "}"
+CaseClauses	    :	CaseClause
+| CaseClauses CaseClause
+CaseClause	    :	"case" Expression ":"
+| "case" Expression ":" StatementList
+DefaultClause	:	"default" ":"
+| "default" ":" StatementList
 LabelledStatement	:	Identifier ":" Statement
-ThrowStatement	:	"throw" Expression ( ";" )?
-TryStatement	:	"try" Block ( ( Finally | Catch ( Finally )? ) )
+ThrowStatement	:	"throw" Expression
+| "throw" Expression ";"
+TryStatement	:	"try" Block TryStatmentPart
+TryStatementPart:   Finally
+| Catch
+| Catch Finally
 Catch	:	"catch" "(" Identifier ")" Block
 Finally	:	"finally" Block
-FunctionDeclaration	:	"function" Identifier ( "(" ( FormalParameterList )? ")" ) FunctionBody
-FunctionExpression	:	"function" ( Identifier )? ( "(" ( FormalParameterList )? ")" ) FunctionBody
-FormalParameterList	:	Identifier ( "," Identifier )*
-FunctionBody	:	"{" ( SourceElements )? "}"
-Program	:	( SourceElements )? <EOF>
-SourceElements	:	( SourceElement )+
+FormalParameterListInPare: "()"
+| "(" FormalParameterList ")"
+FunctionDeclaration	:	"function" Identifier FormalParameterListInPare FunctionBody
+FunctionExpression	:	"function" FormalParameterListPare FunctionBody
+| "function" Identifier FormalParameterListPare FunctionBody
+FormalParameterList	:	Identifier
+| FormalParameterList "," Identifier
+FunctionBody	:	"{}"
+| "{" SourceElements "}"
+Program	:	<EOF>
+| SourceElements <EOF>
+SourceElements	:	SourceElement
+| SourceElements SourceElement
 SourceElement	:	FunctionDeclaration
 |	Statement
-ImportStatement	:	"import" Name ( "." "*" )? ";"
-Name	:	<IDENTIFIER_NAME> ( "." <IDENTIFIER_NAME> )*
-JScriptVarStatement	:	"var" JScriptVarDeclarationList ( ";" )?
-JScriptVarDeclarationList	:	JScriptVarDeclaration ( "," JScriptVarDeclaration )*
-JScriptVarDeclaration	:	Identifier ":" <IDENTIFIER_NAME> ( Initialiser )?
+ImportStatement	:	"import" Name ";"
+| "import" Name "." "*"  ";"
+Name	:	<IDENTIFIER_NAME>
+| Name "." <IDENTIFIER_NAME>
+JScriptVarStatement	:	"var" JScriptVarDeclarationList
+| "var" JScriptVarDeclarationList ";"
+JScriptVarDeclarationList	:	JScriptVarDeclaration
+| JScriptVarDeclarationList "," JScriptVarDeclaration
+JScriptVarDeclaration	:	Identifier ":" <IDENTIFIER_NAME>
+| Identifier ":" <IDENTIFIER_NAME> Initialiser

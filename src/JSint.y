@@ -16,7 +16,7 @@ ast::Node* ast_root;
 %union{
 	char* 					debug;
 
-    ast::Node* 				ast_Node; 
+    ast::Node* 				ast_Node;
     ast::Statement* 		ast_Statement;
     ast::Expression* 		ast_Expression;
     ast::Program* 			ast_Program;
@@ -43,28 +43,28 @@ ast::Node* ast_root;
     ast::CaseStmt*          ast_CaseStmt;
 }
 
-%token PROGRAM IDD DOT EQUAL LTHAN LEQU GT GE PLUS MINUS MUL DIV RIGHTP LEFTP 
-%token ASSIGN COLON COMMA SEMI UNTIL OR AND MOD OF READ REPEAT TO UNEQUAL 
-%token IF THEN ELSE WHILE DO BEGINN END CASE DOWNTO FOR GOTO INTEGER LB RB NOT 
-%token NUMBER SYS_CON SYS_BOOL SYS_FUNCT SYS_PROC SYS_TYPE CHAR CONST STRING REAL ARRAY 
+%token PROGRAM IDD DOT EQUAL LTHAN LEQU GT GE PLUS MINUS MUL DIV RIGHTP LEFTP
+%token ASSIGN COLON COMMA SEMI UNTIL OR AND MOD OF READ REPEAT TO UNEQUAL
+%token IF THEN ELSE WHILE DO BEGINN END CASE DOWNTO FOR GOTO INTEGER LB RB NOT
+%token NUMBER SYS_CON SYS_BOOL SYS_FUNCT SYS_PROC SYS_TYPE CHAR CONST STRING REAL ARRAY
 %token VAR PROCEDURE RECORD FUNCTION TYPE
 
 %start program
 
-%type <debug> PROGRAM IDD DOT NAME EQUAL LTHAN LEQU GT GE PLUS MINUS MUL DIV 
+%type <debug> PROGRAM IDD DOT NAME EQUAL LTHAN LEQU GT GE PLUS MINUS MUL DIV
 %type <debug> ASSIGN COLON COMMA SEMI IF THEN ELSE WHILE DO BEGINN FUNCTION LB
 %type <debug> NOT OR AND MOD OF READ REPEAT TO UNEQUAL UNTIL NUMBER SYS_CON RB
-%type <debug> SYS_FUNCT SYS_PROC SYS_TYPE CHAR CONST STRING REAL ARRAY VAR TYPE 
+%type <debug> SYS_FUNCT SYS_PROC SYS_TYPE CHAR CONST STRING REAL ARRAY VAR TYPE
 %type <debug> RIGHTP LEFTP DOWNTO FOR GOTO INTEGER PROCEDURE RECORD END CASE SYS_BOOL
 
 // default type is ast node
-%type <ast_Node> label_part  
+%type <ast_Node> label_part
 
 %type <ast_Program> 		program program_head routine routine_head sub_routine
 %type <ast_TypeDecl> 		type_decl   array_type_decl record_type_decl simple_type_decl
 %type <ast_Statement> 		proc_stmt stmt non_label_stmt else_clause for_stmt repeat_stmt while_stmt if_stmt
-%type <ast_Statement>		goto_stmt case_stmt 
-%type <ast_AssignmentStmt> 	assign_stmt 
+%type <ast_Statement>		goto_stmt case_stmt
+%type <ast_AssignmentStmt> 	assign_stmt
 %type <ast_Expression> 		expression expr term factor
 %type <ast_Routine> 		function_decl function_head procedure_head procedure_decl
 %type <ast_ConstValue>      const_value
@@ -72,25 +72,25 @@ ast::Node* ast_root;
 
 %type <ast_TypeDeclList>    type_part type_decl_list
 %type <ast_VarDeclList> 	parameters para_decl_list para_type_list
-%type <ast_RoutineList> 	routine_part 
-%type <ast_StatementList> 	routine_body compound_stmt stmt_list 
+%type <ast_RoutineList> 	routine_part
+%type <ast_StatementList> 	routine_body compound_stmt stmt_list
 %type <ast_VarDeclList> 	var_part var_decl_list var_decl
 %type <ast_NameList> 		name_list
 %type <ast_ExpressionList>  expression_list
 %type <ast_ConstDeclList>   const_expr_list const_part
 %type <ast_FieldDeclList>   field_decl_list field_decl
-%type <ast_CaseStmt>		case_expr 
+%type <ast_CaseStmt>		case_expr
 %type <ast_CaseList>		case_expr_list
 
 %%
 //张宇昊
 PrimaryExpression	:	"this"
 |	ObjectLiteral
-|	"(" Expression ")" 
+|	"(" Expression ")"
 |	Identifier
 |	ArrayLiteral
 |	Literal
-Literal	:	<DECIMAL_LITERAL> | <HEX_INTEGER_LITERAL> | <STRING_LITERAL> | <BOOLEAN_LITERAL> | <NULL_LITERAL> | <REGULAR_EXPRESSION_LITERAL> 
+Literal	:	<DECIMAL_LITERAL> | <HEX_INTEGER_LITERAL> | <STRING_LITERAL> | <BOOLEAN_LITERAL> | <NULL_LITERAL>
 Identifier	:	<IDENTIFIER_NAME>
 ArrayLiteral    :  "[" Elision "]"
 |   "[" ElementList Elision "]"
@@ -104,16 +104,16 @@ ElementList	:	Elision AssignmentExpression ElementListPart
 ElementListPart :   ElementListPart Elision Assignment
 |
 Elision	:   ","
-|   Elision "," 
+|   Elision ","
 ObjectLiteral	:	"{" PropertyNameAndValueList "}"
 |   "{"  "}"
 //here is an example
 //old one-->PropertyNameAndValueList	:	PropertyNameAndValue ( "," PropertyNameAndValue | "," )*
-//new one 
+//new one
 PropertyNameAndValueList	:	PropertyNameAndValue PropertyNameAndValueListPart
 PropertyNameAndValueListPart    :   PropertyNameAndValueListPart ","
-|   PropertyNameAndValueListPart "," PropertyNameAndValue 
-|   
+|   PropertyNameAndValueListPart "," PropertyNameAndValue
+|
 
 PropertyNameAndValue	:	PropertyName ":" AssignmentExpression
 PropertyName	:	Identifier
@@ -153,65 +153,65 @@ LeftHandSideExpressionForIn	:	CallExpressionForIn
 //李逸婷
 PostfixExpression	:	LeftHandSideExpression
 | LeftHandSideExpression PostfixOperator
-PostfixOperator	:	 "++" 
-| "--" 
-UnaryExpression	:	PostfixExpression 
+PostfixOperator	:	 "++"
+| "--"
+UnaryExpression	:	PostfixExpression
 | UnaryExpressionPart
 UnaryExpressionPart : UnaryOperator UnaryExpression
 | UnaryExpressionPart UnaryOperator UnaryExpression
-UnaryOperator	:	"delete" 
-| "void" 
-| "typeof" 
-| "++" 
-| "--" 
-| "+" 
-| "-" 
-| "~" 
-| "!" 
+UnaryOperator	:	"delete"
+| "void"
+| "typeof"
+| "++"
+| "--"
+| "+"
+| "-"
+| "~"
+| "!"
 MultiplicativeExpression	:    UnaryExpression MultiplicativeExpressionPart
 MultiplicativeExpressionPart  : MultiplicativeExpressionPart MultiplicativeOperator UnaryExpression
 |
-MultiplicativeOperator	:	"*" 
-| <SLASH> 
-| "%" 
+MultiplicativeOperator	:	"*"
+| <SLASH>
+| "%"
 AdditiveExpression	:	MultiplicativeExpression AdditiveExpressionPart
 AdditiveExpressionPart  :   AdditiveExpressionPart AdditiveOperator MultiplicativeExpression
 |
-AdditiveOperator	:	"+" 
-| "-" 
+AdditiveOperator	:	"+"
+| "-"
 ShiftExpression	:	AdditiveExpression ShiftExpressionPart
 ShiftExpressionPart :   ShiftExpressionPart ShiftOperator AdditiveExpression
 |
-ShiftOperator	:	"<<" 
-| ">>" 
-| ">>>" 
+ShiftOperator	:	"<<"
+| ">>"
+| ">>>"
 RelationalExpression	:	ShiftExpression RelationalExpressionPart
 RelationalExpressionPart  :   RelationalExpressionPart RelationalOperator ShiftExpression
 |
-RelationalOperator	:	"<" 
-| ">" 
-| "<=" 
-| ">=" 
-| "instanceof" 
-| "in" 
+RelationalOperator	:	"<"
+| ">"
+| "<="
+| ">="
+| "instanceof"
+| "in"
 RelationalExpressionNoIn	:	ShiftExpression RelationalExpressionNoInPart
 RelationalExpressionNoInPart  :   RelationalExpressionNoInPart RelationalNoInOperator ShiftExpression
 |
-RelationalNoInOperator	:	"<" 
-| ">" 
-| "<=" 
-| ">=" 
-| "instanceof" 
+RelationalNoInOperator	:	"<"
+| ">"
+| "<="
+| ">="
+| "instanceof"
 EqualityExpression	:	RelationalExpression EqualityExpressionPart
 EqualityExpressionPart  :   EqualityExpressionPart EqualityOperator RelationalExpression
 |
 EqualityExpressionNoIn	:	RelationalExpressionNoIn EqualityExpressionNoInPart
 EqualityExpressionNoInPart  :   EqualityExpressionNoInPart EqualityOperator RelationalExpressionNoIn
 |
-EqualityOperator	:	"==" 
-| "!=" 
-| "===" 
-| "!==" 
+EqualityOperator	:	"=="
+| "!="
+| "==="
+| "!=="
 BitwiseANDExpression	:	EqualityExpression BitwiseANDExpressionPart
 BitwiseANDExpressionPart  :   BitwiseANDExpressionPart BitwiseANDOperator EqualityExpression
 |
@@ -251,22 +251,22 @@ ConditionalExpression	:	LogicalORExpression
 |LogicalORExpression "?" AssignmentExpression ":" AssignmentExpression
 ConditionalExpressionNoIn	:	LogicalORExpressionNoIn
 |LogicalORExpressionNoIn "?" AssignmentExpression ":" AssignmentExpressionNoIn
-AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression 
+AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression
 | ConditionalExpression
-AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn 
+AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn
 | ConditionalExpressionNoIn
-AssignmentOperator	:	"=" 
-| "*=" 
-| <SLASHASSIGN> 
-| "%=" 
-| "+=" 
-| "-=" 
-| "<<=" 
-| ">>=" 
-| ">>>=" 
-| "&=" 
-| "^=" 
-| "|=" 
+AssignmentOperator	:	"="
+| "*="
+| <SLASHASSIGN>
+| "%="
+| "+="
+| "-="
+| "<<="
+| ">>="
+| ">>>="
+| "&="
+| "^="
+| "|="
 Expression	:	AssignmentExpression ExpressionPart
 ExpressionPart   :   ExpressionPart "," AssignmentExpression
 |
@@ -295,7 +295,7 @@ Statement	:	Block
 Block	:	"{}"
 |   "{" StatementList "}"
 StatementList	:	Statement
-|   Statement StatementList						
+|   Statement StatementList
 VariableStatement	:	"var" VariableDeclarationList
 |   "var" VariableDeclarationList ";"
 VariableDeclarationList	:	VariableDeclaration VariableDeclarationListPart

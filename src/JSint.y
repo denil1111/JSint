@@ -99,19 +99,21 @@ ArrayLiteral    :  "[" Elision "]"
 // example
 // old one->ElementList	:	( Elision )? AssignmentExpression ( Elision AssignmentExpression )*
 //new one
-ElementList	:	Elision AssignmentExpression 
-|   AssignmentExpression
-|   ElementList Elision AssignmentExpression
+ElementList	:	Elision AssignmentExpression ElementListPart
+|   AssignmentExpression ElementListPart
+ElementListPart :   ElementListPart Elision Assignment
+|
 Elision	:   ","
 |   Elision "," 
 ObjectLiteral	:	"{" PropertyNameAndValueList "}"
-|   "{" PropertyNameAndValueList "}"
+|   "{"  "}"
 //here is an example
 //old one-->PropertyNameAndValueList	:	PropertyNameAndValue ( "," PropertyNameAndValue | "," )*
 //new one 
-PropertyNameAndValueList	:	PropertyNameAndValue 
-|   PropertyNameAndValueList "," PropertyNameAndValue 
-|   propertyNameAndValueList ","
+PropertyNameAndValueList	:	PropertyNameAndValue PropertyNameAndValueListPart
+PropertyNameAndValueListPart    :   PropertyNameAndValueListPart ","
+|   PropertyNameAndValueListPart "," PropertyNameAndValue 
+|   
 
 PropertyNameAndValue	:	PropertyName ":" AssignmentExpression
 PropertyName	:	Identifier
@@ -119,31 +121,31 @@ PropertyName	:	Identifier
 |	<DECIMAL_LITERAL>
 MemberExpression	:  MemberExpressionForIn
 |	AllocationExpression
-MemberExpressionForIn	:	FunctionExpression 
-|   PrimaryExpression
-|   MemberExpressionForIn MemberExpressionPart
+MemberExpressionForIn	:	FunctionExpression MemberExpressionParts
+|   PrimaryExpression MemberExpressionParts
+
 //example 2
 //old one -->AllocationExpression	:	( "new" MemberExpression ( ( Arguments ( MemberExpressionPart )* )* ) )
 //new one
-AllocationExpression    :   "new" MemberExpression 
-|   AllocationExpression    AllocationExpressionPart
-AllocationExpressionPart    :   Arguments
-|   AllocationExpressionPart    MemberExpressionPart
-
+AllocationExpression    :   "new" MemberExpression AllocationExpressionBody
+AllocationExpressionBody    :   AllocationExpressionBody Arguments MemberExpressionParts
+|
+MemberExpressionParts   :   MemberExpressionParts MemberExpressionPart
+|
 MemberExpressionPart    :   "[" Expression "]"
 |	"." Identifier
-CallExpression	:	MemberExpression Arguments 
-|   CallExpression  CallExpressionPart 
-
-CallExpressionForIn	:	MemberExpressionForIn Arguments 
-|   MemberExpressionForIn CallExpressionPart 
+CallExpression	:	MemberExpression Arguments CallExpressionParts
+CallExpressionForIn	:	MemberExpressionForIn Arguments CallExpressionParts
+CallExpressionParts :   CallExpressionParts CallExpressionPart
+|
 CallExpressionPart	:	Arguments
 |   "[" Expression "]"
 |	"." Identifier
 Arguments	:	"(" ArgumentList ")"
 |   "(" ")"
-ArgumentList	:	AssignmentExpression 
-|   AssignmentExpression "," AssignmentExpression
+ArgumentList	:	AssignmentExpression ElAssignmentExpressions
+ElAssignmentExpressions :  ElAssignmentExpressions "," AssignmentExpression
+|
 LeftHandSideExpression	:	CallExpression
 |	MemberExpression
 LeftHandSideExpressionForIn	:	CallExpressionForIn

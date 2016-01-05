@@ -80,7 +80,7 @@ ast::Node* ast_root;
 %type <ast_Node> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
 %type <ast_Node> ExpressionOrNull Statement 
 %type <ast_Node> Block StatementList 
-%type <ast_Node> VariableStatement VariableDeclarationList VariableDeclarationListPart VariableDeclarationListNoIn VariableDeclarationListNotInPart 
+%type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
 %type <ast_Node> VariableDeclaration VariableDeclarationNoIn
 %type <ast_Node> Initialiser InitialiserNoIn
 %type <ast_Node> EmptyStatement ExpressionStatement
@@ -316,12 +316,9 @@ StatementList	:	Statement
 |   Statement StatementList
 VariableStatement	:	"var" VariableDeclarationList
 |   "var" VariableDeclarationList ";"
-VariableDeclarationList	:	VariableDeclaration VariableDeclarationListPart
-VariableDeclarationListPart : VariableDeclarationListPart  "," VariableDeclaration
-|
-VariableDeclarationListNoIn	:	VariableDeclarationNoIn VariableDeclarationNotInPart
-VariableDeclarationListNotInPart: VariableDeclarationListNotInPart  "," VariableDeclarationNoIn
-|
+VariableDeclarationList	:	VariableDeclaration | VariableDeclarationList  "," VariableDeclaration
+VariableDeclarationListNoIn	:	VariableDeclarationNoIn
+| VariableDeclarationListNoIn "," VariableDeclarationNoIn
 VariableDeclaration	:	Identifier
 | Identifier Initialiser
 VariableDeclarationNoIn	:	Identifier
@@ -365,7 +362,7 @@ DefaultClause	:	"default" ":"
 LabelledStatement	:	Identifier ":" Statement
 ThrowStatement	:	"throw" Expression
 | "throw" Expression ";"
-TryStatement	:	"try" Block TryStatmentPart
+TryStatement	:	"try" Block TryStatementPart
 TryStatementPart:   Finally
 | Catch
 | Catch Finally
@@ -374,8 +371,8 @@ Finally	:	"finally" Block
 FormalParameterListInPare: "()"
 | "(" FormalParameterList ")"
 FunctionDeclaration	:	"function" Identifier FormalParameterListInPare FunctionBody
-FunctionExpression	:	"function" FormalParameterListPare FunctionBody
-| "function" Identifier FormalParameterListPare FunctionBody
+FunctionExpression	:	"function" FormalParameterListInPare FunctionBody
+| "function" Identifier FormalParameterListInPare FunctionBody
 FormalParameterList	:	Identifier
 | FormalParameterList "," Identifier
 FunctionBody	:	"{}"

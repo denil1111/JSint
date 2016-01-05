@@ -317,7 +317,8 @@ StatementList	:	Statement
 |   Statement StatementList
 VariableStatement	:	"var" VariableDeclarationList
 |   "var" VariableDeclarationList ";"
-VariableDeclarationList	:	VariableDeclaration | VariableDeclarationList  "," VariableDeclaration
+VariableDeclarationList	:	VariableDeclaration
+| VariableDeclarationList  "," VariableDeclaration
 VariableDeclarationListNoIn	:	VariableDeclarationNoIn
 | VariableDeclarationListNoIn "," VariableDeclarationNoIn
 VariableDeclaration	:	Identifier
@@ -349,11 +350,11 @@ ReturnStatement	:	"return" ExpressionOrNull
 | "return" ExpressionOrNull ";"
 WithStatement	:	"with" "(" Expression ")" Statement
 SwitchStatement	:	"switch" "(" Expression ")" CaseBlock
-CaseBlock	    :	"{"
-| "{" CaseClauses
+CaseBlock	    :	"{" CaseBlockPart
+| "{" CaseClauses CaseBlockPart
 CaseBlockPart   :   "}"
 | DefaultClause "}"
-| CaseClauses "}"
+| DefaultClause CaseClauses "}"
 CaseClauses	    :	CaseClause
 | CaseClauses CaseClause
 CaseClause	    :	"case" Expression ":"

@@ -45,6 +45,10 @@ ast::Node* ast_root;
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
 %token SLASHASSIGN SLASH JEOF IDENTIFIER_NAME
+%token THIS NEW DELETE VOID TYPEOF INSTANCEOF IN VAR IF ELSE DO WHILE FOR CONTINUE BREAK RETURN WITH SWITCH CASE DEFAULT THROW TRY CATCH FINALLY FUNCTION IMPORT
+％token LEFT_BRACKET RIGHT_BRACKET LEFT_PARE RIGHT_PARE LEFT_BRACE RIGHT_BRACE COMMA DOT COLON SEMICOLON 
+%token PLUS MINUS MULTI DIV ASSIGN PLUS_PLUS MINUS_MINUS TILDE QUES EXCLAM PERCENT LESS GREATER EQUAL LSHIFT RSHIFT RRSHIFT LESS_EQ GREATER_EQ ALWAYS_EQ ALWAYS_NEQ BIT_AND BIT_OR BIT_NOT AND OR MULTI_ASG MOD_ASG PLUS_ASG MINUS_ASG LSHIFT_ASG RSHIFT_ASG
+ LLSHIFT_ASG BIT_AND_ASG BIT_NOT_ASG BIT_OR_ASG
 %start Program
 
 %type <debug> DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -102,18 +106,18 @@ ast::Node* ast_root;
 
 %%
 //张宇昊
-PrimaryExpression	:	"this"
+PrimaryExpression	:	THIS
 |	ObjectLiteral
-|	"(" Expression ")"
+|	LEFT_PARE Expression RIGHT_PARE
 |	Identifier
 |	ArrayLiteral
 |	Literal
 Literal	:	DECIMAL_LITERAL | HEX_INTEGER_LITERAL | STRING_LITERAL | BOOLEAN_LITERAL | NULL_LITERAL
 Identifier	:	IDENTIFIER_NAME
-ArrayLiteral    :  "[" Elision "]"
-|   "[" ElementList Elision "]"
-|   "[" ElementList "]"
-|   "[" "]"
+ArrayLiteral    :  LEFT_BRACKET Elision RIGHT_BRACKET
+|   LEFT_BRACKET ElementList Elision RIGHT_BRACKET
+|   LEFT_BRACKET ElementList RIGHT_BRACKET
+|   LEFT_BRACKET RIGHT_BRACKET
 // example
 // old one->ElementList	:	( Elision )? AssignmentExpression ( Elision AssignmentExpression )*
 //new one
@@ -121,19 +125,19 @@ ElementList	:	Elision AssignmentExpression ElementListPart
 |   AssignmentExpression ElementListPart
 ElementListPart :   ElementListPart Elision AssignmentExpression
 |
-Elision	:   ","
-|   Elision ","
-ObjectLiteral	:	"{" PropertyNameAndValueList "}"
-|   "{"  "}"
+Elision	:   COMMA
+|   Elision COMMA
+ObjectLiteral	:	LEFT_BRACE PropertyNameAndValueList RIGHT_BRACE
+|   LEFT_BRACE  RIGHT_BRACE
 //here is an example
-//old one-->PropertyNameAndValueList	:	PropertyNameAndValue ( "," PropertyNameAndValue | "," )*
+//old one-->PropertyNameAndValueList	:	PropertyNameAndValue ( COMMA PropertyNameAndValue | COMMA )*
 //new one
 PropertyNameAndValueList	:	PropertyNameAndValue PropertyNameAndValueListPart
-PropertyNameAndValueListPart    :   PropertyNameAndValueListPart ","
-|   PropertyNameAndValueListPart "," PropertyNameAndValue
+PropertyNameAndValueListPart    :   PropertyNameAndValueListPart COMMA
+|   PropertyNameAndValueListPart COMMA PropertyNameAndValue
 |
 
-PropertyNameAndValue	:	PropertyName ":" AssignmentExpression
+PropertyNameAndValue	:	PropertyName COLON AssignmentExpression
 PropertyName	:	Identifier
 |	STRING_LITERAL
 |	DECIMAL_LITERAL
@@ -143,26 +147,26 @@ MemberExpressionForIn	:	FunctionExpression MemberExpressionParts
 |   PrimaryExpression MemberExpressionParts
 
 //example 2
-//old one -->AllocationExpression	:	( "new" MemberExpression ( ( Arguments ( MemberExpressionPart )* )* ) )
+//old one -->AllocationExpression	:	( NEW MemberExpression ( ( Arguments ( MemberExpressionPart )* )* ) )
 //new one
-AllocationExpression    :   "new" MemberExpression AllocationExpressionBody
+AllocationExpression    :   NEW MemberExpression AllocationExpressionBody
 AllocationExpressionBody    :   AllocationExpressionBody Arguments MemberExpressionParts
 |
 MemberExpressionParts   :   MemberExpressionParts MemberExpressionPart
 |
-MemberExpressionPart    :   "[" Expression "]"
-|	"." Identifier
+MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
+|	DOT Identifier
 CallExpression	:	MemberExpression Arguments CallExpressionParts
 CallExpressionForIn	:	MemberExpressionForIn Arguments CallExpressionParts
 CallExpressionParts :   CallExpressionParts CallExpressionPart
 |
 CallExpressionPart	:	Arguments
-|   "[" Expression "]"
-|	"." Identifier
-Arguments	:	"(" ArgumentList ")"
-|   "(" ")"
+|   LEFT_BRACKET Expression RIGHT_BRACKET
+|	DOT Identifier
+Arguments	:	LEFT_PARE ArgumentList RIGHT_PARE
+|   LEFT_PARE RIGHT_PARE
 ArgumentList	:	AssignmentExpression ElAssignmentExpressions
-ElAssignmentExpressions :  ElAssignmentExpressions "," AssignmentExpression
+ElAssignmentExpressions :  ElAssignmentExpressions COMMA AssignmentExpression
 |
 LeftHandSideExpression	:	CallExpression
 |	MemberExpression
@@ -172,129 +176,130 @@ LeftHandSideExpressionForIn	:	CallExpressionForIn
 //李逸婷
 PostfixExpression	:	LeftHandSideExpression
 | LeftHandSideExpression PostfixOperator
-PostfixOperator	:	 "++"
-| "--"
+PostfixOperator	:	 PLUS_PLUS
+| MINUS_MINUS
 UnaryExpression	:	PostfixExpression
 | UnaryExpressionPart
 UnaryExpressionPart : UnaryOperator UnaryExpression
 | UnaryExpressionPart UnaryOperator UnaryExpression
-UnaryOperator	:	"delete"
-| "void"
-| "typeof"
-| "++"
-| "--"
-| "+"
-| "-"
-| "~"
-| "!"
+UnaryOperator	:	DELETE
+| VOID
+| TYPEOF
+| PLUS_PLUS
+| MINUS_MINUS
+| PLUS
+| MINUS
+| TILDE
+| EXCLA
 MultiplicativeExpression	:    UnaryExpression MultiplicativeExpressionPart
 MultiplicativeExpressionPart  : MultiplicativeExpressionPart MultiplicativeOperator UnaryExpression
 |
-MultiplicativeOperator	:	"*"
+MultiplicativeOperator	:	MULTI
 | SLASH
-| "%"
+| PERCENT
 AdditiveExpression	:	MultiplicativeExpression AdditiveExpressionPart
 AdditiveExpressionPart  :   AdditiveExpressionPart AdditiveOperator MultiplicativeExpression
 |
-AdditiveOperator	:	"+"
-| "-"
+AdditiveOperator	:	PLUS
+| MINUS
 ShiftExpression	:	AdditiveExpression ShiftExpressionPart
 ShiftExpressionPart :   ShiftExpressionPart ShiftOperator AdditiveExpression
 |
-ShiftOperator	:	"<<"
-| ">>"
-| ">>>"
+ShiftOperator	:	LSHIFT
+| RSHIFT
+| RRSHIFT
 RelationalExpression	:	ShiftExpression RelationalExpressionPart
 RelationalExpressionPart  :   RelationalExpressionPart RelationalOperator ShiftExpression
 |
-RelationalOperator	:	"<"
-| ">"
-| "<="
-| ">="
-| "instanceof"
-| "in"
+RelationalOperator	:	LESS
+| GREATER
+| LESS_EQ
+| GREATER_EQ
+| INSTANCEOF
+| IN
 RelationalExpressionNoIn	:	ShiftExpression RelationalExpressionNoInPart
 RelationalExpressionNoInPart  :   RelationalExpressionNoInPart RelationalNoInOperator ShiftExpression
 |
-RelationalNoInOperator	:	"<"
-| ">"
-| "<="
-| ">="
-| "instanceof"
+RelationalNoInOperator	:	LESS
+| GREATER
+| LESS_EQ
+| GREATER_EQ
+| INSTANCEOF
 EqualityExpression	:	RelationalExpression EqualityExpressionPart
 EqualityExpressionPart  :   EqualityExpressionPart EqualityOperator RelationalExpression
 |
 EqualityExpressionNoIn	:	RelationalExpressionNoIn EqualityExpressionNoInPart
 EqualityExpressionNoInPart  :   EqualityExpressionNoInPart EqualityOperator RelationalExpressionNoIn
 |
-EqualityOperator	:	"=="
-| "!="
-| "==="
-| "!=="
+EqualityOperator	:	EQUAL
+| NOT_EQUAL
+| ALWAYS_EQ
+| ALWAYS_NEQ
 BitwiseANDExpression	:	EqualityExpression BitwiseANDExpressionPart
 BitwiseANDExpressionPart  :   BitwiseANDExpressionPart BitwiseANDOperator EqualityExpression
 |
 BitwiseANDExpressionNoIn	:	EqualityExpressionNoIn BitwiseANDExpressionNoInPart
 BitwiseANDExpressionNoInPart  :   BitwiseANDExpressionNoInPart BitwiseANDOperator EqualityExpressionNoIn
 |
-BitwiseANDOperator	:	"&"
+BitwiseANDOperator	:	BIT_AND
 BitwiseXORExpression	:	BitwiseANDExpression BitwiseXORExpressionPart
 BitwiseXORExpressionPart   :   BitwiseXORExpressionPart BitwiseXOROperator BitwiseANDExpression
 |
 BitwiseXORExpressionNoIn	:	BitwiseANDExpressionNoIn BitwiseXORExpressionNoInPart
 BitwiseXORExpressionNoInPart   :   BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseANDExpressionNoIn
 |
-BitwiseXOROperator	:	"^"
+BitwiseXOROperator	:	BIT_NOT
 BitwiseORExpression	:	BitwiseXORExpression BitwiseORExpressionPart
 BitwiseORExpressionPart   :   BitwiseORExpressionPart BitwiseOROperator BitwiseXORExpression
 |
 BitwiseORExpressionNoIn	:	BitwiseXORExpressionNoIn BitwiseORExpressionNoInPart
 BitwiseORExpressionNoInPart   :   BitwiseORExpressionNoInPart BitwiseOROperator BitwiseXORExpressionNoIn
 |
-BitwiseOROperator	:	"|"
+BitwiseOROperator	:	BIT_OR
 LogicalANDExpression	:	BitwiseORExpression LogicalANDExpressionPart
 LogicalANDExpressionPart   :   LogicalANDExpressionPart LogicalANDOperator BitwiseORExpression
 |
 LogicalANDExpressionNoIn	:	BitwiseORExpressionNoIn LogicalANDExpressionNoInPart
 LogicalANDExpressionNoInPart   :   LogicalANDExpressionNoInPart LogicalANDOperator BitwiseORExpressionNoIn
 |
-LogicalANDOperator	:	"&&"
+LogicalANDOperator	:	AND
 LogicalORExpression	:	LogicalANDExpression LogicalORExpressionPart
 LogicalORExpressionPart   :   LogicalORExpressionPart LogicalOROperator LogicalANDExpression
 |
 LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart
 LogicalORExpressionNoInPart   :   LogicalORExpressionNoInPart LogicalOROperator LogicalANDExpressionNoIn
 |
-LogicalOROperator	:	"||"
+LogicalOROperator	:	OR
 ConditionalExpression	:	LogicalORExpression
-|LogicalORExpression "?" AssignmentExpression ":" AssignmentExpression
+|LogicalORExpression QUES AssignmentExpression COLON AssignmentExpression
 ConditionalExpressionNoIn	:	LogicalORExpressionNoIn
-|LogicalORExpressionNoIn "?" AssignmentExpression ":" AssignmentExpressionNoIn
+|LogicalORExpressionNoIn QUES AssignmentExpression COLON AssignmentExpressionNoIn
 AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression
 | ConditionalExpression
 AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn
 | ConditionalExpressionNoIn
-AssignmentOperator	:	"=" { printf("haha!=\n");}
-| "*="
+AssignmentOperator	:	ASSIGN { printf("haha!=\n");}
+| MULTI_ASG
 | SLASHASSIGN
-| "%="
-| "+="
-| "-="
-| "<<="
-| ">>="
-| ">>>="
-| "&="
-| "^="
-| "|="
+| MOD_ASG
+| PLUS_ASG
+| MINUS_ASG
+| LSHIFT_ASG
+| RSHIFT_ASG
+| LLSHIFT_ASG
+| BIT_AND_ASG
+| BIT_NOT_ASG
+| BIT_OR_ASG
 Expression	:	AssignmentExpression ExpressionPart
-ExpressionPart   :   ExpressionPart "," AssignmentExpression
+ExpressionPart   :   ExpressionPart COMMA AssignmentExpression
 |
 ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart
-ExpressionNoInPart   :   ExpressionNoInPart "," AssignmentExpressionNoIn
+ExpressionNoInPart   :   ExpressionNoInPart COMMA AssignmentExpressionNoIn
 |
 
 //陈睿
-ExpressionOrNull: | Expression
+ExpressionOrNull: 
+| Expression
 Statement	:	Block
 |	JScriptVarStatement
 |	VariableStatement
@@ -311,74 +316,74 @@ Statement	:	Block
 |	SwitchStatement
 |	ThrowStatement
 |	TryStatement
-Block	:	"{}"
-|   "{" StatementList "}"
+Block	:	LEFT_BRACE RIGHT_BRACE
+|   LEFT_BRACE StatementList RIGHT_BRACE
 StatementList	:	Statement
 |   Statement StatementList
-VariableStatement	:	"var" VariableDeclarationList
-|   "var" VariableDeclarationList ";"
+VariableStatement	:	VAR VariableDeclarationList
+|   VAR VariableDeclarationList SEMICOLON
 VariableDeclarationList	:	VariableDeclaration
-| VariableDeclarationList  "," VariableDeclaration
+| VariableDeclarationList  COMMA VariableDeclaration
 VariableDeclarationListNoIn	:	VariableDeclarationNoIn
-| VariableDeclarationListNoIn "," VariableDeclarationNoIn
+| VariableDeclarationListNoIn COMMA VariableDeclarationNoIn
 VariableDeclaration	:	Identifier
 | Identifier Initialiser
 VariableDeclarationNoIn	:	Identifier
 | Identifier  InitialiserNoIn
-Initialiser	:	"=" AssignmentExpression
-InitialiserNoIn	:	"=" AssignmentExpressionNoIn
-EmptyStatement	:	";"
+Initialiser	:	ASSIGN AssignmentExpression
+InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn
+EmptyStatement	:	SEMICOLON
 ExpressionStatement	:	Expression
-| Expression ";"
-IfStatement	:	"if" "(" Expression ")" Statement
-| "if" "(" Expression ")" Statement "else" Statement
-IterationStatement	:	"do" Statement "while" "(" Expression ")"
-|   "do" Statement "while" "(" Expression ")" ";"
-|	"while" "(" Expression ")" Statement
-|	"for" "(" ";" ExpressionOrNull ";" ExpressionOrNull ")" Statement
-|	"for" "(" ExpressionNoIn ";" ExpressionOrNull ";" ExpressionOrNull ")" Statement
-|	"for" "(" "var" VariableDeclarationList ";" ExpressionOrNull ";" ExpressionOrNull ")" Statement
-|	"for" "(" "var" VariableDeclarationNoIn "in" Expression ")" Statement
-|	"for" "(" LeftHandSideExpressionForIn "in" Expression ")" Statement
+| Expression SEMICOLON
+IfStatement	:	IF LEFT_PARE Expression RIGHT_PARE Statement
+| IF LEFT_PARE Expression RIGHT_PARE Statement ELSE Statement
+IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE
+|   DO Statement WHILE LEFT_PARE Expression RIGHT_PARE SEMICOLON
+|	WHILE LEFT_PARE Expression RIGHT_PARE Statement
+|	FOR LEFT_PARE SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement
+|	FOR LEFT_PARE ExpressionNoIn SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement
+|	FOR LEFT_PARE VAR VariableDeclarationList SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement
+|	FOR LEFT_PARE VAR VariableDeclarationNoIn IN Expression RIGHT_PARE Statement
+|	FOR LEFT_PARE LeftHandSideExpressionForIn IN Expression RIGHT_PARE Statement
 IdentifierComma  :
 | Identifier
-| ";"
-| Identifier ";"
-ContinueStatement	:	"continue" IdentifierComma
-BreakStatement	:	"break" IdentifierComma
-ReturnStatement	:	"return" ExpressionOrNull
-| "return" ExpressionOrNull ";"
-WithStatement	:	"with" "(" Expression ")" Statement
-SwitchStatement	:	"switch" "(" Expression ")" CaseBlock
-CaseBlock	    :	"{" CaseBlockPart
-| "{" CaseClauses CaseBlockPart
-CaseBlockPart   :   "}"
-| DefaultClause "}"
-| DefaultClause CaseClauses "}"
+| SEMICOLON
+| Identifier SEMICOLON
+ContinueStatement	:	CONTINUE IdentifierComma
+BreakStatement	:	BREAK IdentifierComma
+ReturnStatement	:	RETURN ExpressionOrNull
+| RETURN ExpressionOrNull SEMICOLON
+WithStatement	:	WITH LEFT_PARE Expression RIGHT_PARE Statement
+SwitchStatement	:	SWITCH LEFT_PARE Expression RIGHT_PARE CaseBlock
+CaseBlock	    :	LEFT_BRACE CaseBlockPart
+| LEFT_BRACE CaseClauses CaseBlockPart
+CaseBlockPart   :   RIGHT_BRACE
+| DefaultClause RIGHT_BRACE
+| DefaultClause CaseClauses RIGHT_BRACE
 CaseClauses	    :	CaseClause
 | CaseClauses CaseClause
-CaseClause	    :	"case" Expression ":"
-| "case" Expression ":" StatementList
-DefaultClause	:	"default" ":"
-| "default" ":" StatementList
-LabelledStatement	:	Identifier ":" Statement
-ThrowStatement	:	"throw" Expression
-| "throw" Expression ";"
-TryStatement	:	"try" Block TryStatementPart
+CaseClause	    :	CASE Expression COLON
+| CASE Expression COLON StatementList
+DefaultClause	:	DEFAULT COLON
+| DEFAULT COLON StatementList
+LabelledStatement	:	Identifier COLON Statement
+ThrowStatement	:	THROW Expression
+| THROW Expression SEMICOLON
+TryStatement	:	TRY Block TryStatementPart
 TryStatementPart:   Finally
 | Catch
 | Catch Finally
-Catch	:	"catch" "(" Identifier ")" Block
-Finally	:	"finally" Block
-FormalParameterListInPare: "()"
-| "(" FormalParameterList ")"
-FunctionDeclaration	:	"function" Identifier FormalParameterListInPare FunctionBody
-FunctionExpression	:	"function" FormalParameterListInPare FunctionBody
-| "function" Identifier FormalParameterListInPare FunctionBody
+Catch	:	CATCH LEFT_PARE Identifier RIGHT_PARE Block
+Finally	:	FINALLY Block
+FormalParameterListInPare: LEFT_PARE RIGHT_PARE
+| LEFT_PARE FormalParameterList RIGHT_PARE
+FunctionDeclaration	:	FUNCTION Identifier FormalParameterListInPare FunctionBody
+FunctionExpression	:	FUNCTION FormalParameterListInPare FunctionBody
+| FUNCTION Identifier FormalParameterListInPare FunctionBody
 FormalParameterList	:	Identifier
-| FormalParameterList "," Identifier
-FunctionBody	:	"{}"
-| "{" SourceElements "}"
+| FormalParameterList COMMA Identifier
+FunctionBody	:	LEFT_BRACE RIGHT_BRACE
+| LEFT_BRACE SourceElements RIGHT_BRACE
 Program	:	JEOF 
 | SourceElements JEOF 
 | SourceElements 
@@ -386,13 +391,13 @@ SourceElements	:	SourceElement
 | SourceElements SourceElement
 SourceElement	:	FunctionDeclaration
 |	Statement
-ImportStatement	:	"import" Name ";"
-| "import" Name "." "*"  ";"
+ImportStatement	:	IMPORT Name SEMICOLON
+| IMPORT Name DOT MULTI  SEMICOLON
 Name	:	IDENTIFIER_NAME
-| Name "." IDENTIFIER_NAME
-JScriptVarStatement	:	"var" JScriptVarDeclarationList
-| "var" JScriptVarDeclarationList ";"
+| Name DOT IDENTIFIER_NAME
+JScriptVarStatement	:	VAR JScriptVarDeclarationList
+| VAR JScriptVarDeclarationList SEMICOLON
 JScriptVarDeclarationList	:	JScriptVarDeclaration
-| JScriptVarDeclarationList "," JScriptVarDeclaration
-JScriptVarDeclaration	:	Identifier ":" IDENTIFIER_NAME
-| Identifier ":" IDENTIFIER_NAME Initialiser
+| JScriptVarDeclarationList COMMA JScriptVarDeclaration
+JScriptVarDeclaration	:	Identifier COLON IDENTIFIER_NAME
+| Identifier COLON IDENTIFIER_NAME Initialiser

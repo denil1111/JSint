@@ -45,39 +45,60 @@ ast::Node* ast_root;
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
 %token SLASHASSIGN SLASH EOF IDENTIFIER_NAME
+%start Program
 
-%start program
+%type <debug> DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
+%type <debug> SLASHASSIGN SLASH EOF IDENTIFIER_NAME
 
-%type <debug> PROGRAM IDD DOT NAME EQUAL LTHAN LEQU GT GE PLUS MINUS MUL DIV
-%type <debug> ASSIGN COLON COMMA SEMI IF THEN ELSE WHILE DO BEGINN FUNCTION LB
-%type <debug> NOT OR AND MOD OF READ REPEAT TO UNEQUAL UNTIL NUMBER SYS_CON RB
-%type <debug> SYS_FUNCT SYS_PROC SYS_TYPE CHAR CONST STRING REAL ARRAY VAR TYPE
-%type <debug> RIGHTP LEFTP DOWNTO FOR GOTO INTEGER PROCEDURE RECORD END CASE SYS_BOOL
 
 // default type is ast node
-%type <ast_Node> label_part
+%type <ast_Node> PrimaryExpression Literal Identifier ArrayLiteral
+%type <ast_Node> ElementList ElementListPart Elision ObjectLiteral
+%type <ast_Node> PropertyNameAndValueList PropertyNameAndValueListPart
+%type <ast_Node> PropertyNameAndValue PropertyName 
+%type <ast_Node> MemberExpression MemberExpressionForIn
+%type <ast_Node> AllocationExpression AllocationExpressionBody
+%type <ast_Node> MemberExpressionParts MemberExpressionPart
+%type <ast_Node> CallExpression CallExpressionForIn CallExpressionParts CallExpressionPart
+%type <ast_Node> Arguments ArgumentList
+%type <ast_Node> ElAssignmentExpressions 
+%type <ast_Node> LeftHandSideExpression LeftHandSideExpressionForIn
+%type <ast_Node> PostfixExpression PostfixOperator
+%type <ast_Node> UnaryExpression UnaryExpressionPart UnaryOperator
+%type <ast_Node> MultiplicativeExpression MultiplicativeExpressionPart MultiplicativeOperator
+%type <ast_Node> AdditiveExpression AdditiveExpressionPart AdditiveOperator
+%type <ast_Node> ShiftExpression ShiftExpressionPart ShiftOperator
+%type <ast_Node> RelationalExpression RelationalExpressionPart RelationalOperator
+%type <ast_Node> RelationalExpressionNoIn RelationalExpressionNoInPart RelationalNoInOperator
+%type <ast_Node> EqualityExpression EqualityExpressionPart EqualityExpressionNoIn EqualityExpressionNoInPart EqualityOperator
+%type <ast_Node> BitwiseANDExpression BitwiseANDExpressionPart BitwiseANDExpressionNoIn BitwiseANDExpressionNoInPart BitwiseANDOperator BitwiseXORExpression
+%type <ast_Node> BitwiseXORExpressionPart BitwiseXORExpressionNoIn BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseORExpression BitwiseORExpressionPart
+%type <ast_Node> BitwiseORExpressionNoIn BitwiseORExpressionNoInPart BitwiseOROperator
+%type <ast_Node> LogicalANDExpression LogicalANDExpressionPart LogicalANDExpressionNoIn LogicalANDExpressionNoInPart LogicalANDOperator
+%type <ast_Node> LogicalORExpression LogicalORExpressionPart LogicalORExpressionNoIn LogicalORExpressionNoInPart LogicalOROperator
+%type <ast_Node> ConditionalExpression ConditionalExpressionNoIn AssignmentExpression AssignmentExpressionNoIn AssignmentOperator
+%type <ast_Node> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
+%type <ast_Node> ExpressionOrNull Statement 
+%type <ast_Node> Block StatementList 
+%type <ast_Node> VariableStatement VariableDeclarationList VariableDeclarationListPart VariableDeclarationListNoIn VariableDeclarationListNotInPart 
+%type <ast_Node> VariableDeclaration VariableDeclarationNoIn
+%type <ast_Node> Initialiser InitialiserNoIn
+%type <ast_Node> EmptyStatement ExpressionStatement
+%type <ast_Node> IfStatement IterationStatement
+%type <ast_Node> IdentifierComma 
+%type <ast_Node> ContinueStatement BreakStatement ReturnStatement
+%type <ast_Node> WithStatement SwitchStatement
+%type <ast_Node> CaseBlock CaseBlockPart CaseClauses CaseClause DefaultClause
+%type <ast_Node> LabelledStatement ThrowStatement
+%type <ast_Node> TryStatement TryStatementPart Catch Finally
+%type <ast_Node> FormalParameterListInPare
+%type <ast_Node> FunctionDeclaration FunctionExpression
+%type <ast_Node> FormalParameterList FunctionBody
+%type <ast_Node> Program 
+%type <ast_Node> SourceElements SourceElement
+%type <ast_Node> ImportStatement Name
+%type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
 
-%type <ast_Program> 		program program_head routine routine_head sub_routine
-%type <ast_TypeDecl> 		type_decl   array_type_decl record_type_decl simple_type_decl
-%type <ast_Statement> 		proc_stmt stmt non_label_stmt else_clause for_stmt repeat_stmt while_stmt if_stmt
-%type <ast_Statement>		goto_stmt case_stmt
-%type <ast_AssignmentStmt> 	assign_stmt
-%type <ast_Expression> 		expression expr term factor
-%type <ast_Routine> 		function_decl function_head procedure_head procedure_decl
-%type <ast_ConstValue>      const_value
-%type <ast_TypeConst>       type_definition
-
-%type <ast_TypeDeclList>    type_part type_decl_list
-%type <ast_VarDeclList> 	parameters para_decl_list para_type_list
-%type <ast_RoutineList> 	routine_part
-%type <ast_StatementList> 	routine_body compound_stmt stmt_list
-%type <ast_VarDeclList> 	var_part var_decl_list var_decl
-%type <ast_NameList> 		name_list
-%type <ast_ExpressionList>  expression_list
-%type <ast_ConstDeclList>   const_expr_list const_part
-%type <ast_FieldDeclList>   field_decl_list field_decl
-%type <ast_CaseStmt>		case_expr
-%type <ast_CaseList>		case_expr_list
 
 %%
 //张宇昊
@@ -98,7 +119,7 @@ ArrayLiteral    :  "[" Elision "]"
 //new one
 ElementList	:	Elision AssignmentExpression ElementListPart
 |   AssignmentExpression ElementListPart
-ElementListPart :   ElementListPart Elision Assignment
+ElementListPart :   ElementListPart Elision AssignmentExpression
 |
 Elision	:   ","
 |   Elision ","
@@ -298,7 +319,7 @@ VariableStatement	:	"var" VariableDeclarationList
 VariableDeclarationList	:	VariableDeclaration VariableDeclarationListPart
 VariableDeclarationListPart : VariableDeclarationListPart  "," VariableDeclaration
 |
-VariableDeclarationListNoIn	:	VariableDeclarationNoIn VariableDeclarationNoInPart
+VariableDeclarationListNoIn	:	VariableDeclarationNoIn VariableDeclarationNotInPart
 VariableDeclarationListNotInPart: VariableDeclarationListNotInPart  "," VariableDeclarationNoIn
 |
 VariableDeclaration	:	Identifier

@@ -44,11 +44,11 @@ ast::Node* ast_root;
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
-%token SLASHASSIGN SLASH EOF IDENTIFIER_NAME
+%token SLASHASSIGN SLASH JEOF IDENTIFIER_NAME
 %start Program
 
 %type <debug> DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
-%type <debug> SLASHASSIGN SLASH EOF IDENTIFIER_NAME
+%type <debug> SLASHASSIGN SLASH JEOF IDENTIFIER_NAME
 
 
 // default type is ast node
@@ -168,6 +168,7 @@ LeftHandSideExpression	:	CallExpression
 |	MemberExpression
 LeftHandSideExpressionForIn	:	CallExpressionForIn
 |	MemberExpressionForIn
+
 //李逸婷
 PostfixExpression	:	LeftHandSideExpression
 | LeftHandSideExpression PostfixOperator
@@ -273,7 +274,7 @@ AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpre
 | ConditionalExpression
 AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn
 | ConditionalExpressionNoIn
-AssignmentOperator	:	"="
+AssignmentOperator	:	"=" { printf("haha!=\n");}
 | "*="
 | SLASHASSIGN
 | "%="
@@ -377,8 +378,9 @@ FormalParameterList	:	Identifier
 | FormalParameterList "," Identifier
 FunctionBody	:	"{}"
 | "{" SourceElements "}"
-Program	:	EOF
-| SourceElements EOF
+Program	:	JEOF 
+| SourceElements JEOF 
+| SourceElements 
 SourceElements	:	SourceElement
 | SourceElements SourceElement
 SourceElement	:	FunctionDeclaration

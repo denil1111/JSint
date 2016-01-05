@@ -47,8 +47,10 @@ IdentifierPart {IdentifierStart}|[0-9]
 "null" { BeginToken(yytext);YYLVAL_DEBUG return NULL_LITERAL; }
 "/=" { BeginToken(yytext);YYLVAL_DEBUG return SLASHASSIGN; }
 "/" { BeginToken(yytext);YYLVAL_DEBUG return SLASH; }
-<<EOF>> { BeginToken(yytext);YYLVAL_DEBUG return EOF; }
-{IdentifierStart}{IdentifierPart} { BeginToken(yytext);YYLVAL_DEBUG return IDENTIFIER_NAME; }
+<<EOF>> { BeginToken(yytext);YYLVAL_DEBUG return JEOF; }
+{IdentifierStart}{IdentifierPart}  { BeginToken(yytext);printf("haha\n");YYLVAL_DEBUG return IDENTIFIER_NAME; }
+
+
 
 [ \n\t]+ { BeginToken(yytext); }
 .		{ printf("Invalid character\n"); }

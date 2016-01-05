@@ -46,64 +46,16 @@ extern int yydebug;
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     PROGRAM = 258,
-     IDD = 259,
-     DOT = 260,
-     EQUAL = 261,
-     LTHAN = 262,
-     LEQU = 263,
-     GT = 264,
-     GE = 265,
-     PLUS = 266,
-     MINUS = 267,
-     MUL = 268,
-     DIV = 269,
-     RIGHTP = 270,
-     LEFTP = 271,
-     ASSIGN = 272,
-     COLON = 273,
-     COMMA = 274,
-     SEMI = 275,
-     UNTIL = 276,
-     OR = 277,
-     AND = 278,
-     MOD = 279,
-     OF = 280,
-     READ = 281,
-     REPEAT = 282,
-     TO = 283,
-     UNEQUAL = 284,
-     IF = 285,
-     THEN = 286,
-     ELSE = 287,
-     WHILE = 288,
-     DO = 289,
-     BEGINN = 290,
-     END = 291,
-     CASE = 292,
-     DOWNTO = 293,
-     FOR = 294,
-     GOTO = 295,
-     INTEGER = 296,
-     LB = 297,
-     RB = 298,
-     NOT = 299,
-     NUMBER = 300,
-     SYS_CON = 301,
-     SYS_BOOL = 302,
-     SYS_FUNCT = 303,
-     SYS_PROC = 304,
-     SYS_TYPE = 305,
-     CHAR = 306,
-     CONST = 307,
-     STRING = 308,
-     REAL = 309,
-     ARRAY = 310,
-     VAR = 311,
-     PROCEDURE = 312,
-     RECORD = 313,
-     FUNCTION = 314,
-     TYPE = 315
+     DECIMAL_LITERAL = 258,
+     HEX_INTEGER_LITERAL = 259,
+     STRING_LITERAL = 260,
+     BOOLEAN_LITERAL = 261,
+     NULL_LITERAL = 262,
+     SLASHASSIGN = 263,
+     SLASH = 264,
+     JEOF = 265,
+     IDENTIFIER_NAME = 266,
+     ASS = 267
    };
 #endif
 
@@ -116,7 +68,7 @@ typedef union YYSTYPE
 
 	char* 					debug;
 
-    ast::Node* 				ast_Node; 
+    ast::Node* 				ast_Node;
     ast::Statement* 		ast_Statement;
     ast::Expression* 		ast_Expression;
     ast::Program* 			ast_Program;
@@ -144,7 +96,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 148 "parser.hpp"
+#line 100 "parser.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

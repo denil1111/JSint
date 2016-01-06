@@ -46,9 +46,9 @@ ast::Node* ast_root;
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
 %token SLASHASSIGN SLASH JEOF IDENTIFIER_NAME
 %token THIS NEW DELETE VOID TYPEOF INSTANCEOF IN VAR IF ELSE DO WHILE FOR CONTINUE BREAK RETURN WITH SWITCH CASE DEFAULT THROW TRY CATCH FINALLY FUNCTION IMPORT
-％token LEFT_BRACKET RIGHT_BRACKET LEFT_PARE RIGHT_PARE LEFT_BRACE RIGHT_BRACE COMMA DOT COLON SEMICOLON 
-%token PLUS MINUS MULTI DIV ASSIGN PLUS_PLUS MINUS_MINUS TILDE QUES EXCLAM PERCENT LESS GREATER EQUAL LSHIFT RSHIFT RRSHIFT LESS_EQ GREATER_EQ ALWAYS_EQ ALWAYS_NEQ BIT_AND BIT_OR BIT_NOT AND OR MULTI_ASG MOD_ASG PLUS_ASG MINUS_ASG LSHIFT_ASG RSHIFT_ASG
- LLSHIFT_ASG BIT_AND_ASG BIT_NOT_ASG BIT_OR_ASG
+%token LEFT_BRACKET RIGHT_BRACKET LEFT_PARE RIGHT_PARE LEFT_BRACE RIGHT_BRACE COMMA DOT COLON SEMICOLON
+%token PLUS MINUS MULTI ASSIGN PLUS_PLUS MINUS_MINUS TILDE QUES EXCLAM PERCENT LESS GREATER EQUAL LSHIFT RSHIFT RRSHIFT LESS_EQ GREATER_EQ NOT_EQUAL ALWAYS_EQ ALWAYS_NEQ BIT_AND BIT_OR BIT_NOT AND OR MULTI_ASG MOD_ASG PLUS_ASG MINUS_ASG LSHIFT_ASG RSHIFT_ASG
+%token LLSHIFT_ASG BIT_AND_ASG BIT_NOT_ASG BIT_OR_ASG
 %start Program
 
 %type <debug> DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -59,13 +59,13 @@ ast::Node* ast_root;
 %type <ast_Node> PrimaryExpression Literal Identifier ArrayLiteral
 %type <ast_Node> ElementList ElementListPart Elision ObjectLiteral
 %type <ast_Node> PropertyNameAndValueList PropertyNameAndValueListPart
-%type <ast_Node> PropertyNameAndValue PropertyName 
+%type <ast_Node> PropertyNameAndValue PropertyName
 %type <ast_Node> MemberExpression MemberExpressionForIn
 %type <ast_Node> AllocationExpression AllocationExpressionBody
 %type <ast_Node> MemberExpressionParts MemberExpressionPart
 %type <ast_Node> CallExpression CallExpressionForIn CallExpressionParts CallExpressionPart
 %type <ast_Node> Arguments ArgumentList
-%type <ast_Node> ElAssignmentExpressions 
+%type <ast_Node> ElAssignmentExpressions
 %type <ast_Node> LeftHandSideExpression LeftHandSideExpressionForIn
 %type <ast_Node> PostfixExpression PostfixOperator
 %type <ast_Node> UnaryExpression UnaryExpressionPart UnaryOperator
@@ -82,14 +82,14 @@ ast::Node* ast_root;
 %type <ast_Node> LogicalORExpression LogicalORExpressionPart LogicalORExpressionNoIn LogicalORExpressionNoInPart LogicalOROperator
 %type <ast_Node> ConditionalExpression ConditionalExpressionNoIn AssignmentExpression AssignmentExpressionNoIn AssignmentOperator
 %type <ast_Node> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
-%type <ast_Node> ExpressionOrNull Statement 
-%type <ast_Node> Block StatementList 
+%type <ast_Node> ExpressionOrNull Statement
+%type <ast_Node> Block StatementList
 %type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
 %type <ast_Node> VariableDeclaration VariableDeclarationNoIn
 %type <ast_Node> Initialiser InitialiserNoIn
 %type <ast_Node> EmptyStatement ExpressionStatement
 %type <ast_Node> IfStatement IterationStatement
-%type <ast_Node> IdentifierComma 
+%type <ast_Node> IdentifierComma
 %type <ast_Node> ContinueStatement BreakStatement ReturnStatement
 %type <ast_Node> WithStatement SwitchStatement
 %type <ast_Node> CaseBlock CaseBlockPart CaseClauses CaseClause DefaultClause
@@ -98,7 +98,7 @@ ast::Node* ast_root;
 %type <ast_Node> FormalParameterListInPare
 %type <ast_Node> FunctionDeclaration FunctionExpression
 %type <ast_Node> FormalParameterList FunctionBody
-%type <ast_Node> Program 
+%type <ast_Node> Program
 %type <ast_Node> SourceElements SourceElement
 %type <ast_Node> ImportStatement Name
 %type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
@@ -190,7 +190,7 @@ UnaryOperator	:	DELETE
 | PLUS
 | MINUS
 | TILDE
-| EXCLA
+| EXCLAM
 MultiplicativeExpression	:    UnaryExpression MultiplicativeExpressionPart
 MultiplicativeExpressionPart  : MultiplicativeExpressionPart MultiplicativeOperator UnaryExpression
 |
@@ -298,7 +298,7 @@ ExpressionNoInPart   :   ExpressionNoInPart COMMA AssignmentExpressionNoIn
 |
 
 //陈睿
-ExpressionOrNull: 
+ExpressionOrNull:
 | Expression
 Statement	:	Block
 |	JScriptVarStatement
@@ -384,9 +384,9 @@ FormalParameterList	:	Identifier
 | FormalParameterList COMMA Identifier
 FunctionBody	:	LEFT_BRACE RIGHT_BRACE
 | LEFT_BRACE SourceElements RIGHT_BRACE
-Program	:	JEOF 
-| SourceElements JEOF 
-| SourceElements 
+Program	:	JEOF
+| SourceElements JEOF
+| SourceElements
 SourceElements	:	SourceElement
 | SourceElements SourceElement
 SourceElement	:	FunctionDeclaration

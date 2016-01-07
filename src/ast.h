@@ -11,7 +11,6 @@
 
 // namespace ast start
 namespace ast {
-
 // forward declaration
 class LabelDecl;
 class ConstDecl;
@@ -89,6 +88,11 @@ public:
     }
     virtual std::string toString(){ return "stmt_list";}
     virtual std::vector<Statement*> *getlist(){ return &list;}
+	virtual std::vector<Node *> getChildren() { 
+		std::vector<Node *> rlist;
+		for(auto i : list) rlist.push_back((Node *)i);
+		return rlist;
+	}
 };
 
 class Program : public Node {
@@ -164,7 +168,7 @@ public:
     virtual void run();
 };
 
-class Expression : public Node {
+class Expression : public Statement {
 public:
     virtual void run();
 };
@@ -403,7 +407,7 @@ public:
     virtual void run();
 };
 
-class FuncCall : public Expression, public Statement {
+class FuncCall : public Expression{
 public:
     Identifier* id;
     ExpressionList* argument_list;
@@ -482,7 +486,10 @@ public:
         lt,
         gt,
         le,
-        ge
+        ge,
+		assign,
+		comma,
+		
     };
 
     Expression *op1, *op2;

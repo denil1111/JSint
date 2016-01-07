@@ -25,6 +25,7 @@ ast::Node* ast_root;
     ast::VarDecl* 			ast_VarDecl;
     ast::Identifier* 		ast_Identifier;
     ast::AssignmentStmt* 	ast_AssignmentStmt;
+	ast::BinaryOperator::OpType ast_OpType;
     ast::ConstDecl*         ast_ConstDecl;
     ast::ConstValue*        ast_ConstValue;
     ast::RecordType*        ast_RecordType;
@@ -56,33 +57,35 @@ ast::Node* ast_root;
 
 
 // default type is ast node
-%type <ast_Node> PrimaryExpression Literal Identifier ArrayLiteral
+%type <ast_Expression> PrimaryExpression Literal Identifier ArrayLiteral
 %type <ast_Node> ElementList ElementListPart Elision ObjectLiteral
 %type <ast_Node> PropertyNameAndValueList PropertyNameAndValueListPart
 %type <ast_Node> PropertyNameAndValue PropertyName
-%type <ast_Node> MemberExpression MemberExpressionForIn
-%type <ast_Node> AllocationExpression AllocationExpressionBody
-%type <ast_Node> MemberExpressionParts MemberExpressionPart
-%type <ast_Node> CallExpression CallExpressionForIn CallExpressionParts CallExpressionPart
+%type <ast_Expression> MemberExpression MemberExpressionForIn
+%type <ast_Expression> AllocationExpression AllocationExpressionBody
+%type <ast_Expression> MemberExpressionParts MemberExpressionPart
+%type <ast_Expression> CallExpression CallExpressionForIn CallExpressionParts CallExpressionPart
 %type <ast_Node> Arguments ArgumentList
 %type <ast_Node> ElAssignmentExpressions
-%type <ast_Node> LeftHandSideExpression LeftHandSideExpressionForIn
-%type <ast_Node> PostfixExpression PostfixOperator
-%type <ast_Node> UnaryExpression UnaryExpressionPart UnaryOperator
-%type <ast_Node> MultiplicativeExpression MultiplicativeExpressionPart MultiplicativeOperator
-%type <ast_Node> AdditiveExpression AdditiveExpressionPart AdditiveOperator
-%type <ast_Node> ShiftExpression ShiftExpressionPart ShiftOperator
-%type <ast_Node> RelationalExpression RelationalExpressionPart RelationalOperator
-%type <ast_Node> RelationalExpressionNoIn RelationalExpressionNoInPart RelationalNoInOperator
-%type <ast_Node> EqualityExpression EqualityExpressionPart EqualityExpressionNoIn EqualityExpressionNoInPart EqualityOperator
-%type <ast_Node> BitwiseANDExpression BitwiseANDExpressionPart BitwiseANDExpressionNoIn BitwiseANDExpressionNoInPart BitwiseANDOperator BitwiseXORExpression
-%type <ast_Node> BitwiseXORExpressionPart BitwiseXORExpressionNoIn BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseORExpression BitwiseORExpressionPart
-%type <ast_Node> BitwiseORExpressionNoIn BitwiseORExpressionNoInPart BitwiseOROperator
-%type <ast_Node> LogicalANDExpression LogicalANDExpressionPart LogicalANDExpressionNoIn LogicalANDExpressionNoInPart LogicalANDOperator
-%type <ast_Node> LogicalORExpression LogicalORExpressionPart LogicalORExpressionNoIn LogicalORExpressionNoInPart LogicalOROperator
-%type <ast_Node> ConditionalExpression ConditionalExpressionNoIn AssignmentExpression AssignmentExpressionNoIn AssignmentOperator
-%type <ast_Node> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
-%type <ast_Node> ExpressionOrNull Statement
+%type <ast_Expression> LeftHandSideExpression LeftHandSideExpressionForIn
+%type <ast_Expression> PostfixExpression PostfixOperator
+%type <ast_Expression> UnaryExpression UnaryExpressionPart UnaryOperator
+%type <ast_Expression> MultiplicativeExpression MultiplicativeExpressionPart MultiplicativeOperator
+%type <ast_Expression> AdditiveExpression AdditiveExpressionPart AdditiveOperator
+%type <ast_Expression> ShiftExpression ShiftExpressionPart ShiftOperator
+%type <ast_Expression> RelationalExpression RelationalExpressionPart RelationalOperator
+%type <ast_Expression> RelationalExpressionNoIn RelationalExpressionNoInPart RelationalNoInOperator
+%type <ast_Expression> EqualityExpression EqualityExpressionPart EqualityExpressionNoIn EqualityExpressionNoInPart EqualityOperator
+%type <ast_Expression> BitwiseANDExpression BitwiseANDExpressionPart BitwiseANDExpressionNoIn BitwiseANDExpressionNoInPart BitwiseANDOperator BitwiseXORExpression
+%type <ast_Expression> BitwiseXORExpressionPart BitwiseXORExpressionNoIn BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseORExpression BitwiseORExpressionPart
+%type <ast_Expression> BitwiseORExpressionNoIn BitwiseORExpressionNoInPart BitwiseOROperator
+%type <ast_Expression> LogicalANDExpression LogicalANDExpressionPart LogicalANDExpressionNoIn LogicalANDExpressionNoInPart LogicalANDOperator
+%type <ast_Expression> LogicalORExpression LogicalORExpressionPart LogicalORExpressionNoIn LogicalORExpressionNoInPart LogicalOROperator
+%type <ast_Expression> ConditionalExpression ConditionalExpressionNoIn AssignmentExpression AssignmentExpressionNoIn 
+%type <ast_OpType> AssignmentOperator
+%type <ast_Expression> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
+%type <ast_Node> ExpressionOrNull 
+%type <ast_Statement> Statement
 %type <ast_Node> Block StatementList
 %type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
 %type <ast_Node> VariableDeclaration VariableDeclarationNoIn
@@ -98,8 +101,9 @@ ast::Node* ast_root;
 %type <ast_Node> FormalParameterListInPare
 %type <ast_Node> FunctionDeclaration FunctionExpression
 %type <ast_Node> FormalParameterList FunctionBody
-%type <ast_Node> Program
-%type <ast_Node> SourceElements SourceElement
+%type <ast_StatementList> Program
+%type <ast_StatementList> SourceElements 
+%type <ast_Statement> SourceElement
 %type <ast_Node> ImportStatement Name
 %type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
 
@@ -109,18 +113,27 @@ ast::Node* ast_root;
 PrimaryExpression	:	THIS
 |	ObjectLiteral
 |	LEFT_PARE Expression RIGHT_PARE
-|	Identifier
+|	Identifier {
+	printf("identifier\n");
+	$$ = $1;
+}
 |	ArrayLiteral
-|	Literal
-Literal	:	DECIMAL_LITERAL | HEX_INTEGER_LITERAL | STRING_LITERAL | BOOLEAN_LITERAL | NULL_LITERAL
-Identifier	:	IDENTIFIER_NAME
+|	Literal {
+	printf("Literal\n");
+	$$ = $1;
+}
+Literal	:	DECIMAL_LITERAL {
+	$$ = new ast::IntegerType(atoi($1)); $$->debug = $1;
+	printf("number\n");
+}
+| HEX_INTEGER_LITERAL | STRING_LITERAL | BOOLEAN_LITERAL | NULL_LITERAL
+Identifier	:	IDENTIFIER_NAME {
+	$$ = new ast::Identifier($1);
+}
 ArrayLiteral    :  LEFT_BRACKET Elision RIGHT_BRACKET
 |   LEFT_BRACKET ElementList Elision RIGHT_BRACKET
 |   LEFT_BRACKET ElementList RIGHT_BRACKET
 |   LEFT_BRACKET RIGHT_BRACKET
-// example
-// old one->ElementList	:	( Elision )? AssignmentExpression ( Elision AssignmentExpression )*
-//new one
 ElementList	:	Elision AssignmentExpression ElementListPart
 |   AssignmentExpression ElementListPart
 ElementListPart :   ElementListPart Elision AssignmentExpression
@@ -129,9 +142,6 @@ Elision	:   COMMA
 |   Elision COMMA
 ObjectLiteral	:	LEFT_BRACE PropertyNameAndValueList RIGHT_BRACE
 |   LEFT_BRACE  RIGHT_BRACE
-//here is an example
-//old one-->PropertyNameAndValueList	:	PropertyNameAndValue ( COMMA PropertyNameAndValue | COMMA )*
-//new one
 PropertyNameAndValueList	:	PropertyNameAndValue PropertyNameAndValueListPart
 PropertyNameAndValueListPart    :   PropertyNameAndValueListPart COMMA
 |   PropertyNameAndValueListPart COMMA PropertyNameAndValue
@@ -141,19 +151,28 @@ PropertyNameAndValue	:	PropertyName COLON AssignmentExpression
 PropertyName	:	Identifier
 |	STRING_LITERAL
 |	DECIMAL_LITERAL
-MemberExpression	:  MemberExpressionForIn
+MemberExpression	:  FunctionExpression MemberExpressionParts
+|   PrimaryExpression MemberExpressionParts{
+	if ($2 == nullptr)
+	{
+		$$ = $1;
+		printf("MemberExp\n");
+	}
+	printf("MemberExp\n");
+}
 |	AllocationExpression
 MemberExpressionForIn	:	FunctionExpression MemberExpressionParts
-|   PrimaryExpression MemberExpressionParts
+|   PrimaryExpression MemberExpressionParts {
+	printf("MemberExpForIn\n");
+}
 
-//example 2
-//old one -->AllocationExpression	:	( NEW MemberExpression ( ( Arguments ( MemberExpressionPart )* )* ) )
-//new one
 AllocationExpression    :   NEW MemberExpression AllocationExpressionBody
 AllocationExpressionBody    :   AllocationExpressionBody Arguments MemberExpressionParts
 |
 MemberExpressionParts   :   MemberExpressionParts MemberExpressionPart
-|
+| {
+	$$ = nullptr;
+}
 MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
 |	DOT Identifier
 CallExpression	:	MemberExpression Arguments CallExpressionParts
@@ -169,16 +188,26 @@ ArgumentList	:	AssignmentExpression ElAssignmentExpressions
 ElAssignmentExpressions :  ElAssignmentExpressions COMMA AssignmentExpression
 |
 LeftHandSideExpression	:	CallExpression
-|	MemberExpression
+|	MemberExpression {
+	$$ = $1;
+	printf("LeftHandExp\n");
+}
 LeftHandSideExpressionForIn	:	CallExpressionForIn
-|	MemberExpressionForIn
+|	MemberExpressionForIn {
+	
+}
 
 //李逸婷
-PostfixExpression	:	LeftHandSideExpression
+PostfixExpression	:	LeftHandSideExpression {
+	$$ = $1;
+	printf("postfixExp\n");
+}
 | LeftHandSideExpression PostfixOperator
 PostfixOperator	:	 PLUS_PLUS
 | MINUS_MINUS
-UnaryExpression	:	PostfixExpression
+UnaryExpression	:	PostfixExpression {
+	$$ = $1;
+}
 | UnaryExpressionPart
 UnaryExpressionPart : UnaryOperator UnaryExpression
 | UnaryExpressionPart UnaryOperator UnaryExpression
@@ -191,26 +220,64 @@ UnaryOperator	:	DELETE
 | MINUS
 | TILDE
 | EXCLAM
-MultiplicativeExpression	:    UnaryExpression MultiplicativeExpressionPart
+MultiplicativeExpression	:    UnaryExpression MultiplicativeExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
+
 MultiplicativeExpressionPart  : MultiplicativeExpressionPart MultiplicativeOperator UnaryExpression
-|
+| {
+	$$ = nullptr;
+}
 MultiplicativeOperator	:	MULTI
 | SLASH
 | PERCENT
-AdditiveExpression	:	MultiplicativeExpression AdditiveExpressionPart
+AdditiveExpression	:	MultiplicativeExpression AdditiveExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
+
 AdditiveExpressionPart  :   AdditiveExpressionPart AdditiveOperator MultiplicativeExpression
-|
+| {
+	$$ = nullptr;
+}
 AdditiveOperator	:	PLUS
 | MINUS
-ShiftExpression	:	AdditiveExpression ShiftExpressionPart
+ShiftExpression	:	AdditiveExpression ShiftExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
 ShiftExpressionPart :   ShiftExpressionPart ShiftOperator AdditiveExpression
-|
+| {
+	$$ = nullptr;
+}
 ShiftOperator	:	LSHIFT
 | RSHIFT
 | RRSHIFT
-RelationalExpression	:	ShiftExpression RelationalExpressionPart
+RelationalExpression	:	ShiftExpression RelationalExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
 RelationalExpressionPart  :   RelationalExpressionPart RelationalOperator ShiftExpression
-|
+| {
+	$$ = nullptr;
+}
 RelationalOperator	:	LESS
 | GREATER
 | LESS_EQ
@@ -225,9 +292,18 @@ RelationalNoInOperator	:	LESS
 | LESS_EQ
 | GREATER_EQ
 | INSTANCEOF
-EqualityExpression	:	RelationalExpression EqualityExpressionPart
+EqualityExpression	:	RelationalExpression EqualityExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
 EqualityExpressionPart  :   EqualityExpressionPart EqualityOperator RelationalExpression
-|
+| {
+	$$ = nullptr;
+}
 EqualityExpressionNoIn	:	RelationalExpressionNoIn EqualityExpressionNoInPart
 EqualityExpressionNoInPart  :   EqualityExpressionNoInPart EqualityOperator RelationalExpressionNoIn
 |
@@ -235,50 +311,104 @@ EqualityOperator	:	EQUAL
 | NOT_EQUAL
 | ALWAYS_EQ
 | ALWAYS_NEQ
-BitwiseANDExpression	:	EqualityExpression BitwiseANDExpressionPart
+BitwiseANDExpression	:	EqualityExpression BitwiseANDExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
 BitwiseANDExpressionPart  :   BitwiseANDExpressionPart BitwiseANDOperator EqualityExpression
-|
+| {
+	$$ = nullptr;
+}
 BitwiseANDExpressionNoIn	:	EqualityExpressionNoIn BitwiseANDExpressionNoInPart
 BitwiseANDExpressionNoInPart  :   BitwiseANDExpressionNoInPart BitwiseANDOperator EqualityExpressionNoIn
 |
 BitwiseANDOperator	:	BIT_AND
-BitwiseXORExpression	:	BitwiseANDExpression BitwiseXORExpressionPart
+BitwiseXORExpression	:	BitwiseANDExpression BitwiseXORExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
 BitwiseXORExpressionPart   :   BitwiseXORExpressionPart BitwiseXOROperator BitwiseANDExpression
-|
+| {
+	$$ = nullptr;
+}
 BitwiseXORExpressionNoIn	:	BitwiseANDExpressionNoIn BitwiseXORExpressionNoInPart
 BitwiseXORExpressionNoInPart   :   BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseANDExpressionNoIn
 |
 BitwiseXOROperator	:	BIT_NOT
-BitwiseORExpression	:	BitwiseXORExpression BitwiseORExpressionPart
+BitwiseORExpression	:	BitwiseXORExpression BitwiseORExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
 BitwiseORExpressionPart   :   BitwiseORExpressionPart BitwiseOROperator BitwiseXORExpression
-|
+| {
+	$$ = nullptr;
+}
 BitwiseORExpressionNoIn	:	BitwiseXORExpressionNoIn BitwiseORExpressionNoInPart
 BitwiseORExpressionNoInPart   :   BitwiseORExpressionNoInPart BitwiseOROperator BitwiseXORExpressionNoIn
 |
 BitwiseOROperator	:	BIT_OR
-LogicalANDExpression	:	BitwiseORExpression LogicalANDExpressionPart
+LogicalANDExpression	:	BitwiseORExpression LogicalANDExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
 LogicalANDExpressionPart   :   LogicalANDExpressionPart LogicalANDOperator BitwiseORExpression
-|
+| {
+	$$ = nullptr;
+}
 LogicalANDExpressionNoIn	:	BitwiseORExpressionNoIn LogicalANDExpressionNoInPart
 LogicalANDExpressionNoInPart   :   LogicalANDExpressionNoInPart LogicalANDOperator BitwiseORExpressionNoIn
 |
 LogicalANDOperator	:	AND
-LogicalORExpression	:	LogicalANDExpression LogicalORExpressionPart
+LogicalORExpression	:	LogicalANDExpression LogicalORExpressionPart {
+	if ($2 == nullptr) {
+		$$ = $1;
+	}
+	else {
+		
+	}
+}
 LogicalORExpressionPart   :   LogicalORExpressionPart LogicalOROperator LogicalANDExpression
-|
+| {
+	$$ = nullptr;
+}
 LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart
 LogicalORExpressionNoInPart   :   LogicalORExpressionNoInPart LogicalOROperator LogicalANDExpressionNoIn
 |
 LogicalOROperator	:	OR
-ConditionalExpression	:	LogicalORExpression
+ConditionalExpression	:	LogicalORExpression{
+	$$ = $1;
+}
 |LogicalORExpression QUES AssignmentExpression COLON AssignmentExpression
 ConditionalExpressionNoIn	:	LogicalORExpressionNoIn
 |LogicalORExpressionNoIn QUES AssignmentExpression COLON AssignmentExpressionNoIn
 AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression
-| ConditionalExpression
-AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn
+{
+	$$ = new ast::BinaryOperator($1,$2,$3);
+	printf("an assign exp\n");
+}
+| ConditionalExpression{
+	$$ = $1;
+	printf("an assign exp from condition\n");
+}
+AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn {}
 | ConditionalExpressionNoIn
-AssignmentOperator	:	ASSIGN { printf("haha!=\n");}
+AssignmentOperator	:	ASSIGN { $$ =ast::BinaryOperator::OpType::assign; printf("an assign\n");}
 | MULTI_ASG
 | SLASHASSIGN
 | MOD_ASG
@@ -291,8 +421,27 @@ AssignmentOperator	:	ASSIGN { printf("haha!=\n");}
 | BIT_NOT_ASG
 | BIT_OR_ASG
 Expression	:	AssignmentExpression ExpressionPart
-ExpressionPart   :   ExpressionPart COMMA AssignmentExpression
-|
+{
+	if ($2 == nullptr){
+		$$ = $1;
+	}
+	else {
+		$$ = new ast::BinaryOperator($1,ast::BinaryOperator::OpType::comma,$2);
+	}
+	
+	
+}
+ExpressionPart   :    COMMA AssignmentExpression ExpressionPart{
+	if ($3 == nullptr) {
+		$$ = $2;
+	} else {
+		$$ = new ast::BinaryOperator($2,ast::BinaryOperator::OpType::comma,$3);
+	}
+	
+}
+| {
+	$$ = nullptr;
+}
 ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart
 ExpressionNoInPart   :   ExpressionNoInPart COMMA AssignmentExpressionNoIn
 |
@@ -306,6 +455,9 @@ Statement	:	Block
 |	EmptyStatement
 |	LabelledStatement
 |	ExpressionStatement
+{
+	
+}
 |	IfStatement
 |	IterationStatement
 |	ContinueStatement
@@ -333,8 +485,12 @@ VariableDeclarationNoIn	:	Identifier
 Initialiser	:	ASSIGN AssignmentExpression
 InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn
 EmptyStatement	:	SEMICOLON
-ExpressionStatement	:	Expression
-| Expression SEMICOLON
+ExpressionStatement	:	Expression {
+	$$ = $1;
+}
+| Expression SEMICOLON{
+	$$ = $1;
+}
 IfStatement	:	IF LEFT_PARE Expression RIGHT_PARE Statement
 | IF LEFT_PARE Expression RIGHT_PARE Statement ELSE Statement
 IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE
@@ -386,11 +542,45 @@ FunctionBody	:	LEFT_BRACE RIGHT_BRACE
 | LEFT_BRACE SourceElements RIGHT_BRACE
 Program	:	JEOF
 | SourceElements JEOF
-| SourceElements
-SourceElements	:	SourceElement
-| SourceElements SourceElement
+{
+	$$ = $1;
+}
+SourceElements	:	SourceElement {
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+	$1 -> print_node("", true, true);
+	ast_root = $1;
+	try {
+		ast_root->run();
+	} catch (const std::domain_error &de) {
+		cout << de.what() << endl;		
+	} catch (const std::logic_error &le) {
+		cout << le.what() << endl;	
+	} catch (...) {
+		cout << "other uncaught error" << endl;
+	}
+	printf("To SourceElements\n");
+} 
+| SourceElements SourceElement {
+	$2 -> print_node("", true, true);
+	ast_root = $2;
+	try {
+		ast_root->run();
+	} catch (const std::domain_error &de) {
+		cout << de.what() << endl;		
+	} catch (const std::logic_error &le) {
+		cout << le.what() << endl;	
+	} catch (...) {
+		cout << "other uncaught error" << endl;
+	}
+	printf("To SourceElements\n");
+	printf("new source\n");
+	$1->list.push_back($2);
+}
 SourceElement	:	FunctionDeclaration
-|	Statement
+|	Statement {
+	$$ = $1;
+}
 ImportStatement	:	IMPORT Name SEMICOLON
 | IMPORT Name DOT MULTI  SEMICOLON
 Name	:	IDENTIFIER_NAME

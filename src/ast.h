@@ -1,11 +1,13 @@
 #ifndef __AST_H__
 #define __AST_H__
 
+
 #include <string>
 #include <map>
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include "varlist.hpp"
 
 //used forward-declaration to deal with cross-reference issue
 
@@ -49,7 +51,7 @@ typedef std::vector<CaseStmt *>     CaseList;
 class Node {
 public:
     std::string     debug;
-
+	TValue	value;
     void print_node(std::string prefix, bool tail, bool root) {
         std::string tailStr = "└── ";
         std::string branchStr = "├── ";
@@ -523,7 +525,9 @@ public:
             { OpType::lt, "lt" },
             { OpType::gt, "gt" },
             { OpType::le, "le" },
-            { OpType::ge, "ge" }
+            { OpType::ge, "ge" },
+			{ OpType::comma, "comma"},
+			{ OpType::assign, "assign"}
         }[op];
     }
     virtual void run();

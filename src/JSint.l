@@ -120,7 +120,7 @@ IdentifierPart {IdentifierStart}|[0-9]
 "&&" { BeginToken(yytext);YYLVAL_DEBUG return AND; }
 "||" { BeginToken(yytext);YYLVAL_DEBUG return OR; }
 <<EOF>> { BeginToken(yytext);YYLVAL_DEBUG return JEOF; }
-{IdentifierStart}{IdentifierPart}  { BeginToken(yytext);printf("haha\n");YYLVAL_DEBUG return IDENTIFIER_NAME; }
+{IdentifierStart}{IdentifierPart}  { BeginToken(yytext);YYLVAL_DEBUG return IDENTIFIER_NAME; }
 
 [ \n\t]+ { BeginToken(yytext); }
 .		{ printf("Invalid character\n"); }

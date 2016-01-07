@@ -1319,7 +1319,7 @@ case YY_STATE_EOF(INITIAL):
 case 80:
 YY_RULE_SETUP
 #line 123 "JSint.l"
-{ BeginToken(yytext);printf("haha\n");YYLVAL_DEBUG return IDENTIFIER_NAME; }
+{ BeginToken(yytext);YYLVAL_DEBUG return IDENTIFIER_NAME; }
 	YY_BREAK
 case 81:
 /* rule 81 can match eol */

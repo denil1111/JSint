@@ -694,19 +694,19 @@ static const yytype_uint16 yyrline[] =
      330,   338,   339,   342,   343,   344,   345,   346,   354,   355,
      358,   359,   360,   361,   362,   370,   371,   374,   375,   376,
      377,   378,   386,   387,   390,   391,   392,   393,   394,   397,
-     398,   399,   400,   405,   409,   410,   411,   412,   413,   414,
-     415,   416,   417,   418,   419,   420,   421,   422,   423,   434,
-     442,   445,   446,   447,   450,   451,   452,   453,   454,   455,
-     456,   457,   461,   462,   463,   464,   465,   466,   467,   468,
-     469,   470,   471,   472,   473,   474,   475,   476,   477,   478,
-     481,   482,   483,   484,   485,   486,   487,   488,   491,   494,
-     495,   496,   497,   498,   499,   500,   501,   502,   503,   504,
-     505,   506,   507,   508,   509,   510,   511,   512,   513,   514,
-     515,   516,   517,   518,   519,   520,   521,   522,   523,   524,
-     525,   526,   527,   528,   529,   530,   531,   532,   533,   534,
-     535,   536,   537,   538,   539,   540,   541,   542,   543,   544,
-     548,   564,   580,   581,   584,   585,   586,   587,   588,   589,
-     590,   591,   592,   593
+     398,   399,   400,   405,   409,   410,   411,   415,   416,   417,
+     418,   419,   420,   421,   422,   423,   424,   425,   426,   437,
+     445,   448,   449,   450,   453,   454,   455,   456,   457,   458,
+     459,   460,   464,   465,   466,   467,   468,   469,   470,   471,
+     472,   473,   474,   475,   476,   477,   478,   479,   480,   481,
+     484,   485,   486,   487,   488,   489,   490,   491,   494,   497,
+     498,   499,   500,   501,   502,   503,   504,   505,   506,   507,
+     508,   509,   510,   511,   512,   513,   514,   515,   516,   517,
+     518,   519,   520,   521,   522,   523,   524,   525,   526,   527,
+     528,   529,   530,   531,   532,   533,   534,   535,   536,   537,
+     538,   539,   540,   541,   542,   543,   544,   545,   546,   547,
+     551,   568,   585,   586,   589,   590,   591,   592,   593,   594,
+     595,   596,   597,   598
 };
 #endif
 
@@ -2081,7 +2081,7 @@ yyreduce:
 /* Line 1787 of yacc.c  */
 #line 116 "JSint.y"
     {
-	printf("identifier\n");
+/*	//printf("identifier\n");*/
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
 }
     break;
@@ -2090,7 +2090,7 @@ yyreduce:
 /* Line 1787 of yacc.c  */
 #line 121 "JSint.y"
     {
-	printf("Literal\n");
+/*	//printf("Literal\n");*/
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
 }
     break;
@@ -2100,7 +2100,7 @@ yyreduce:
 #line 125 "JSint.y"
     {
 	(yyval.ast_Expression) = new ast::IntegerType(atoi((yyvsp[(1) - (1)].debug))); (yyval.ast_Expression)->debug = (yyvsp[(1) - (1)].debug);
-	printf("number\n");
+	//printf("number\n");
 }
     break;
 
@@ -2119,9 +2119,9 @@ yyreduce:
 	if ((yyvsp[(2) - (2)].ast_Expression) == nullptr)
 	{
 		(yyval.ast_Expression) = (yyvsp[(1) - (2)].ast_Expression);
-		printf("MemberExp\n");
+/*		//printf("MemberExp\n");*/
 	}
-	printf("MemberExp\n");
+/*	//printf("MemberExp\n");*/
 }
     break;
 
@@ -2129,7 +2129,7 @@ yyreduce:
 /* Line 1787 of yacc.c  */
 #line 165 "JSint.y"
     {
-	printf("MemberExpForIn\n");
+/*	//printf("MemberExpForIn\n");*/
 }
     break;
 
@@ -2146,7 +2146,7 @@ yyreduce:
 #line 191 "JSint.y"
     {
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
-	printf("LeftHandExp\n");
+/*	//printf("LeftHandExp\n");*/
 }
     break;
 
@@ -2163,7 +2163,7 @@ yyreduce:
 #line 201 "JSint.y"
     {
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
-	printf("postfixExp\n");
+/*	//printf("postfixExp\n");*/
 }
     break;
 
@@ -2398,7 +2398,7 @@ yyreduce:
 #line 401 "JSint.y"
     {
 	(yyval.ast_Expression) = new ast::BinaryOperator((yyvsp[(1) - (3)].ast_Expression),(yyvsp[(2) - (3)].ast_OpType),(yyvsp[(3) - (3)].ast_Expression));
-	printf("an assign exp\n");
+/*	//printf("an assign exp\n");*/
 }
     break;
 
@@ -2407,7 +2407,7 @@ yyreduce:
 #line 405 "JSint.y"
     {
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
-	printf("an assign exp from condition\n");
+	//printf("an assign exp from condition\n");
 }
     break;
 
@@ -2420,12 +2420,15 @@ yyreduce:
   case 166:
 /* Line 1787 of yacc.c  */
 #line 411 "JSint.y"
-    { (yyval.ast_OpType) =ast::BinaryOperator::OpType::assign; printf("an assign\n");}
+    { 
+	(yyval.ast_OpType) =ast::BinaryOperator::OpType::assign; 
+	//printf("an assign\n");
+}
     break;
 
   case 178:
 /* Line 1787 of yacc.c  */
-#line 424 "JSint.y"
+#line 427 "JSint.y"
     {
 	if ((yyvsp[(2) - (2)].ast_Expression) == nullptr){
 		(yyval.ast_Expression) = (yyvsp[(1) - (2)].ast_Expression);
@@ -2440,7 +2443,7 @@ yyreduce:
 
   case 179:
 /* Line 1787 of yacc.c  */
-#line 434 "JSint.y"
+#line 437 "JSint.y"
     {
 	if ((yyvsp[(3) - (3)].ast_Expression) == nullptr) {
 		(yyval.ast_Expression) = (yyvsp[(2) - (3)].ast_Expression);
@@ -2453,7 +2456,7 @@ yyreduce:
 
   case 180:
 /* Line 1787 of yacc.c  */
-#line 442 "JSint.y"
+#line 445 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2461,31 +2464,31 @@ yyreduce:
 
   case 191:
 /* Line 1787 of yacc.c  */
-#line 458 "JSint.y"
+#line 461 "JSint.y"
     {
-	
+	(yyval.ast_Statement) = (yyvsp[(1) - (1)].ast_Statement);
 }
     break;
 
   case 217:
 /* Line 1787 of yacc.c  */
-#line 488 "JSint.y"
+#line 491 "JSint.y"
     {
-	(yyval.ast_Node) = (yyvsp[(1) - (1)].ast_Expression);
+	(yyval.ast_Statement) = (yyvsp[(1) - (1)].ast_Expression);
 }
     break;
 
   case 218:
 /* Line 1787 of yacc.c  */
-#line 491 "JSint.y"
+#line 494 "JSint.y"
     {
-	(yyval.ast_Node) = (yyvsp[(1) - (2)].ast_Expression);
+	(yyval.ast_Statement) = (yyvsp[(1) - (2)].ast_Expression);
 }
     break;
 
   case 269:
 /* Line 1787 of yacc.c  */
-#line 545 "JSint.y"
+#line 548 "JSint.y"
     {
 	(yyval.ast_StatementList) = (yyvsp[(1) - (2)].ast_StatementList);
 }
@@ -2493,7 +2496,7 @@ yyreduce:
 
   case 270:
 /* Line 1787 of yacc.c  */
-#line 548 "JSint.y"
+#line 551 "JSint.y"
     {
 	(yyval.ast_StatementList) = new ast::StatementList;
 	(yyval.ast_StatementList) -> list.push_back((yyvsp[(1) - (1)].ast_Statement));
@@ -2508,13 +2511,14 @@ yyreduce:
 	} catch (...) {
 		cout << "other uncaught error" << endl;
 	}
-	printf("To SourceElements\n");
+	ast_root->value.print();
+	//printf("To SourceElements\n");
 }
     break;
 
   case 271:
 /* Line 1787 of yacc.c  */
-#line 564 "JSint.y"
+#line 568 "JSint.y"
     {
 	(yyvsp[(2) - (2)].ast_Statement) -> print_node("", true, true);
 	ast_root = (yyvsp[(2) - (2)].ast_Statement);
@@ -2527,15 +2531,16 @@ yyreduce:
 	} catch (...) {
 		cout << "other uncaught error" << endl;
 	}
-	printf("To SourceElements\n");
-	printf("new source\n");
+	//printf("To SourceElements\n");
+	//printf("new source\n");
+	ast_root->value.print();
 	(yyvsp[(1) - (2)].ast_StatementList)->list.push_back((yyvsp[(2) - (2)].ast_Statement));
 }
     break;
 
   case 273:
 /* Line 1787 of yacc.c  */
-#line 581 "JSint.y"
+#line 586 "JSint.y"
     {
 	(yyval.ast_Statement) = (yyvsp[(1) - (1)].ast_Statement);
 }
@@ -2543,7 +2548,7 @@ yyreduce:
 
 
 /* Line 1787 of yacc.c  */
-#line 2547 "parser.cpp"
+#line 2552 "parser.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

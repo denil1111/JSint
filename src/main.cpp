@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "parser.hpp"
 #include "ccalc.h"
+#include "varlist.hpp"
 
 using namespace std;
 std::string red(const std::string& str) {
@@ -16,12 +17,16 @@ std::string green(const std::string& str) {
 	std::string red_e = "\033[0m";
 	return red_b + str + red_e;
 }
-
+int debugFlag = 0;
 extern int yyparse();
 extern ast::StatementList* ast_root;
-
+VarList nowList;
 int main(int argc, char** argv) {
-	cout<<"!!"<<endl;
+	cout << green("start!") << endl;
+	if (argc>1 && argv[1][0] == 'd')
+	{
+		debugFlag = 1;
+	}
 	init_buffer();
 	yyparse();
 	extern int parseError;

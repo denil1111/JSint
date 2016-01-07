@@ -90,7 +90,7 @@ ast::Node* ast_root;
 %type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
 %type <ast_Node> VariableDeclaration VariableDeclarationNoIn
 %type <ast_Node> Initialiser InitialiserNoIn
-%type <ast_Node> EmptyStatement ExpressionStatement
+%type <ast_Statement> EmptyStatement ExpressionStatement
 %type <ast_Node> IfStatement IterationStatement
 %type <ast_Node> IdentifierComma
 %type <ast_Node> ContinueStatement BreakStatement ReturnStatement
@@ -114,17 +114,17 @@ PrimaryExpression	:	THIS
 |	ObjectLiteral
 |	LEFT_PARE Expression RIGHT_PARE
 |	Identifier {
-	printf("identifier\n");
+/*	//printf("identifier\n");*/
 	$$ = $1;
 }
 |	ArrayLiteral
 |	Literal {
-	printf("Literal\n");
+/*	//printf("Literal\n");*/
 	$$ = $1;
 }
 Literal	:	DECIMAL_LITERAL {
 	$$ = new ast::IntegerType(atoi($1)); $$->debug = $1;
-	printf("number\n");
+	//printf("number\n");
 }
 | HEX_INTEGER_LITERAL | STRING_LITERAL | BOOLEAN_LITERAL | NULL_LITERAL
 Identifier	:	IDENTIFIER_NAME {
@@ -156,14 +156,14 @@ MemberExpression	:  FunctionExpression MemberExpressionParts
 	if ($2 == nullptr)
 	{
 		$$ = $1;
-		printf("MemberExp\n");
+/*		//printf("MemberExp\n");*/
 	}
-	printf("MemberExp\n");
+/*	//printf("MemberExp\n");*/
 }
 |	AllocationExpression
 MemberExpressionForIn	:	FunctionExpression MemberExpressionParts
 |   PrimaryExpression MemberExpressionParts {
-	printf("MemberExpForIn\n");
+/*	//printf("MemberExpForIn\n");*/
 }
 
 AllocationExpression    :   NEW MemberExpression AllocationExpressionBody
@@ -190,7 +190,7 @@ ElAssignmentExpressions :  ElAssignmentExpressions COMMA AssignmentExpression
 LeftHandSideExpression	:	CallExpression
 |	MemberExpression {
 	$$ = $1;
-	printf("LeftHandExp\n");
+/*	//printf("LeftHandExp\n");*/
 }
 LeftHandSideExpressionForIn	:	CallExpressionForIn
 |	MemberExpressionForIn {
@@ -200,7 +200,7 @@ LeftHandSideExpressionForIn	:	CallExpressionForIn
 //李逸婷
 PostfixExpression	:	LeftHandSideExpression {
 	$$ = $1;
-	printf("postfixExp\n");
+/*	//printf("postfixExp\n");*/
 }
 | LeftHandSideExpression PostfixOperator
 PostfixOperator	:	 PLUS_PLUS
@@ -400,15 +400,18 @@ ConditionalExpressionNoIn	:	LogicalORExpressionNoIn
 AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression
 {
 	$$ = new ast::BinaryOperator($1,$2,$3);
-	printf("an assign exp\n");
+/*	//printf("an assign exp\n");*/
 }
 | ConditionalExpression{
 	$$ = $1;
-	printf("an assign exp from condition\n");
+	//printf("an assign exp from condition\n");
 }
 AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn {}
 | ConditionalExpressionNoIn
-AssignmentOperator	:	ASSIGN { $$ =ast::BinaryOperator::OpType::assign; printf("an assign\n");}
+AssignmentOperator	:	ASSIGN { 
+	$$ =ast::BinaryOperator::OpType::assign; 
+	//printf("an assign\n");
+}
 | MULTI_ASG
 | SLASHASSIGN
 | MOD_ASG
@@ -456,7 +459,7 @@ Statement	:	Block
 |	LabelledStatement
 |	ExpressionStatement
 {
-	
+	$$ = $1;
 }
 |	IfStatement
 |	IterationStatement
@@ -559,7 +562,8 @@ SourceElements	:	SourceElement {
 	} catch (...) {
 		cout << "other uncaught error" << endl;
 	}
-	printf("To SourceElements\n");
+	ast_root->value.print();
+	//printf("To SourceElements\n");
 } 
 | SourceElements SourceElement {
 	$2 -> print_node("", true, true);
@@ -573,8 +577,9 @@ SourceElements	:	SourceElement {
 	} catch (...) {
 		cout << "other uncaught error" << endl;
 	}
-	printf("To SourceElements\n");
-	printf("new source\n");
+	//printf("To SourceElements\n");
+	//printf("new source\n");
+	ast_root->value.print();
 	$1->list.push_back($2);
 }
 SourceElement	:	FunctionDeclaration

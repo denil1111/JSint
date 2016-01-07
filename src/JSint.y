@@ -70,19 +70,20 @@ ast::Node* ast_root;
 %type <ast_Expression> LeftHandSideExpression LeftHandSideExpressionForIn
 %type <ast_Expression> PostfixExpression PostfixOperator
 %type <ast_Expression> UnaryExpression UnaryExpressionPart UnaryOperator
-%type <ast_Expression> MultiplicativeExpression MultiplicativeExpressionPart MultiplicativeOperator
-%type <ast_Expression> AdditiveExpression AdditiveExpressionPart AdditiveOperator
-%type <ast_Expression> ShiftExpression ShiftExpressionPart ShiftOperator
-%type <ast_Expression> RelationalExpression RelationalExpressionPart RelationalOperator
-%type <ast_Expression> RelationalExpressionNoIn RelationalExpressionNoInPart RelationalNoInOperator
-%type <ast_Expression> EqualityExpression EqualityExpressionPart EqualityExpressionNoIn EqualityExpressionNoInPart EqualityOperator
-%type <ast_Expression> BitwiseANDExpression BitwiseANDExpressionPart BitwiseANDExpressionNoIn BitwiseANDExpressionNoInPart BitwiseANDOperator BitwiseXORExpression
-%type <ast_Expression> BitwiseXORExpressionPart BitwiseXORExpressionNoIn BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseORExpression BitwiseORExpressionPart
-%type <ast_Expression> BitwiseORExpressionNoIn BitwiseORExpressionNoInPart BitwiseOROperator
-%type <ast_Expression> LogicalANDExpression LogicalANDExpressionPart LogicalANDExpressionNoIn LogicalANDExpressionNoInPart LogicalANDOperator
-%type <ast_Expression> LogicalORExpression LogicalORExpressionPart LogicalORExpressionNoIn LogicalORExpressionNoInPart LogicalOROperator
+%type <ast_Expression> MultiplicativeExpression MultiplicativeExpressionPart 
+%type <ast_Expression> AdditiveExpression AdditiveExpressionPart 
+%type <ast_Expression> ShiftExpression ShiftExpressionPart 
+%type <ast_Expression> RelationalExpression RelationalExpressionPart 
+%type <ast_Expression> RelationalExpressionNoIn RelationalExpressionNoInPart 
+%type <ast_Expression> EqualityExpression EqualityExpressionPart EqualityExpressionNoIn EqualityExpressionNoInPart 
+%type <ast_Expression> BitwiseANDExpression BitwiseANDExpressionPart BitwiseANDExpressionNoIn BitwiseANDExpressionNoInPart  
+%type <ast_Expression> BitwiseXORExpressionPart BitwiseXORExpressionNoIn BitwiseXORExpressionNoInPart  BitwiseORExpression 
+%type <ast_Expression> BitwiseORExpressionNoIn BitwiseORExpressionNoInPart BitwiseORExpressionPart BitwiseXORExpression
+%type <ast_Expression> LogicalANDExpression LogicalANDExpressionPart LogicalANDExpressionNoIn LogicalANDExpressionNoInPart 
+%type <ast_Expression> LogicalORExpression LogicalORExpressionPart LogicalORExpressionNoIn LogicalORExpressionNoInPart 
 %type <ast_Expression> ConditionalExpression ConditionalExpressionNoIn AssignmentExpression AssignmentExpressionNoIn 
-%type <ast_OpType> AssignmentOperator
+%type <ast_OpType> AssignmentOperator LogicalOROperator LogicalANDOperator BitwiseOROperator  EqualityOperator BitwiseXOROperator BitwiseANDOperator
+%type <ast_OpType> RelationalNoInOperator RelationalOperator ShiftOperator AdditiveOperator MultiplicativeOperator
 %type <ast_Expression> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
 %type <ast_Node> ExpressionOrNull 
 %type <ast_Statement> Statement
@@ -221,42 +222,64 @@ UnaryOperator	:	DELETE
 | TILDE
 | EXCLAM
 MultiplicativeExpression	:    UnaryExpression MultiplicativeExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 
-MultiplicativeExpressionPart  : MultiplicativeExpressionPart MultiplicativeOperator UnaryExpression
+MultiplicativeExpressionPart  : MultiplicativeExpressionPart MultiplicativeOperator UnaryExpression {
+	$$ = new ast::BinaryOperator($1,$2,$3);
+
+}
 | {
 	$$ = nullptr;
 }
-MultiplicativeOperator	:	MULTI
-| SLASH
-| PERCENT
+MultiplicativeOperator	:	MULTI {
+	$$ = ast::BinaryOperator::OpType::mul;
+}
+| SLASH {
+	$$ = ast::BinaryOperator::OpType::div;
+}
+| PERCENT {
+	$$ = ast::BinaryOperator::OpType::mod;
+}
 AdditiveExpression	:	MultiplicativeExpression AdditiveExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 
-AdditiveExpressionPart  :   AdditiveExpressionPart AdditiveOperator MultiplicativeExpression
+AdditiveExpressionPart  :   AdditiveExpressionPart AdditiveOperator MultiplicativeExpression {
+	$$ = new ast::BinaryOperator($1,$2,$3);
+
+}
 | {
 	$$ = nullptr;
 }
-AdditiveOperator	:	PLUS
-| MINUS
+AdditiveOperator	:	PLUS {
+	$$ = ast::BinaryOperator::OpType::plus;
+}
+| MINUS {
+	$$ = ast::BinaryOperator::OpType::minus;
+}
 ShiftExpression	:	AdditiveExpression ShiftExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 ShiftExpressionPart :   ShiftExpressionPart ShiftOperator AdditiveExpression
@@ -267,11 +290,13 @@ ShiftOperator	:	LSHIFT
 | RSHIFT
 | RRSHIFT
 RelationalExpression	:	ShiftExpression RelationalExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 RelationalExpressionPart  :   RelationalExpressionPart RelationalOperator ShiftExpression
@@ -293,11 +318,13 @@ RelationalNoInOperator	:	LESS
 | GREATER_EQ
 | INSTANCEOF
 EqualityExpression	:	RelationalExpression EqualityExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 EqualityExpressionPart  :   EqualityExpressionPart EqualityOperator RelationalExpression
@@ -312,11 +339,13 @@ EqualityOperator	:	EQUAL
 | ALWAYS_EQ
 | ALWAYS_NEQ
 BitwiseANDExpression	:	EqualityExpression BitwiseANDExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 BitwiseANDExpressionPart  :   BitwiseANDExpressionPart BitwiseANDOperator EqualityExpression
@@ -328,11 +357,13 @@ BitwiseANDExpressionNoInPart  :   BitwiseANDExpressionNoInPart BitwiseANDOperato
 |
 BitwiseANDOperator	:	BIT_AND
 BitwiseXORExpression	:	BitwiseANDExpression BitwiseXORExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 BitwiseXORExpressionPart   :   BitwiseXORExpressionPart BitwiseXOROperator BitwiseANDExpression
@@ -344,11 +375,13 @@ BitwiseXORExpressionNoInPart   :   BitwiseXORExpressionNoInPart BitwiseXOROperat
 |
 BitwiseXOROperator	:	BIT_NOT
 BitwiseORExpression	:	BitwiseXORExpression BitwiseORExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 BitwiseORExpressionPart   :   BitwiseORExpressionPart BitwiseOROperator BitwiseXORExpression
@@ -360,11 +393,13 @@ BitwiseORExpressionNoInPart   :   BitwiseORExpressionNoInPart BitwiseOROperator 
 |
 BitwiseOROperator	:	BIT_OR
 LogicalANDExpression	:	BitwiseORExpression LogicalANDExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 LogicalANDExpressionPart   :   LogicalANDExpressionPart LogicalANDOperator BitwiseORExpression
@@ -376,11 +411,13 @@ LogicalANDExpressionNoInPart   :   LogicalANDExpressionNoInPart LogicalANDOperat
 |
 LogicalANDOperator	:	AND
 LogicalORExpression	:	LogicalANDExpression LogicalORExpressionPart {
-	if ($2 == nullptr) {
+	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
+	if (exp == nullptr) {
 		$$ = $1;
 	}
 	else {
-		
+		$$ = exp;
+		exp ->op1 = $1;
 	}
 }
 LogicalORExpressionPart   :   LogicalORExpressionPart LogicalOROperator LogicalANDExpression

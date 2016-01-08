@@ -23,6 +23,63 @@ TValue TValue::operator   +(const TValue &rx){
 				ss<<this->sValue.integer;
 				ss>>s1;
 				ret.sValue.str = s1 + rx.sValue.str;
+				break;
+			}
+		}
+	}
+	if (this->type == TType::Tdouble)
+	{
+		switch (rx.type)
+		{
+			case TType::Tint: {
+				ret.type = TType::Tdouble;
+				ret.sValue.dou = this->sValue.dou + rx.sValue.integer;
+				break;
+			}
+			case TType::Tdouble: {
+				ret.type = TType::Tdouble;
+				ret.sValue.dou = this->sValue.dou + rx.sValue.dou;
+				break;
+			}
+			case TType::Tstring: {
+				ret.type = TType::Tstring;
+				stringstream ss;
+				string s1;
+				ss<<this->sValue.dou;
+				ss>>s1;
+				ret.sValue.str = s1 + rx.sValue.str;
+				break;
+			}
+		}
+	}
+	if (this->type == TType::Tstring)
+	{
+		
+		switch (rx.type)
+		{
+			
+			case TType::Tint: {
+				ret.type = TType::Tstring;
+				stringstream ss;
+				string s1;
+				ss<<rx.sValue.integer;
+				ss>>s1;
+				ret.sValue.str = this->sValue.str + s1;
+				break;
+			}
+			case TType::Tdouble: {
+				ret.type = TType::Tstring;
+				stringstream ss;
+				string s1;
+				ss<<rx.sValue.dou;
+				ss>>s1;
+				ret.sValue.str = this->sValue.str + s1;
+				break;
+				break;
+			}
+			case TType::Tstring: {
+				ret.type = TType::Tstring;
+				ret.sValue.str = this->sValue.str + rx.sValue.str;
 			}
 		}
 	}

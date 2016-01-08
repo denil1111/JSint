@@ -135,7 +135,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 16 "JSint.y"
+#line 17 "JSint.y"
 
 	char* 					debug;
 

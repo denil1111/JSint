@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <iostream>
+#include <cstring>
 #include <string>
 #include "ast.h"
 #include "utils.h"
@@ -127,7 +128,15 @@ Literal	:	DECIMAL_LITERAL {
 	$$ = new ast::IntegerType(atoi($1)); $$->debug = $1;
 	//printf("number\n");
 }
-| HEX_INTEGER_LITERAL | STRING_LITERAL | BOOLEAN_LITERAL | NULL_LITERAL
+| HEX_INTEGER_LITERAL 
+| STRING_LITERAL {
+	char a[200];
+	strcpy(a,$1+1);
+	a[strlen(a)-1] = 0;
+/*	std::cout<<a<<std::endl;*/
+	$$ = new ast::StringType(a); $$->debug = a;
+}
+| BOOLEAN_LITERAL | NULL_LITERAL
 Identifier	:	IDENTIFIER_NAME {
 	$$ = new ast::Identifier($1);
 }
@@ -586,37 +595,47 @@ Program	:	JEOF
 	$$ = $1;
 }
 SourceElements	:	SourceElement {
-	$$ = new ast::StatementList;
-	$$ -> list.push_back($1);
-	$1 -> print_node("", true, true);
-	ast_root = $1;
-	try {
-		ast_root->run();
-	} catch (const std::domain_error &de) {
-		cout << de.what() << endl;		
-	} catch (const std::logic_error &le) {
-		cout << le.what() << endl;	
-	} catch (...) {
-		cout << "other uncaught error" << endl;
-	}
-	ast_root->value.print();
+	extern int parseError;
+	if (!parseError)
+	{
+		$$ = new ast::StatementList;
+		$$ -> list.push_back($1);
+		$1 -> print_node("", true, true);
+		ast_root = $1;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;		
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;	
+		} catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+		if (!parseError)
+			ast_root->value.print();
+	}	
 	//printf("To SourceElements\n");
 } 
 | SourceElements SourceElement {
-	$2 -> print_node("", true, true);
-	ast_root = $2;
-	try {
-		ast_root->run();
-	} catch (const std::domain_error &de) {
-		cout << de.what() << endl;		
-	} catch (const std::logic_error &le) {
-		cout << le.what() << endl;	
-	} catch (...) {
-		cout << "other uncaught error" << endl;
+	extern int parseError;
+	if (!parseError)
+	{
+		$2 -> print_node("", true, true);
+		ast_root = $2;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;		
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;	
+		} catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+		//printf("To SourceElements\n");
+		//printf("new source\n");
+		if (!parseError)
+			ast_root->value.print();
 	}
-	//printf("To SourceElements\n");
-	//printf("new source\n");
-	ast_root->value.print();
 	$1->list.push_back($2);
 }
 SourceElement	:	FunctionDeclaration

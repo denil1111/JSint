@@ -27,6 +27,11 @@ void ast::RealType::run() {
 void ast::CharType::run() {
     std::cout << "Creating char: " << val << std::endl;
 }
+void ast::StringType::run() {
+    std::cout << "Creating String: " << val << std::endl;
+	value.type = TValue::TType::Tstring;
+	value.sValue.str = val;
+}
 void ast::BooleanType::run() {
     std::cout << "Creating boolean: " << val << std::endl;
 }
@@ -46,6 +51,10 @@ void ast::BinaryOperator::run() {
 			value = op2->value;
 			nowList.assignAndNew(id->name,value);
 		}
+	}
+	if (op == OpType::plus) {
+		op1->run();
+		value = op1->value + op2->value;
 	}
 	
 }

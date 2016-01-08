@@ -37,6 +37,7 @@ static int nTokenLength = 0;
 static int nTokenNextStart = 0;
 static int lMaxBuffer = 1000;
 static char *buffer,*lastbuffer;
+static char *totalBuff;
 
 /*--------------------------------------------------------------------
  * dumpChar
@@ -109,7 +110,7 @@ void PrintError(char *errorstring, ...) {
   // DumpRow();
   // buffer = temp;
   // nRow+=1;
-  // DumpRow();
+  DumpRow();
   int start=nTokenStart;
   int end=start + nTokenLength - 1;
   int i;
@@ -182,7 +183,7 @@ int getNextLine(void) {
 
   nRow += 1;
   lBuffer = strlen(buffer);
-  DumpRow();
+  // DumpRow();
 
   /*================================================================*/
   /* that's it -----------------------------------------------------*/

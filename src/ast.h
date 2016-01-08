@@ -189,7 +189,8 @@ public:
         range,
         array,
         record,
-        user_defined
+        user_defined,
+		string
     };
 
     std::string     raw_name = "";
@@ -380,6 +381,18 @@ public:
     CharType(const char * p_str) : val(*(p_str)) {}   
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::character; }
     virtual int toRange() { return (int)val; }
+    virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
+    virtual void run();
+};
+
+class StringType : public ConstValue {
+public:
+    std::string val;
+
+    StringType(const std::string& name) : val(name) {}
+    StringType(const char * ptr_s) : val(*(new std::string(ptr_s))) {}
+	virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::string; }
+	virtual int toRange() { return 0; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
     virtual void run();
 };

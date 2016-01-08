@@ -69,6 +69,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <iostream>
+#include <cstring>
 #include <string>
 #include "ast.h"
 #include "utils.h"
@@ -80,7 +81,7 @@ int yydebug = 1;
 ast::Node* ast_root;
 
 /* Line 371 of yacc.c  */
-#line 84 "parser.cpp"
+#line 85 "parser.cpp"
 
 # ifndef YY_NULL
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -205,7 +206,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 387 of yacc.c  */
-#line 16 "JSint.y"
+#line 17 "JSint.y"
 
 	char* 					debug;
 
@@ -238,7 +239,7 @@ typedef union YYSTYPE
 
 
 /* Line 387 of yacc.c  */
-#line 242 "parser.cpp"
+#line 243 "parser.cpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -266,7 +267,7 @@ int yyparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 270 "parser.cpp"
+#line 271 "parser.cpp"
 
 #ifdef short
 # undef short
@@ -678,35 +679,35 @@ static const yytype_int16 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   114,   114,   115,   116,   117,   121,   122,   126,   130,
-     130,   130,   130,   131,   134,   135,   136,   137,   138,   139,
-     140,   141,   142,   143,   144,   145,   146,   147,   148,   149,
-     151,   152,   153,   154,   155,   156,   164,   165,   166,   170,
-     171,   172,   173,   174,   177,   178,   179,   180,   181,   182,
-     183,   184,   185,   186,   187,   188,   189,   190,   191,   192,
-     196,   197,   202,   206,   207,   208,   209,   212,   213,   214,
-     215,   216,   217,   218,   219,   220,   221,   222,   223,   224,
-     235,   239,   242,   245,   248,   251,   262,   266,   269,   272,
-     275,   285,   286,   289,   290,   291,   292,   302,   303,   306,
-     307,   308,   309,   310,   311,   312,   313,   314,   315,   316,
-     317,   318,   319,   320,   330,   331,   334,   335,   336,   337,
-     338,   339,   340,   341,   351,   352,   355,   356,   357,   358,
-     359,   369,   370,   373,   374,   375,   376,   377,   387,   388,
-     391,   392,   393,   394,   395,   405,   406,   409,   410,   411,
-     412,   413,   423,   424,   427,   428,   429,   430,   431,   434,
-     435,   436,   437,   442,   446,   447,   448,   452,   453,   454,
-     455,   456,   457,   458,   459,   460,   461,   462,   463,   474,
-     482,   485,   486,   487,   490,   491,   492,   493,   494,   495,
-     496,   497,   501,   502,   503,   504,   505,   506,   507,   508,
-     509,   510,   511,   512,   513,   514,   515,   516,   517,   518,
-     521,   522,   523,   524,   525,   526,   527,   528,   531,   534,
-     535,   536,   537,   538,   539,   540,   541,   542,   543,   544,
-     545,   546,   547,   548,   549,   550,   551,   552,   553,   554,
-     555,   556,   557,   558,   559,   560,   561,   562,   563,   564,
-     565,   566,   567,   568,   569,   570,   571,   572,   573,   574,
-     575,   576,   577,   578,   579,   580,   581,   582,   583,   584,
-     588,   605,   622,   623,   626,   627,   628,   629,   630,   631,
-     632,   633,   634,   635
+       0,   115,   115,   116,   117,   118,   122,   123,   127,   131,
+     132,   139,   139,   140,   143,   144,   145,   146,   147,   148,
+     149,   150,   151,   152,   153,   154,   155,   156,   157,   158,
+     160,   161,   162,   163,   164,   165,   173,   174,   175,   179,
+     180,   181,   182,   183,   186,   187,   188,   189,   190,   191,
+     192,   193,   194,   195,   196,   197,   198,   199,   200,   201,
+     205,   206,   211,   215,   216,   217,   218,   221,   222,   223,
+     224,   225,   226,   227,   228,   229,   230,   231,   232,   233,
+     244,   248,   251,   254,   257,   260,   271,   275,   278,   281,
+     284,   294,   295,   298,   299,   300,   301,   311,   312,   315,
+     316,   317,   318,   319,   320,   321,   322,   323,   324,   325,
+     326,   327,   328,   329,   339,   340,   343,   344,   345,   346,
+     347,   348,   349,   350,   360,   361,   364,   365,   366,   367,
+     368,   378,   379,   382,   383,   384,   385,   386,   396,   397,
+     400,   401,   402,   403,   404,   414,   415,   418,   419,   420,
+     421,   422,   432,   433,   436,   437,   438,   439,   440,   443,
+     444,   445,   446,   451,   455,   456,   457,   461,   462,   463,
+     464,   465,   466,   467,   468,   469,   470,   471,   472,   483,
+     491,   494,   495,   496,   499,   500,   501,   502,   503,   504,
+     505,   506,   510,   511,   512,   513,   514,   515,   516,   517,
+     518,   519,   520,   521,   522,   523,   524,   525,   526,   527,
+     530,   531,   532,   533,   534,   535,   536,   537,   540,   543,
+     544,   545,   546,   547,   548,   549,   550,   551,   552,   553,
+     554,   555,   556,   557,   558,   559,   560,   561,   562,   563,
+     564,   565,   566,   567,   568,   569,   570,   571,   572,   573,
+     574,   575,   576,   577,   578,   579,   580,   581,   582,   583,
+     584,   585,   586,   587,   588,   589,   590,   591,   592,   593,
+     597,   619,   641,   642,   645,   646,   647,   648,   649,   650,
+     651,   652,   653,   654
 };
 #endif
 
@@ -2079,7 +2080,7 @@ yyreduce:
     {
         case 5:
 /* Line 1787 of yacc.c  */
-#line 117 "JSint.y"
+#line 118 "JSint.y"
     {
 /*	//printf("identifier\n");*/
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
@@ -2088,7 +2089,7 @@ yyreduce:
 
   case 7:
 /* Line 1787 of yacc.c  */
-#line 122 "JSint.y"
+#line 123 "JSint.y"
     {
 /*	//printf("Literal\n");*/
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
@@ -2097,16 +2098,28 @@ yyreduce:
 
   case 8:
 /* Line 1787 of yacc.c  */
-#line 126 "JSint.y"
+#line 127 "JSint.y"
     {
 	(yyval.ast_Expression) = new ast::IntegerType(atoi((yyvsp[(1) - (1)].debug))); (yyval.ast_Expression)->debug = (yyvsp[(1) - (1)].debug);
 	//printf("number\n");
 }
     break;
 
+  case 10:
+/* Line 1787 of yacc.c  */
+#line 132 "JSint.y"
+    {
+	char a[200];
+	strcpy(a,(yyvsp[(1) - (1)].debug)+1);
+	a[strlen(a)-1] = 0;
+/*	std::cout<<a<<std::endl;*/
+	(yyval.ast_Expression) = new ast::StringType(a); (yyval.ast_Expression)->debug = a;
+}
+    break;
+
   case 13:
 /* Line 1787 of yacc.c  */
-#line 131 "JSint.y"
+#line 140 "JSint.y"
     {
 	(yyval.ast_Expression) = new ast::Identifier((yyvsp[(1) - (1)].debug));
 }
@@ -2114,7 +2127,7 @@ yyreduce:
 
   case 35:
 /* Line 1787 of yacc.c  */
-#line 156 "JSint.y"
+#line 165 "JSint.y"
     {
 	if ((yyvsp[(2) - (2)].ast_Expression) == nullptr)
 	{
@@ -2127,7 +2140,7 @@ yyreduce:
 
   case 38:
 /* Line 1787 of yacc.c  */
-#line 166 "JSint.y"
+#line 175 "JSint.y"
     {
 /*	//printf("MemberExpForIn\n");*/
 }
@@ -2135,7 +2148,7 @@ yyreduce:
 
   case 43:
 /* Line 1787 of yacc.c  */
-#line 174 "JSint.y"
+#line 183 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2143,7 +2156,7 @@ yyreduce:
 
   case 59:
 /* Line 1787 of yacc.c  */
-#line 192 "JSint.y"
+#line 201 "JSint.y"
     {
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
 /*	//printf("LeftHandExp\n");*/
@@ -2152,7 +2165,7 @@ yyreduce:
 
   case 61:
 /* Line 1787 of yacc.c  */
-#line 197 "JSint.y"
+#line 206 "JSint.y"
     {
 	
 }
@@ -2160,7 +2173,7 @@ yyreduce:
 
   case 62:
 /* Line 1787 of yacc.c  */
-#line 202 "JSint.y"
+#line 211 "JSint.y"
     {
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
 /*	//printf("postfixExp\n");*/
@@ -2169,7 +2182,7 @@ yyreduce:
 
   case 66:
 /* Line 1787 of yacc.c  */
-#line 209 "JSint.y"
+#line 218 "JSint.y"
     {
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
 }
@@ -2177,7 +2190,7 @@ yyreduce:
 
   case 79:
 /* Line 1787 of yacc.c  */
-#line 224 "JSint.y"
+#line 233 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2192,7 +2205,7 @@ yyreduce:
 
   case 80:
 /* Line 1787 of yacc.c  */
-#line 235 "JSint.y"
+#line 244 "JSint.y"
     {
 	(yyval.ast_Expression) = new ast::BinaryOperator((yyvsp[(1) - (3)].ast_Expression),(yyvsp[(2) - (3)].ast_OpType),(yyvsp[(3) - (3)].ast_Expression));
 
@@ -2201,7 +2214,7 @@ yyreduce:
 
   case 81:
 /* Line 1787 of yacc.c  */
-#line 239 "JSint.y"
+#line 248 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2209,7 +2222,7 @@ yyreduce:
 
   case 82:
 /* Line 1787 of yacc.c  */
-#line 242 "JSint.y"
+#line 251 "JSint.y"
     {
 	(yyval.ast_OpType) = ast::BinaryOperator::OpType::mul;
 }
@@ -2217,7 +2230,7 @@ yyreduce:
 
   case 83:
 /* Line 1787 of yacc.c  */
-#line 245 "JSint.y"
+#line 254 "JSint.y"
     {
 	(yyval.ast_OpType) = ast::BinaryOperator::OpType::div;
 }
@@ -2225,7 +2238,7 @@ yyreduce:
 
   case 84:
 /* Line 1787 of yacc.c  */
-#line 248 "JSint.y"
+#line 257 "JSint.y"
     {
 	(yyval.ast_OpType) = ast::BinaryOperator::OpType::mod;
 }
@@ -2233,7 +2246,7 @@ yyreduce:
 
   case 85:
 /* Line 1787 of yacc.c  */
-#line 251 "JSint.y"
+#line 260 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2248,7 +2261,7 @@ yyreduce:
 
   case 86:
 /* Line 1787 of yacc.c  */
-#line 262 "JSint.y"
+#line 271 "JSint.y"
     {
 	(yyval.ast_Expression) = new ast::BinaryOperator((yyvsp[(1) - (3)].ast_Expression),(yyvsp[(2) - (3)].ast_OpType),(yyvsp[(3) - (3)].ast_Expression));
 
@@ -2257,7 +2270,7 @@ yyreduce:
 
   case 87:
 /* Line 1787 of yacc.c  */
-#line 266 "JSint.y"
+#line 275 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2265,7 +2278,7 @@ yyreduce:
 
   case 88:
 /* Line 1787 of yacc.c  */
-#line 269 "JSint.y"
+#line 278 "JSint.y"
     {
 	(yyval.ast_OpType) = ast::BinaryOperator::OpType::plus;
 }
@@ -2273,7 +2286,7 @@ yyreduce:
 
   case 89:
 /* Line 1787 of yacc.c  */
-#line 272 "JSint.y"
+#line 281 "JSint.y"
     {
 	(yyval.ast_OpType) = ast::BinaryOperator::OpType::minus;
 }
@@ -2281,7 +2294,7 @@ yyreduce:
 
   case 90:
 /* Line 1787 of yacc.c  */
-#line 275 "JSint.y"
+#line 284 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2296,7 +2309,7 @@ yyreduce:
 
   case 92:
 /* Line 1787 of yacc.c  */
-#line 286 "JSint.y"
+#line 295 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2304,7 +2317,7 @@ yyreduce:
 
   case 96:
 /* Line 1787 of yacc.c  */
-#line 292 "JSint.y"
+#line 301 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2319,7 +2332,7 @@ yyreduce:
 
   case 98:
 /* Line 1787 of yacc.c  */
-#line 303 "JSint.y"
+#line 312 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2327,7 +2340,7 @@ yyreduce:
 
   case 113:
 /* Line 1787 of yacc.c  */
-#line 320 "JSint.y"
+#line 329 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2342,7 +2355,7 @@ yyreduce:
 
   case 115:
 /* Line 1787 of yacc.c  */
-#line 331 "JSint.y"
+#line 340 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2350,7 +2363,7 @@ yyreduce:
 
   case 123:
 /* Line 1787 of yacc.c  */
-#line 341 "JSint.y"
+#line 350 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2365,7 +2378,7 @@ yyreduce:
 
   case 125:
 /* Line 1787 of yacc.c  */
-#line 352 "JSint.y"
+#line 361 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2373,7 +2386,7 @@ yyreduce:
 
   case 130:
 /* Line 1787 of yacc.c  */
-#line 359 "JSint.y"
+#line 368 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2388,7 +2401,7 @@ yyreduce:
 
   case 132:
 /* Line 1787 of yacc.c  */
-#line 370 "JSint.y"
+#line 379 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2396,7 +2409,7 @@ yyreduce:
 
   case 137:
 /* Line 1787 of yacc.c  */
-#line 377 "JSint.y"
+#line 386 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2411,7 +2424,7 @@ yyreduce:
 
   case 139:
 /* Line 1787 of yacc.c  */
-#line 388 "JSint.y"
+#line 397 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2419,7 +2432,7 @@ yyreduce:
 
   case 144:
 /* Line 1787 of yacc.c  */
-#line 395 "JSint.y"
+#line 404 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2434,7 +2447,7 @@ yyreduce:
 
   case 146:
 /* Line 1787 of yacc.c  */
-#line 406 "JSint.y"
+#line 415 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2442,7 +2455,7 @@ yyreduce:
 
   case 151:
 /* Line 1787 of yacc.c  */
-#line 413 "JSint.y"
+#line 422 "JSint.y"
     {
 	auto exp = dynamic_cast<ast::BinaryOperator*>((yyvsp[(2) - (2)].ast_Expression));
 	if (exp == nullptr) {
@@ -2457,7 +2470,7 @@ yyreduce:
 
   case 153:
 /* Line 1787 of yacc.c  */
-#line 424 "JSint.y"
+#line 433 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2465,7 +2478,7 @@ yyreduce:
 
   case 158:
 /* Line 1787 of yacc.c  */
-#line 431 "JSint.y"
+#line 440 "JSint.y"
     {
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
 }
@@ -2473,7 +2486,7 @@ yyreduce:
 
   case 162:
 /* Line 1787 of yacc.c  */
-#line 438 "JSint.y"
+#line 447 "JSint.y"
     {
 	(yyval.ast_Expression) = new ast::BinaryOperator((yyvsp[(1) - (3)].ast_Expression),(yyvsp[(2) - (3)].ast_OpType),(yyvsp[(3) - (3)].ast_Expression));
 /*	//printf("an assign exp\n");*/
@@ -2482,7 +2495,7 @@ yyreduce:
 
   case 163:
 /* Line 1787 of yacc.c  */
-#line 442 "JSint.y"
+#line 451 "JSint.y"
     {
 	(yyval.ast_Expression) = (yyvsp[(1) - (1)].ast_Expression);
 	//printf("an assign exp from condition\n");
@@ -2491,13 +2504,13 @@ yyreduce:
 
   case 164:
 /* Line 1787 of yacc.c  */
-#line 446 "JSint.y"
+#line 455 "JSint.y"
     {}
     break;
 
   case 166:
 /* Line 1787 of yacc.c  */
-#line 448 "JSint.y"
+#line 457 "JSint.y"
     { 
 	(yyval.ast_OpType) =ast::BinaryOperator::OpType::assign; 
 	//printf("an assign\n");
@@ -2506,7 +2519,7 @@ yyreduce:
 
   case 178:
 /* Line 1787 of yacc.c  */
-#line 464 "JSint.y"
+#line 473 "JSint.y"
     {
 	if ((yyvsp[(2) - (2)].ast_Expression) == nullptr){
 		(yyval.ast_Expression) = (yyvsp[(1) - (2)].ast_Expression);
@@ -2521,7 +2534,7 @@ yyreduce:
 
   case 179:
 /* Line 1787 of yacc.c  */
-#line 474 "JSint.y"
+#line 483 "JSint.y"
     {
 	if ((yyvsp[(3) - (3)].ast_Expression) == nullptr) {
 		(yyval.ast_Expression) = (yyvsp[(2) - (3)].ast_Expression);
@@ -2534,7 +2547,7 @@ yyreduce:
 
   case 180:
 /* Line 1787 of yacc.c  */
-#line 482 "JSint.y"
+#line 491 "JSint.y"
     {
 	(yyval.ast_Expression) = nullptr;
 }
@@ -2542,7 +2555,7 @@ yyreduce:
 
   case 191:
 /* Line 1787 of yacc.c  */
-#line 498 "JSint.y"
+#line 507 "JSint.y"
     {
 	(yyval.ast_Statement) = (yyvsp[(1) - (1)].ast_Statement);
 }
@@ -2550,7 +2563,7 @@ yyreduce:
 
   case 217:
 /* Line 1787 of yacc.c  */
-#line 528 "JSint.y"
+#line 537 "JSint.y"
     {
 	(yyval.ast_Statement) = (yyvsp[(1) - (1)].ast_Expression);
 }
@@ -2558,7 +2571,7 @@ yyreduce:
 
   case 218:
 /* Line 1787 of yacc.c  */
-#line 531 "JSint.y"
+#line 540 "JSint.y"
     {
 	(yyval.ast_Statement) = (yyvsp[(1) - (2)].ast_Expression);
 }
@@ -2566,7 +2579,7 @@ yyreduce:
 
   case 269:
 /* Line 1787 of yacc.c  */
-#line 585 "JSint.y"
+#line 594 "JSint.y"
     {
 	(yyval.ast_StatementList) = (yyvsp[(1) - (2)].ast_StatementList);
 }
@@ -2574,51 +2587,61 @@ yyreduce:
 
   case 270:
 /* Line 1787 of yacc.c  */
-#line 588 "JSint.y"
+#line 597 "JSint.y"
     {
-	(yyval.ast_StatementList) = new ast::StatementList;
-	(yyval.ast_StatementList) -> list.push_back((yyvsp[(1) - (1)].ast_Statement));
-	(yyvsp[(1) - (1)].ast_Statement) -> print_node("", true, true);
-	ast_root = (yyvsp[(1) - (1)].ast_Statement);
-	try {
-		ast_root->run();
-	} catch (const std::domain_error &de) {
-		cout << de.what() << endl;		
-	} catch (const std::logic_error &le) {
-		cout << le.what() << endl;	
-	} catch (...) {
-		cout << "other uncaught error" << endl;
-	}
-	ast_root->value.print();
+	extern int parseError;
+	if (!parseError)
+	{
+		(yyval.ast_StatementList) = new ast::StatementList;
+		(yyval.ast_StatementList) -> list.push_back((yyvsp[(1) - (1)].ast_Statement));
+		(yyvsp[(1) - (1)].ast_Statement) -> print_node("", true, true);
+		ast_root = (yyvsp[(1) - (1)].ast_Statement);
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;		
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;	
+		} catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+		if (!parseError)
+			ast_root->value.print();
+	}	
 	//printf("To SourceElements\n");
 }
     break;
 
   case 271:
 /* Line 1787 of yacc.c  */
-#line 605 "JSint.y"
+#line 619 "JSint.y"
     {
-	(yyvsp[(2) - (2)].ast_Statement) -> print_node("", true, true);
-	ast_root = (yyvsp[(2) - (2)].ast_Statement);
-	try {
-		ast_root->run();
-	} catch (const std::domain_error &de) {
-		cout << de.what() << endl;		
-	} catch (const std::logic_error &le) {
-		cout << le.what() << endl;	
-	} catch (...) {
-		cout << "other uncaught error" << endl;
+	extern int parseError;
+	if (!parseError)
+	{
+		(yyvsp[(2) - (2)].ast_Statement) -> print_node("", true, true);
+		ast_root = (yyvsp[(2) - (2)].ast_Statement);
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;		
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;	
+		} catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+		//printf("To SourceElements\n");
+		//printf("new source\n");
+		if (!parseError)
+			ast_root->value.print();
 	}
-	//printf("To SourceElements\n");
-	//printf("new source\n");
-	ast_root->value.print();
 	(yyvsp[(1) - (2)].ast_StatementList)->list.push_back((yyvsp[(2) - (2)].ast_Statement));
 }
     break;
 
   case 273:
 /* Line 1787 of yacc.c  */
-#line 623 "JSint.y"
+#line 642 "JSint.y"
     {
 	(yyval.ast_Statement) = (yyvsp[(1) - (1)].ast_Statement);
 }
@@ -2626,7 +2649,7 @@ yyreduce:
 
 
 /* Line 1787 of yacc.c  */
-#line 2630 "parser.cpp"
+#line 2653 "parser.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

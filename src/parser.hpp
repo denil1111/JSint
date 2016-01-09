@@ -114,7 +114,7 @@ extern int yydebug;
      ALWAYS_NEQ = 323,
      BIT_AND = 324,
      BIT_OR = 325,
-     BIT_NOT = 326,
+     BIT_XOR = 326,
      AND = 327,
      OR = 328,
      MULTI_ASG = 329,
@@ -135,7 +135,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 17 "JSint.y"
+#line 18 "JSint.y"
 
 	char* 					debug;
 

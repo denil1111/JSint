@@ -1300,7 +1300,7 @@ YY_RULE_SETUP
 case 77:
 YY_RULE_SETUP
 #line 119 "JSint.l"
-{ BeginToken(yytext);YYLVAL_DEBUG return BIT_NOT; }
+{ BeginToken(yytext);YYLVAL_DEBUG return BIT_XOR; }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP

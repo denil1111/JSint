@@ -16,10 +16,24 @@ struct TValue {
 		Tint,
 		Tdouble,
 		Tarray,
+		TNaN
 	};
 	TSValue sValue;
 	TType type;
-	void print() {
+	TValue(){}
+	TValue(int x) {
+		type = TType::Tint;
+		sValue.integer = x;
+	}
+	TValue(double x) {
+		type = TType::Tdouble;
+		sValue.dou = x;
+	}
+	TValue(std::string x) {
+		type = TType::Tint;
+		sValue.str = x;
+	}
+	void print() const{
 		std::stringstream  ss;
 		std::string st;
 		if (type == TType::Tint) {
@@ -32,8 +46,25 @@ struct TValue {
 		std::cout<<green(std::string(st))<<std::endl;
 	}
 	TValue operator   +(const TValue &rx);
-	// TValue operator   -(const X &rx);
+	TValue operator   -(const TValue &rx);
+	TValue operator   *(const TValue &rx);
+	TValue operator   /(const TValue &rx);
+	TValue operator   %(const TValue &rx);
+	TValue operator   >(const TValue &rx);
+	TValue operator   <(const TValue &rx);
+	TValue operator   >=(const TValue &rx);
+	TValue operator   <=(const TValue &rx);
+	TValue operator   !=(const TValue &rx);
+	TValue operator   ==(const TValue &rx);
+	TValue operator   ||(const TValue &rx);
+	TValue operator   &&(const TValue &rx);
+	TValue operator   |(const TValue &rx);
+	TValue operator   &(const TValue &rx);
+	TValue operator   ^(const TValue &rx);
+	TValue operator   !();
+	TValue operator   -();
 };
+
 class VarList {
 	std::map<std::string,TValue> list;
 public:

@@ -52,10 +52,92 @@ void ast::BinaryOperator::run() {
 			nowList.assignAndNew(id->name,value);
 		}
 	}
-	if (op == OpType::plus) {
+	else
+	{
 		op1->run();
-		value = op1->value + op2->value;
+		switch (op)
+		{
+			case OpType::plus :{
+				value = op1->value + op2->value;
+				break;
+			}
+			case OpType::minus :{
+				value = op1->value - op2->value;
+				break;
+			}
+			case OpType::mul :{
+				value = op1->value * op2->value;
+				break;
+			}
+			case OpType::div :{
+				value = op1->value / op2->value;
+				break;
+			}
+			case OpType::mod :{
+				value = op1->value % op2->value;
+				break;
+			}
+			case OpType::bit_and :{
+				value = op1->value & op2->value;
+				break;
+			}
+			case OpType::bit_or :{
+				value = op1->value | op2->value;
+				break;
+			}
+			case OpType::land :{
+				value = op1->value && op2->value;
+				break;
+			}
+			case OpType::lor :{
+				value = op1->value || op2->value;
+				break;
+			}
+			case OpType::bit_xor :{
+				value = op1->value ^ op2->value;
+				break;
+			}
+			case OpType::eq :{
+				value = op1->value == op2->value;
+				break;
+			}
+			case OpType::ne :{
+				value = op1->value != op2->value;
+				break;
+			}
+			case OpType::lt :{
+				value = op1->value < op2->value;
+				break;
+			}
+			case OpType::gt :{
+				value = op1->value > op2->value;
+				break;
+			}
+			case OpType::le :{
+				value = op1->value <= op2->value;
+				break;
+			}
+			case OpType::ge :{
+				value = op1->value >= op2->value;
+				break;
+			}
+			case OpType::aeq :{
+				value = op1->value == op2->value;
+				if (op1->value.type != op2->value.type) {
+					value.sValue.integer = 0;
+				}
+				break;
+			}
+			case OpType::ane :{
+				value = op1->value == op2->value;
+				if (op1->value.type != op2->value.type) {
+					value.sValue.integer = 1;
+				}
+				break;
+			}
+		}
 	}
+	
 	
 }
 

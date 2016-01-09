@@ -496,6 +496,8 @@ public:
         bit_and,
         bit_or,
         bit_xor,
+		land,
+		lor,
         eq,
         ne,
         lt,
@@ -504,7 +506,13 @@ public:
         ge,
 		assign,
 		comma,
-		
+		aeq,
+		ane,
+		iof,
+		iin,
+		lsh,
+		rsh,
+		ursh
     };
 
     Expression *op1, *op2;
@@ -540,7 +548,17 @@ public:
             { OpType::le, "le" },
             { OpType::ge, "ge" },
 			{ OpType::comma, "comma"},
-			{ OpType::assign, "assign"}
+			{ OpType::assign, "assign"},
+			{ OpType::land, "logic_and"},
+			{ OpType::lor, "logic_or"},
+			{ OpType::land, "logic_and"},
+			{ OpType::aeq, "all_eq"},
+			{ OpType::ane, "all_ne"},
+			{ OpType::iof, "of"},
+			{ OpType::iin, "in"},
+			{ OpType::lsh, "left_shift"},
+			{ OpType::rsh, "right_shift"},
+			{ OpType::ursh, "right_u_shift"},
         }[op];
     }
     virtual void run();

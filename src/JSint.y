@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include <vector>
 #include "ast.h"
 #include "utils.h"
 #include "parser.hpp"
@@ -44,6 +45,11 @@ ast::BinaryOperator* noOp1Exp;
     ast::TypeDeclList*      ast_TypeDeclList;
     ast::CaseList*          ast_CaseList;
     ast::CaseStmt*          ast_CaseStmt;
+
+	ast::ParameterList*     ast_ParameterList;
+	ast::FunctionDeclaration* ast_FunctionDeclaration;
+	ast::ArgumentList*      ast_ArgumentList;
+	ast::CallExpression*    ast_CallExpression;
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -59,35 +65,36 @@ ast::BinaryOperator* noOp1Exp;
 
 
 // default type is ast node
-%type <ast_Expression> PrimaryExpression Literal Identifier ArrayLiteral
+%type <ast_Identifier> Identifier
+%type <ast_Expression> PrimaryExpression Literal ArrayLiteral
 %type <ast_Node> ElementList ElementListPart Elision ObjectLiteral
 %type <ast_Node> PropertyNameAndValueList PropertyNameAndValueListPart
 %type <ast_Node> PropertyNameAndValue PropertyName
 %type <ast_Expression> MemberExpression MemberExpressionForIn
 %type <ast_Expression> AllocationExpression AllocationExpressionBody
 %type <ast_Expression> MemberExpressionParts MemberExpressionPart
-%type <ast_Expression> CallExpression CallExpressionForIn CallExpressionParts CallExpressionPart
-%type <ast_Node> Arguments ArgumentList
-%type <ast_Node> ElAssignmentExpressions
+%type <ast_Expression> CallExpressionForIn CallExpressionParts CallExpressionPart
+%type <ast_CallExpression> CallExpression
+%type <ast_ArgumentList> Arguments ArgumentList
 %type <ast_Expression> LeftHandSideExpression LeftHandSideExpressionForIn
 %type <ast_Expression> PostfixExpression PostfixOperator
 %type <ast_Expression> UnaryExpression UnaryExpressionPart UnaryOperator
-%type <ast_Expression> MultiplicativeExpression MultiplicativeExpressionPart 
-%type <ast_Expression> AdditiveExpression AdditiveExpressionPart 
-%type <ast_Expression> ShiftExpression ShiftExpressionPart 
-%type <ast_Expression> RelationalExpression RelationalExpressionPart 
-%type <ast_Expression> RelationalExpressionNoIn RelationalExpressionNoInPart 
-%type <ast_Expression> EqualityExpression EqualityExpressionPart EqualityExpressionNoIn EqualityExpressionNoInPart 
-%type <ast_Expression> BitwiseANDExpression BitwiseANDExpressionPart BitwiseANDExpressionNoIn BitwiseANDExpressionNoInPart  
-%type <ast_Expression> BitwiseXORExpressionPart BitwiseXORExpressionNoIn BitwiseXORExpressionNoInPart  BitwiseORExpression 
+%type <ast_Expression> MultiplicativeExpression MultiplicativeExpressionPart
+%type <ast_Expression> AdditiveExpression AdditiveExpressionPart
+%type <ast_Expression> ShiftExpression ShiftExpressionPart
+%type <ast_Expression> RelationalExpression RelationalExpressionPart
+%type <ast_Expression> RelationalExpressionNoIn RelationalExpressionNoInPart
+%type <ast_Expression> EqualityExpression EqualityExpressionPart EqualityExpressionNoIn EqualityExpressionNoInPart
+%type <ast_Expression> BitwiseANDExpression BitwiseANDExpressionPart BitwiseANDExpressionNoIn BitwiseANDExpressionNoInPart
+%type <ast_Expression> BitwiseXORExpressionPart BitwiseXORExpressionNoIn BitwiseXORExpressionNoInPart  BitwiseORExpression
 %type <ast_Expression> BitwiseORExpressionNoIn BitwiseORExpressionNoInPart BitwiseORExpressionPart BitwiseXORExpression
-%type <ast_Expression> LogicalANDExpression LogicalANDExpressionPart LogicalANDExpressionNoIn LogicalANDExpressionNoInPart 
-%type <ast_Expression> LogicalORExpression LogicalORExpressionPart LogicalORExpressionNoIn LogicalORExpressionNoInPart 
-%type <ast_Expression> ConditionalExpression ConditionalExpressionNoIn AssignmentExpression AssignmentExpressionNoIn 
+%type <ast_Expression> LogicalANDExpression LogicalANDExpressionPart LogicalANDExpressionNoIn LogicalANDExpressionNoInPart
+%type <ast_Expression> LogicalORExpression LogicalORExpressionPart LogicalORExpressionNoIn LogicalORExpressionNoInPart
+%type <ast_Expression> ConditionalExpression ConditionalExpressionNoIn AssignmentExpression AssignmentExpressionNoIn
 %type <ast_OpType> AssignmentOperator LogicalOROperator LogicalANDOperator BitwiseOROperator  EqualityOperator BitwiseXOROperator BitwiseANDOperator
 %type <ast_OpType> RelationalNoInOperator RelationalOperator ShiftOperator AdditiveOperator MultiplicativeOperator
 %type <ast_Expression> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
-%type <ast_Node> ExpressionOrNull 
+%type <ast_Node> ExpressionOrNull
 %type <ast_Statement> Statement
 %type <ast_Node> Block StatementList
 %type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
@@ -101,11 +108,11 @@ ast::BinaryOperator* noOp1Exp;
 %type <ast_Node> CaseBlock CaseBlockPart CaseClauses CaseClause DefaultClause
 %type <ast_Node> LabelledStatement ThrowStatement
 %type <ast_Node> TryStatement TryStatementPart Catch Finally
-%type <ast_Node> FormalParameterListInPare
-%type <ast_Node> FunctionDeclaration FunctionExpression
-%type <ast_Node> FormalParameterList FunctionBody
+%type <ast_ParameterList> FormalParameterListInPare FormalParameterList
+%type <ast_FunctionDeclaration> FunctionDeclaration FunctionExpression
+%type <ast_StatementList> FunctionBody
 %type <ast_StatementList> Program
-%type <ast_StatementList> SourceElements 
+%type <ast_StatementList> SourceElements
 %type <ast_Statement> SourceElement
 %type <ast_Node> ImportStatement Name
 %type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
@@ -129,7 +136,7 @@ Literal	:	DECIMAL_LITERAL {
 	$$ = new ast::IntegerType(atoi($1)); $$->debug = $1;
 	//printf("number\n");
 }
-| HEX_INTEGER_LITERAL 
+| HEX_INTEGER_LITERAL
 | STRING_LITERAL {
 	char a[200];
 	strcpy(a,$1+1);
@@ -186,26 +193,47 @@ MemberExpressionParts   :   MemberExpressionParts MemberExpressionPart
 }
 MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
 |	DOT Identifier
-CallExpression	:	MemberExpression Arguments CallExpressionParts
+
+CallExpression	:	MemberExpression Arguments CallExpressionParts {
+	$$ = new ast::CallExpression(dynamic_cast<ast::Identifier*>($1), $2);
+}
+
 CallExpressionForIn	:	MemberExpressionForIn Arguments CallExpressionParts
+
 CallExpressionParts :   CallExpressionParts CallExpressionPart
-|
+| {
+	$$ = nullptr;
+}
 CallExpressionPart	:	Arguments
 |   LEFT_BRACKET Expression RIGHT_BRACKET
 |	DOT Identifier
-Arguments	:	LEFT_PARE ArgumentList RIGHT_PARE
-|   LEFT_PARE RIGHT_PARE
-ArgumentList	:	AssignmentExpression ElAssignmentExpressions
-ElAssignmentExpressions :  ElAssignmentExpressions COMMA AssignmentExpression
-|
-LeftHandSideExpression	:	CallExpression
+
+Arguments	:	LEFT_PARE ArgumentList RIGHT_PARE {
+	$$ = $2;
+}
+|   LEFT_PARE RIGHT_PARE {
+	$$ = nullptr;
+}
+
+ArgumentList	:	AssignmentExpression {
+	$$ = new ast::ArgumentList();
+	$$->push_back($1);
+}
+| ArgumentList COMMA AssignmentExpression {
+	$1->push_back($3);
+	$$ = $1;
+}
+
+LeftHandSideExpression	:	CallExpression {
+	$$ = $1;
+}
 |	MemberExpression {
 	$$ = $1;
 /*	//printf("LeftHandExp\n");*/
 }
 LeftHandSideExpressionForIn	:	CallExpressionForIn
 |	MemberExpressionForIn {
-	
+
 }
 
 //李逸婷
@@ -358,7 +386,7 @@ RelationalOperator	:	LESS {
 RelationalExpressionNoIn	:	ShiftExpression RelationalExpressionNoInPart
 RelationalExpressionNoInPart  :   RelationalExpressionNoInPart RelationalNoInOperator ShiftExpression
 |
-RelationalNoInOperator	:	LESS 
+RelationalNoInOperator	:	LESS
 | GREATER
 | LESS_EQ
 | GREATER_EQ
@@ -522,7 +550,7 @@ LogicalORExpressionPart   :   LogicalORExpressionPart LogicalOROperator LogicalA
 | {
 	$$ = nullptr;
 }
-LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart 
+LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart
 LogicalORExpressionNoInPart   :   LogicalORExpressionNoInPart LogicalOROperator LogicalANDExpressionNoIn
 |
 LogicalOROperator	:	OR {
@@ -546,8 +574,8 @@ AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpre
 }
 AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn {}
 | ConditionalExpressionNoIn
-AssignmentOperator	:	ASSIGN { 
-	$$ =ast::BinaryOperator::OpType::assign; 
+AssignmentOperator	:	ASSIGN {
+	$$ =ast::BinaryOperator::OpType::assign;
 	//printf("an assign\n");
 }
 | MULTI_ASG
@@ -569,8 +597,8 @@ Expression	:	AssignmentExpression ExpressionPart
 	else {
 		$$ = new ast::BinaryOperator($1,ast::BinaryOperator::OpType::comma,$2);
 	}
-	
-	
+
+
 }
 ExpressionPart   :    COMMA AssignmentExpression ExpressionPart{
 	if ($3 == nullptr) {
@@ -578,7 +606,7 @@ ExpressionPart   :    COMMA AssignmentExpression ExpressionPart{
 	} else {
 		$$ = new ast::BinaryOperator($2,ast::BinaryOperator::OpType::comma,$3);
 	}
-	
+
 }
 | {
 	$$ = nullptr;
@@ -672,15 +700,37 @@ TryStatementPart:   Finally
 | Catch Finally
 Catch	:	CATCH LEFT_PARE Identifier RIGHT_PARE Block
 Finally	:	FINALLY Block
-FormalParameterListInPare: LEFT_PARE RIGHT_PARE
-| LEFT_PARE FormalParameterList RIGHT_PARE
-FunctionDeclaration	:	FUNCTION Identifier FormalParameterListInPare FunctionBody
+
+FormalParameterListInPare: LEFT_PARE RIGHT_PARE {
+	$$ = new ast::ParameterList();
+}
+| LEFT_PARE FormalParameterList RIGHT_PARE {
+	$$ = $2;
+}
+
+FunctionDeclaration	:	FUNCTION Identifier FormalParameterListInPare FunctionBody {
+	$$ = new ast::FunctionDeclaration((ast::Identifier*)$2, $3, $4);
+}
+
 FunctionExpression	:	FUNCTION FormalParameterListInPare FunctionBody
 | FUNCTION Identifier FormalParameterListInPare FunctionBody
-FormalParameterList	:	Identifier
-| FormalParameterList COMMA Identifier
-FunctionBody	:	LEFT_BRACE RIGHT_BRACE
-| LEFT_BRACE SourceElements RIGHT_BRACE
+
+FormalParameterList	:	Identifier {
+	$$ = new ast::ParameterList();
+	$$->push_back($1);
+}
+| FormalParameterList COMMA Identifier {
+	$1->push_back($3);
+	$$ = $1;
+}
+
+FunctionBody	:	LEFT_BRACE RIGHT_BRACE {
+	$$ = nullptr;
+}
+| LEFT_BRACE SourceElements RIGHT_BRACE {
+	$$ = $2;
+}
+
 Program	:	JEOF
 | SourceElements JEOF
 {
@@ -697,17 +747,17 @@ SourceElements	:	SourceElement {
 		try {
 			ast_root->run();
 		} catch (const std::domain_error &de) {
-			cout << de.what() << endl;		
+			cout << de.what() << endl;
 		} catch (const std::logic_error &le) {
-			cout << le.what() << endl;	
+			cout << le.what() << endl;
 		} catch (...) {
 			cout << "other uncaught error" << endl;
 		}
 		if (!parseError)
 			ast_root->value.print();
-	}	
+	}
 	//printf("To SourceElements\n");
-} 
+}
 | SourceElements SourceElement {
 	extern int parseError;
 	if (!parseError)
@@ -717,9 +767,9 @@ SourceElements	:	SourceElement {
 		try {
 			ast_root->run();
 		} catch (const std::domain_error &de) {
-			cout << de.what() << endl;		
+			cout << de.what() << endl;
 		} catch (const std::logic_error &le) {
-			cout << le.what() << endl;	
+			cout << le.what() << endl;
 		} catch (...) {
 			cout << "other uncaught error" << endl;
 		}

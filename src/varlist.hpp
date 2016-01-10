@@ -4,6 +4,7 @@
 #include <map>
 #include <sstream>
 #include <iostream>
+#include "declared_function.h"
 extern std::string green(const std::string& str);
 struct TValue {
 	struct TSValue{
@@ -12,12 +13,14 @@ struct TValue {
 		double dou;
 	};
 	enum TType {
+		Tfunction,
 		Tstring,
 		Tint,
 		Tdouble,
 		Tarray,
 		TNaN
 	};
+	DeclaredFunction *func;
 	TSValue sValue;
 	TType type;
 	TValue(){}
@@ -33,11 +36,15 @@ struct TValue {
 		type = TType::Tint;
 		sValue.str = x;
 	}
+	TValue(DeclaredFunction* function) {
+		type = TType::Tfunction;
+		func = function;
+	}
 	void print() const{
 		std::stringstream  ss;
 		std::string st;
 		if (type == TType::Tint) {
-			ss << sValue.integer;	
+			ss << sValue.integer;
 		}
 		if (type == TType::Tstring) {
 			ss << "\""<<sValue.str<<"\"";

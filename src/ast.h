@@ -34,9 +34,11 @@ class FieldDecl;
 class RecordType;
 class TypeConst;
 class CaseStmt;
+class FunctionDeclaration;
 
-
-
+typedef std::vector<Identifier*> ParameterList;
+typedef std::vector<Expression*> ArgumentList;
+typedef StatementList FunctionBody;
 
 typedef std::vector<VarDecl *>      VarDeclList;
 typedef std::vector<Identifier *>   IdentifierList;
@@ -90,11 +92,21 @@ public:
     }
     virtual std::string toString(){ return "stmt_list";}
     virtual std::vector<Statement*> *getlist(){ return &list;}
-	virtual std::vector<Node *> getChildren() { 
+	virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;
 		for(auto i : list) rlist.push_back((Node *)i);
 		return rlist;
 	}
+};
+
+class FunctionDeclaration : StatementList {
+public:
+    Identifier* function_name;
+    ParameterList* parameter_list;
+    FunctionBody* function_body;
+    FunctionDeclaration(Identifier* id, ParameterList* args, FunctionBody* body) : function_name(id), parameter_list(args), function_body(body) {}
+    virtual std::string toString(){ return "function_declaration"; }
+    virtual void run();
 };
 
 class Program : public Node {
@@ -114,12 +126,12 @@ public:
         var_part(vp),
         routine_part(rp),
         routine_body(rb) {}
-    virtual std::vector<Node *> getChildren() { 
+    virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         for(auto i : *(const_part))         list.push_back((Node *)i);
         for(auto i : *(type_part))          list.push_back((Node *)i);
         for(auto i : *(var_part))           list.push_back((Node *)i);
-        for(auto i : *(routine_part))       list.push_back((Node *)i);  
+        for(auto i : *(routine_part))       list.push_back((Node *)i);
         for(auto i : *(routine_body->getlist())) list.push_back((Node *)i);
         return list;
     }
@@ -133,7 +145,7 @@ public:
     Identifier*     routine_name;
     TypeDecl*       return_type;
     VarDeclList*    argument_list;
-    RoutineType     routine_type; // function or procedure 
+    RoutineType     routine_type; // function or procedure
     Routine(RoutineType rt, Identifier* rn, VarDeclList* vdl, TypeDecl* td) :
         Program(),
         routine_name(rn),
@@ -142,7 +154,7 @@ public:
         // routine_list(nullptr),
         routine_type(rt) {}
     Routine(Routine* r, Program* p) :
-        Program(*p), 
+        Program(*p),
         routine_name(r->routine_name),
         return_type(r->return_type),
         argument_list(r->argument_list),
@@ -153,7 +165,7 @@ public:
     bool isFunction() { return routine_type == RoutineType::function; }
     bool isProcedure() { return routine_type == RoutineType::procedure; }
 
-    virtual std::vector<Node *> getChildren() { 
+    virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)routine_name);
         list.push_back((Node *)return_type);
@@ -163,7 +175,7 @@ public:
         for(auto i : *(routine_part)) list.push_back((Node *)i);
             // std::cout<<"hahaha"<<this<<";"<<var_part<<"\n";
         for(auto i : *(routine_body->getlist())) list.push_back((Node *)i);
-        
+
         return list;
     }
     virtual std::string toString() { return routine_type == RoutineType::function ? "Function" : "Procedure"; }
@@ -172,6 +184,15 @@ public:
 
 class Expression : public Statement {
 public:
+    virtual void run();
+};
+
+class CallExpression : public Expression {
+public:
+    Identifier* function_name;
+    ArgumentList* argument_list;
+    CallExpression(Identifier* id, ArgumentList* args) : function_name(id), argument_list(args) {}
+    virtual std::string toString(){ return "function_called"; }
     virtual void run();
 };
 
@@ -206,7 +227,7 @@ public:
     TypeDecl(const std::string &str) : raw_name(str){init();}
     TypeDecl(const char * ptr_c) : raw_name(*(new std::string(ptr_c))) {init();}
 
-    void init() { 
+    void init() {
         // std::cout << this << std::endl;
         if (sys_name != TypeName::error)
             return;
@@ -220,7 +241,7 @@ public:
         //else if (record_type)               sys_name = TypeName::record;
         else                                throw std::logic_error("Unimplemented type");
     }
-    
+
     virtual std::string toString() { return raw_name; }
     virtual void run();
 };
@@ -238,7 +259,7 @@ public:
 class FieldDecl: public Statement {
 public:
     Identifier* first;
-    TypeDecl*   second; 
+    TypeDecl*   second;
     FieldDecl(Identifier* first, TypeDecl* second) : first(first), second(second) {}
     virtual std::string toString() { return "FieldDecl"; }
     virtual void run() {}
@@ -248,7 +269,7 @@ class RecordType: public Statement {
 public:
     FieldDeclList*      field_list;
 
-    RecordType(FieldDeclList* list) : field_list(list)  {} 
+    RecordType(FieldDeclList* list) : field_list(list)  {}
     virtual std::string toString() { return "RecordType"; }
     virtual void run() {}
 };
@@ -289,7 +310,7 @@ public:
     virtual TypeDecl::TypeName getConstType() = 0;
     virtual int toRange() = 0;
     /* canRange : bool, if subclass can not be a range, overwrite it and return true  */
-    virtual bool notRange() { return false; } 
+    virtual bool notRange() { return false; }
 };
 
 
@@ -322,9 +343,9 @@ public:
 //    ConstDecl(Identifier* name, RealType* it)       : name(name), val((ConstValue *)it), type(new TypeDecl("real"))    {}
 //    ConstDecl(Identifier* name, CharType* it)       : name(name), val((ConstValue *)it), type(new TypeDecl("char"))    {}
 //    ConstDecl(Identifier* name, BooleanType* it)    : name(name), val((ConstValue *)it), type(new TypeDecl("boolean")) {}
-    virtual std::vector<Node *> getChildren() { 
-        std::vector<Node *> list; 
-        list.push_back(name); 
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> list;
+        list.push_back(name);
         list.push_back(val);
         list.push_back(type);
         return list;
@@ -341,7 +362,7 @@ public:
     bool isGolbal;
 
     VarDecl(Identifier* name, TypeDecl* type) : name(name), type(type) {}
-    virtual std::vector<Node *> getChildren() { 
+    virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)name);
         list.push_back((Node *)type);
@@ -365,7 +386,7 @@ class RealType : public ConstValue {
 public:
     double val;
 
-    RealType(double val) : val(val) {}   
+    RealType(double val) : val(val) {}
 
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::real; }
     virtual int toRange() { return 0; }
@@ -378,7 +399,7 @@ class CharType : public ConstValue {
 public:
     char val;
 
-    CharType(const char * p_str) : val(*(p_str)) {}   
+    CharType(const char * p_str) : val(*(p_str)) {}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::character; }
     virtual int toRange() { return (int)val; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
@@ -401,7 +422,7 @@ class BooleanType : public ConstValue {
 public:
     int val;
 
-    BooleanType(const char * str) : val(std::string(str) == "true" ? 1 : 0) {}   
+    BooleanType(const char * str) : val(std::string(str) == "true" ? 1 : 0) {}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::boolean; }
     virtual int toRange() { return val; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
@@ -430,7 +451,7 @@ public:
     FuncCall(Identifier* id) : id(id), argument_list(nullptr) {}
     FuncCall(Identifier* id, ExpressionList* argument_list) : id(id), argument_list(argument_list) {}
 
-    virtual std::vector<Node *> getChildren() { 
+    virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)id);
         // list.push_back((Node *)return_type);
@@ -452,7 +473,7 @@ public:
     ProcCall(Identifier* id) : id(id), argument_list(new ExpressionList) {}
     ProcCall(Identifier* id, ExpressionList* argument_list) : id(id), argument_list(argument_list) {}
 
-    virtual std::vector<Node *> getChildren() { 
+    virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)id);
         // list.push_back((Node *)return_type);
@@ -471,7 +492,7 @@ public:
     SysProcCall(Identifier* id) : ProcCall(id) {}
     SysProcCall(Identifier* id, ExpressionList* al) : ProcCall(id, al) {}
 
-    
+
     virtual std::string toString() { return "System Porcedure Call " + id->name; }
     virtual void run();
 };
@@ -524,14 +545,14 @@ public:
         op2(op2)
     {}
 
-    
-    virtual std::vector<Node *> getChildren() { 
+
+    virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)op1);
         list.push_back((Node *)op2);
         return list;
     }
-    virtual std::string toString() { 
+    virtual std::string toString() {
         return "Binary op: " + (std::map<OpType, std::string>){
             { OpType::plus, "plus" },
             { OpType::minus, "minus" },
@@ -577,7 +598,7 @@ public:
         return complex_assign ? ((ast::ArrayRef*) this->lhs)->array->name : this->lhs->name;
     }
 
-    virtual std::vector<Node *> getChildren() { 
+    virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)lhs);
         list.push_back((Node *)rhs);
@@ -591,8 +612,8 @@ class IfStmt : public Statement {
 private:
     int instanceCount;
 public:
-    Expression* condition; 
-    Statement* thenStmt; 
+    Expression* condition;
+    Statement* thenStmt;
     Statement* elseStmt;
     IfStmt(Expression* condition,Statement* thenStmt,Statement* elseStmt) : condition(condition),thenStmt(thenStmt),elseStmt(elseStmt) {};
     virtual void run();
@@ -644,7 +665,7 @@ public:
 class SwitchStmt : public Statement {
 public:
     Expression* exp;
-    CaseList* list; 
+    CaseList* list;
     SwitchStmt(Expression* exp,CaseList* list):exp(exp),list(list){}
     virtual void run();
     virtual std::string toString() { return "switch statement"; }
@@ -668,4 +689,3 @@ public:
 };
 }
 #endif
-

@@ -137,6 +137,9 @@ ast::BinaryOperator* noOp1Exp;
 PrimaryExpression	:	THIS
 |	ObjectLiteral
 |	LEFT_PARE Expression RIGHT_PARE
+{
+	$$ = $2;
+}
 |	Identifier {
 /*	//printf("identifier\n");*/
 	$$ = $1;
@@ -147,7 +150,7 @@ PrimaryExpression	:	THIS
 	$$ = $1;
 }
 Literal	:	DECIMAL_LITERAL {
-	$$ = new ast::IntegerType(atoi($1)); $$->debug = $1;
+	$$ = new ast::RealType(atof($1)); 
 	//printf("number\n");
 }
 | HEX_INTEGER_LITERAL
@@ -156,9 +159,12 @@ Literal	:	DECIMAL_LITERAL {
 	strcpy(a,$1+1);
 	a[strlen(a)-1] = 0;
 /*	std::cout<<a<<std::endl;*/
-	$$ = new ast::StringType(a); $$->debug = a;
+	$$ = new ast::StringType(a);
 }
-| BOOLEAN_LITERAL | NULL_LITERAL
+| BOOLEAN_LITERAL {
+	$$ = new ast::BooleanType($1); 
+
+}| NULL_LITERAL
 Identifier	:	IDENTIFIER_NAME {
 	$$ = new ast::Identifier($1);
 }

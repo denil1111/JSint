@@ -427,9 +427,9 @@ public:
 
 class BooleanType : public ConstValue {
 public:
-    int val;
+    bool val;
 
-    BooleanType(const char * str) : val(std::string(str) == "true" ? 1 : 0) {}
+    BooleanType(const char * str) : val(std::string(str) == "true" ? true : false) {}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::boolean; }
     virtual int toRange() { return val; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
@@ -618,7 +618,7 @@ class AssignmentStmt : public Statement {
 public:
     Identifier* lhs = nullptr; // left-hand side
     Expression* rhs = nullptr;
-    bool        complex_assign = false;
+    bool  complex_assign = false;
     AssignmentStmt(Identifier* lhs, Expression* rhs) : lhs(lhs), rhs(rhs) {}
     AssignmentStmt(ArrayRef* lhs, Expression* rhs) : lhs((Identifier *)lhs), rhs(rhs), complex_assign(true) {}
     AssignmentStmt(RecordRef* lhs, Expression* rhs) : lhs((Identifier *)lhs), rhs(rhs), complex_assign(true) {}

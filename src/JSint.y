@@ -11,7 +11,7 @@
 #include "parser.hpp"
 #include "ccalc.h"
 using namespace std;
-
+extern VarStack nowStack;
 int yydebug = 1;
 ast::Node* ast_root;
 ast::BinaryOperator* noOp1Exp;
@@ -45,7 +45,7 @@ ast::BinaryOperator* noOp1Exp;
     ast::TypeDeclList*      ast_TypeDeclList;
     ast::CaseList*          ast_CaseList;
     ast::CaseStmt*          ast_CaseStmt;
-
+	ast::Block*             ast_Block;
 	ast::ParameterList*     ast_ParameterList;
 	ast::FunctionDeclaration* ast_FunctionDeclaration;
 	ast::ArgumentList*      ast_ArgumentList;
@@ -96,7 +96,8 @@ ast::BinaryOperator* noOp1Exp;
 %type <ast_Expression> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
 %type <ast_Node> ExpressionOrNull
 %type <ast_Statement> Statement
-%type <ast_Node> Block StatementList
+%type <ast_Block> Block
+%type <ast_StatementList> StatementList
 %type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
 %type <ast_Node> VariableDeclaration VariableDeclarationNoIn
 %type <ast_Node> Initialiser InitialiserNoIn
@@ -641,6 +642,9 @@ ExpressionNoInPart   :   ExpressionNoInPart COMMA AssignmentExpressionNoIn
 ExpressionOrNull:
 | Expression
 Statement	:	Block
+{
+	$$ = $1;
+}
 |	JScriptVarStatement
 |	VariableStatement
 |	EmptyStatement
@@ -660,9 +664,19 @@ Statement	:	Block
 |	ThrowStatement
 |	TryStatement
 Block	:	LEFT_BRACE RIGHT_BRACE
+{}
 |   LEFT_BRACE StatementList RIGHT_BRACE
+{
+	$$ = new ast::Block($2);
+}
 StatementList	:	Statement
+{
+	$$ = new ast::StatementList($1);
+}
 |   Statement StatementList
+{
+	$$ = new ast::StatementList($1, $2);
+}
 VariableStatement	:	VAR VariableDeclarationList
 |   VAR VariableDeclarationList SEMICOLON
 VariableDeclarationList	:	VariableDeclaration

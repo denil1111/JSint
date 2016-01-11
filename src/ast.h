@@ -1,7 +1,6 @@
 #ifndef __AST_H__
 #define __AST_H__
 
-
 #include <string>
 #include <map>
 #include <vector>
@@ -10,7 +9,6 @@
 #include "varlist.hpp"
 
 //used forward-declaration to deal with cross-reference issue
-
 // namespace ast start
 namespace ast {
 // forward declaration
@@ -34,12 +32,12 @@ class FieldDecl;
 class RecordType;
 class TypeConst;
 class CaseStmt;
-class FunctionDeclaration;
+class Block;
+
 
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
 typedef StatementList FunctionBody;
-
 typedef std::vector<VarDecl *>      VarDeclList;
 typedef std::vector<Identifier *>   IdentifierList;
 typedef std::vector<Routine *>      RoutineList;
@@ -49,7 +47,7 @@ typedef std::vector<ConstDecl *>    ConstDeclList;
 typedef std::vector<FieldDecl *>    FieldDeclList;
 typedef std::vector<TypeConst *>    TypeDeclList;
 typedef std::vector<CaseStmt *>     CaseList;
-// pure virtual class for all ast nodes
+// pure virtual class for all ast noxdes
 class Node {
 public:
     std::string     debug;
@@ -77,19 +75,25 @@ public:
 class Statement : public Node {
 public:
     Statement() {};
-
     virtual void run() {}
     virtual std::vector<Statement*> *getlist(){}
+	virtual std::string toString() { return "Statement"; }
 };
 
 class StatementList : public Statement{
 public:
     std::vector<Statement*> list;
-    virtual void run() {
-        for (auto stmt: list){
-            stmt->run();
-        }
-    }
+	StatementList() {}
+	StatementList(Statement* stmt) {
+		list = std::vector<Statement*>{stmt};
+	}
+	StatementList(Statement* stmt, StatementList* stmtList) {
+		list = std::vector<Statement*>{stmt};
+		for (auto stmt : stmtList->list) {
+			list.push_back(stmt);
+		}
+	}
+    virtual void run();
     virtual std::string toString(){ return "stmt_list";}
     virtual std::vector<Statement*> *getlist(){ return &list;}
 	virtual std::vector<Node *> getChildren() {
@@ -708,6 +712,15 @@ public:
     virtual void run();
     virtual std::string toString() { return "label statement"; }
 
+};
+
+class Block : public Statement {
+	StatementList* stmtList;
+public:
+    Block(StatementList* stmtList) : stmtList(stmtList) {}
+	virtual std::string toString() { return "block"; }
+    virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }	
+	virtual void run();
 };
 }
 #endif

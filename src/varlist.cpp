@@ -1,8 +1,9 @@
 #include "varlist.hpp"
 using namespace std;
+
 TValue TValue::operator   +(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -29,7 +30,7 @@ TValue TValue::operator   +(const TValue &rx){
 				ss>>s1;
 				ret.sValue.str = s1 + rx.sValue.str;
 				break;
-			} 
+			}
 		}
 	}
 	if (this->type == TType::Tdouble)
@@ -58,10 +59,10 @@ TValue TValue::operator   +(const TValue &rx){
 		}
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		switch (rx.type)
 		{
-			
+
 			case TType::Tint: {
 				ret.type = TType::Tstring;
 				stringstream ss;
@@ -79,7 +80,7 @@ TValue TValue::operator   +(const TValue &rx){
 				ss>>s1;
 				ret.sValue.str = this->sValue.str + s1;
 				break;
-				
+
 			}
 			case TType::Tstring: {
 				ret.type = TType::Tstring;
@@ -92,7 +93,7 @@ TValue TValue::operator   +(const TValue &rx){
 }
 TValue TValue::operator   -(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -139,13 +140,13 @@ TValue TValue::operator   -(const TValue &rx){
 	}
 	if (this->type == TType::Tstring)
 	{
-		ret.type = TType::TNaN;	
+		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  *(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -192,13 +193,13 @@ TValue TValue::operator  *(const TValue &rx){
 	}
 	if (this->type == TType::Tstring)
 	{
-		ret.type = TType::TNaN;	
+		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  /(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -245,13 +246,13 @@ TValue TValue::operator  /(const TValue &rx){
 	}
 	if (this->type == TType::Tstring)
 	{
-		ret.type = TType::TNaN;	
+		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  %(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -281,13 +282,13 @@ TValue TValue::operator  %(const TValue &rx){
 	}
 	if (this->type == TType::Tstring)
 	{
-		ret.type = TType::TNaN;	
+		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  >(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -333,10 +334,10 @@ TValue TValue::operator  >(const TValue &rx){
 		}
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		switch (rx.type)
 		{
-			
+
 			case TType::Tint: {
 				ret.type = TType::TNaN;
 				break;
@@ -344,7 +345,7 @@ TValue TValue::operator  >(const TValue &rx){
 			case TType::Tdouble: {
 				ret.type = TType::TNaN;
 				break;
-				
+
 			}
 			case TType::Tstring: {
 				ret.type = TType::Tstring;
@@ -376,7 +377,7 @@ TValue TValue::operator  <=(const TValue &rx){
 }
 TValue TValue::operator  ==(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -422,10 +423,10 @@ TValue TValue::operator  ==(const TValue &rx){
 		}
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		switch (rx.type)
 		{
-			
+
 			case TType::Tint: {
 				ret.type = TType::TNaN;
 				break;
@@ -433,7 +434,7 @@ TValue TValue::operator  ==(const TValue &rx){
 			case TType::Tdouble: {
 				ret.type = TType::TNaN;
 				break;
-				
+
 			}
 			case TType::Tstring: {
 				ret.type = TType::Tstring;
@@ -452,7 +453,7 @@ TValue TValue::operator  !=(const TValue &rx){
 }
 TValue TValue::operator  ||(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -481,14 +482,14 @@ TValue TValue::operator  ||(const TValue &rx){
 		ret.type = TType::TNaN;
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  &&(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -517,14 +518,14 @@ TValue TValue::operator  &&(const TValue &rx){
 		ret.type = TType::TNaN;
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  |(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -553,14 +554,14 @@ TValue TValue::operator  |(const TValue &rx){
 		ret.type = TType::TNaN;
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  ^(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -589,14 +590,14 @@ TValue TValue::operator  ^(const TValue &rx){
 		ret.type = TType::TNaN;
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  &(const TValue &rx){
 	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -625,14 +626,14 @@ TValue TValue::operator  &(const TValue &rx){
 		ret.type = TType::TNaN;
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  !(){
 	TValue ret;
-	if (this->type == TType::TNaN ) 
+	if (this->type == TType::TNaN )
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -647,14 +648,14 @@ TValue TValue::operator  !(){
 		ret.type = TType::TNaN;
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		ret.type = TType::TNaN;
 	}
 	return ret;
 }
 TValue TValue::operator  -(){
 	TValue ret;
-	if (this->type == TNaN ) 
+	if (this->type == TNaN )
 	{
 		ret.type = TType::TNaN;
 		return ret;
@@ -670,7 +671,7 @@ TValue TValue::operator  -(){
 		ret.sValue.dou = -this->sValue.dou;
 	}
 	if (this->type == TType::Tstring)
-	{	
+	{
 		ret.type = TType::TNaN;
 	}
 	return ret;

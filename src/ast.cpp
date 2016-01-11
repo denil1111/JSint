@@ -39,8 +39,11 @@ void ast::BooleanType::run() {
 void ast::RangeType::run() {
     std::cout << "Creating subscript range from " << this->low << " to " << this->high << std::endl;
 }
-void ast::BinaryOperator::run() {
-	op1->run();
+void ast::Operator::run() {
+	if (op!= OpType::assign)
+	{
+		op1->run();
+	}
 	bool asgFlag = false;
 	switch (op)
 	{
@@ -68,129 +71,187 @@ void ast::BinaryOperator::run() {
 			}
 			break;
 		}
-		op2->run();
-		case OpType::assign :{
-			asgFlag = true;
-			value = op2->value;
+		case OpType::lnot :{
+			value = !op1->value;
 			break;
 		}
-		case OpType::plus_assign :{
-			asgFlag = true;
-		}
-		case OpType::plus :{
-			value = op1->value + op2->value;
+		case OpType::bit_not :{
+			value = ~op1->value;
 			break;
 		}
-		case OpType::minus_assign :{
-			asgFlag = true;
-		}
-		case OpType::minus :{
-			value = op1->value - op2->value;
+		case OpType::positive :{
+			value = - -op1->value;
 			break;
 		}
-		case OpType::mul_assign :{
-			asgFlag = true;
-		}
-		case OpType::mul :{
-			value = op1->value * op2->value;
-			break;
-		}
-		case OpType::div_assign :{
-			asgFlag = true;
-		}
-		case OpType::div :{
-			value = op1->value / op2->value;
-			break;
-		}
-		case OpType::mod_assign :{
-			asgFlag = true;
-		}
-		case OpType::mod :{
-			value = op1->value % op2->value;
-			break;
-		}
-		case OpType::bit_and_assign :{
-			asgFlag = true;
-		}
-		case OpType::bit_and :{
-			value = op1->value & op2->value;
-			break;
-		}
-		case OpType::bit_or_assign :{
-			asgFlag = true;
-		}
-		case OpType::bit_or :{
-			value = op1->value | op2->value;
-			break;
-		}
-		case OpType::bit_xor_assign :{
-			asgFlag = true;
-		}
-		case OpType::bit_xor :{
-			value = op1->value ^ op2->value;
-			break;
-		}
-		case OpType::eq :{
-			value = op1->value == op2->value;
-			break;
-		}
-		case OpType::ne :{
-			value = op1->value != op2->value;
-			break;
-		}
-		case OpType::lt :{
-			value = op1->value < op2->value;
-			break;
-		}
-		case OpType::gt :{
-			value = op1->value > op2->value;
-			break;
-		}
-		case OpType::le :{
-			value = op1->value <= op2->value;
-			break;
-		}
-		case OpType::ge :{
-			value = op1->value >= op2->value;
-			break;
-		}
-		case OpType::aeq :{
-			value = op1->value == op2->value;
-			if (op1->value.getType() != op2->value.getType()) {
-				value = TValue(false);
+        case OpType::negtive :{
+        	value = -op1->value;
+        	break;
+        }
+        case OpType::pplus :{
+        	RealType tempE(1);
+        	Operator tempO(op1,OpType::plus_assign,&tempE);
+        	tempO.run();
+        	value = tempO.value;
+        	break;
+        }
+        case OpType::mminus :{
+        	RealType tempE(1);
+        	Operator tempO(op1,OpType::minus_assign,&tempE);
+        	tempO.run();
+        	value = tempO.value;
+        	break;
+        } 
+        case OpType::rpplus :{
+        	value = op1->value;
+        	RealType tempE(1);
+        	Operator tempO(op1,OpType::plus_assign,&tempE);
+        	tempO.run();
+        	break;
+        }
+        case OpType::rmminus :{
+        	value = op1->value;
+        	RealType tempE(1);
+        	Operator tempO(op1,OpType::minus_assign,&tempE);
+        	tempO.run();
+        	break;
+        }         
+        case OpType::type :{
+        	value = TValue(op1->value.getTypeString());
+        	break;
+        }
+        case OpType::voido :{
+        	value = TValue::undefined();
+        	break;
+        }
+        default:
+        {
+        	op2->run();
+		    switch(op)
+		    {
+				case OpType::assign :{
+					asgFlag = true;
+					value = op2->value;
+					break;
+				}
+				case OpType::plus_assign :{
+					asgFlag = true;
+				}
+				case OpType::plus :{
+					value = op1->value + op2->value;
+					break;
+				}
+				case OpType::minus_assign :{
+					asgFlag = true;
+				}
+				case OpType::minus :{
+					value = op1->value - op2->value;
+					break;
+				}
+				case OpType::mul_assign :{
+					asgFlag = true;
+				}
+				case OpType::mul :{
+					value = op1->value * op2->value;
+					break;
+				}
+				case OpType::div_assign :{
+					asgFlag = true;
+				}
+				case OpType::div :{
+					value = op1->value / op2->value;
+					break;
+				}
+				case OpType::mod_assign :{
+					asgFlag = true;
+				}
+				case OpType::mod :{
+					value = op1->value % op2->value;
+					break;
+				}
+				case OpType::bit_and_assign :{
+					asgFlag = true;
+				}
+				case OpType::bit_and :{
+					value = op1->value & op2->value;
+					break;
+				}
+				case OpType::bit_or_assign :{
+					asgFlag = true;
+				}
+				case OpType::bit_or :{
+					value = op1->value | op2->value;
+					break;
+				}
+				case OpType::bit_xor_assign :{
+					asgFlag = true;
+				}
+				case OpType::bit_xor :{
+					value = op1->value ^ op2->value;
+					break;
+				}
+				case OpType::eq :{
+					value = op1->value == op2->value;
+					break;
+				}
+				case OpType::ne :{
+					value = op1->value != op2->value;
+					break;
+				}
+				case OpType::lt :{
+					value = op1->value < op2->value;
+					break;
+				}
+				case OpType::gt :{
+					value = op1->value > op2->value;
+					break;
+				}
+				case OpType::le :{
+					value = op1->value <= op2->value;
+					break;
+				}
+				case OpType::ge :{
+					value = op1->value >= op2->value;
+					break;
+				}
+				case OpType::aeq :{
+					value = op1->value == op2->value;
+					if (op1->value.getType() != op2->value.getType()) {
+						value = TValue(false);
+					}
+					break;
+				}
+				case OpType::ane :{
+					value = op1->value == op2->value;
+					if (op1->value.getType() != op2->value.getType()) {
+						value = TValue(true);
+					}
+					break;
+				}
+				case OpType::lsh_assign :{
+					asgFlag = true;
+				}
+				case OpType::lsh :{
+					value = op1->value << op2->value;
+					break;
+				}
+				case OpType::rsh_assign :{
+					asgFlag = true;
+				}
+				case OpType::rsh :{
+					value = op1->value >> op2->value;
+					break;
+				}
+				case OpType::lrsh_assign :{
+					asgFlag = true;
+				}
+				case OpType::lrsh :{
+					value = op1->value.logicRShift(op2->value);
+					break;
+				}
 			}
-			break;
-		}
-		case OpType::ane :{
-			value = op1->value == op2->value;
-			if (op1->value.getType() != op2->value.getType()) {
-				value = TValue(true);
-			}
-			break;
-		}
-		case OpType::lsh_assign :{
-			asgFlag = true;
-		}
-		case OpType::lsh :{
-			value = op1->value << op2->value;
-			break;
-		}
-		case OpType::rsh_assign :{
-			asgFlag = true;
-		}
-		case OpType::rsh :{
-			value = op1->value >> op2->value;
-			break;
-		}
-		case OpType::lrsh_assign :{
-			asgFlag = true;
-		}
-		case OpType::lrsh :{
-			value = op1->value.logicRShift(op2->value);
-			break;
-		}
-	}
-	if (asgFlag) {
+        }
+    }
+    if (asgFlag) {
 		auto id = dynamic_cast<Identifier*>(op1);
 		if (id == nullptr)
 		{

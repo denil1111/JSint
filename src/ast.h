@@ -61,7 +61,7 @@ public:
         auto children_list = this->getChildren();
         auto ch_prefix = tail ? prefix + ch_tailStr : prefix + ch_branchStr;
         for(size_t i = 0; i < children_list.size(); i++) {
-            children_list[i] ? children_list[i]->print_node(ch_prefix, i == children_list.size() - 1, false) : []() {std::cout << "nullptr in tree";}();
+            children_list[i] ? children_list[i]->print_node(ch_prefix, i == children_list.size() - 1, false) : []() {std::cout << "nullptr in tree\n";}();
         }
     }
 
@@ -510,9 +510,10 @@ public:
     virtual void run();
 };
 
-class BinaryOperator : public Expression {
+class Operator : public Expression {
 public:
     enum class OpType : int {
+        //binary
         plus,
         minus,
         mul,
@@ -548,27 +549,40 @@ public:
 		bit_xor_assign,
 		lsh_assign,
 		rsh_assign,
-		lrsh_assign
+		lrsh_assign,
+        unary_label,
+        bit_not,
+        lnot,
+        positive,
+        negtive,
+        pplus,
+        mminus,
+        rpplus,
+        rmminus,
+        voido,
+        type,
+        del,
+
     };
 
     Expression *op1, *op2;
     OpType op;
 
-    BinaryOperator(Expression* op1, OpType op, Expression* op2) :
+    Operator(Expression* op1, OpType op, Expression* op2) :
         op1(op1),
         op(op),
         op2(op2)
     {}
 
-
     virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)op1);
-        list.push_back((Node *)op2);
+        if (op<OpType::unary_label)
+            list.push_back((Node *)op2);
         return list;
     }
     virtual std::string toString() {
-        return "Binary op: " + (std::map<OpType, std::string>){
+        return "op: " + (std::map<OpType, std::string>){
             { OpType::plus, "plus" },
             { OpType::minus, "minus" },
             { OpType::mul, "mul" },
@@ -595,17 +609,27 @@ public:
 			{ OpType::lsh, "left_shift"},
 			{ OpType::rsh, "right_shift"},
 			{ OpType::lrsh, "lrshift"},
-			{OpType::plus_assign,"plus_assign"},
-			{OpType::minus_assign,"minus_assign"},
-			{OpType::mul_assign,"mul_assign"},
-			{OpType::div_assign,"div_assign"},
-			{OpType::mod_assign,"mod_assign"},
-			{OpType::bit_and_assign,"bit_and_assign"},
-			{OpType::bit_or_assign,"bit_or_assign"},
-			{OpType::bit_xor_assign,"bit_xor_assign"},
-			{OpType::lsh_assign,"lsh_assign"},
-			{OpType::rsh_assign,"rsh_assign"},
-			{OpType::lrsh_assign,"lrsh_assign"}
+			{ OpType::plus_assign,"plus_assign"},
+			{ OpType::minus_assign,"minus_assign"},
+			{ OpType::mul_assign,"mul_assign"},
+			{ OpType::div_assign,"div_assign"},
+			{ OpType::mod_assign,"mod_assign"},
+			{ OpType::bit_and_assign,"bit_and_assign"},
+			{ OpType::bit_or_assign,"bit_or_assign"},
+			{ OpType::bit_xor_assign,"bit_xor_assign"},
+			{ OpType::lsh_assign,"lsh_assign"},
+			{ OpType::rsh_assign,"rsh_assign"},
+			{ OpType::lrsh_assign,"lrsh_assign"},
+            { OpType::bit_not, "bit_not" },
+            { OpType::positive, "positive"},
+            { OpType::negtive, "negtive"},
+            { OpType::pplus, "plus_plus_left"},
+            { OpType::mminus, "minus_minus_left"},
+            { OpType::rpplus, "plus_plus_right"},
+            { OpType::rmminus, "minus_minus_right"},
+            { OpType::voido, "void"},
+            { OpType::type, "type"},
+            { OpType::del, "delete"}
         }[op];
     }
     virtual void run();

@@ -362,4 +362,12 @@ TValue TValue::logicRShift( TValue &rx){
 	}
 	return TValue((unsigned int)x.sValue.dou >> (int)y.sValue.dou);
 }
+TValue TValue::operator  ~(){
+	TValue x = this->toDouble();
+	if (x.type == TType::TNaN)
+	{
+		x = TValue(0);
+	}
+	return TValue(~(int)x.sValue.dou);
+}
 

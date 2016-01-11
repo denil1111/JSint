@@ -6,10 +6,12 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include "utils.h"
 
 
 #include "Declaration.h"
 
+extern void yyerror(char *s, ...);
 extern std::string green(const std::string& str);
 extern std::string red(const std::string& str);
 struct TValue {
@@ -70,6 +72,22 @@ struct TValue {
 		else return type;
 
 	}
+	std::string getTypeString()
+	{
+		switch (getType())
+		{
+			case TType::Tfunction: return "function";
+			case TType::Tstring: return "string";
+			case TType::Tdouble: return "number";
+			case TType::Tarray: return "array";
+			case TType::TNaN: return "NaN";
+			case TType::Tbool: return "bool";
+			case TType::Tundefined: return "undefined";
+			case TType::Tnull: return "nul";
+		}
+
+	}
+
 	void print() {
 		std::cout<<green(this->toString())<<std::endl;
 	}
@@ -95,6 +113,8 @@ struct TValue {
 	TValue logicRShift( TValue &rx);
 	TValue operator   !();
 	TValue operator   -();
+	TValue operator   ~();
+
 };
 
 class VarList {
@@ -138,8 +158,7 @@ public:
 		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
 			if (it->hasVar(idname)) return it->getVar(idname);
 		}
-		std::cout << red("Not exist in variable stack!") << std::endl;
-		exit(0);
+		yyerror("Not exist in variable stack!");
 	}
 	void push(VarList varList) {
 		vstack.push_back(varList);

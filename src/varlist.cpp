@@ -675,4 +675,112 @@ TValue TValue::operator  -(){
 	}
 	return ret;
 }
+TValue TValue::operator  >>(const TValue &rx){
+	TValue ret;
+	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	{
+		ret.type = TType::TNaN;
+		return ret;
+	}
+	if (this->type == TType::Tint)
+	{
+		switch (rx.type)
+		{
+			case TType::Tint: {
+				ret.type = TType::Tint;
+				ret.sValue.integer = this->sValue.integer >> rx.sValue.integer;
+				break;
+			}
+			case TType::Tdouble: {
+				ret.type = TType::TNaN;
+				break;
+			}
+			case TType::Tstring: {
+				ret.type = TType::TNaN;
+				break;
+			}
+		}
+	}
+	if (this->type == TType::Tdouble)
+	{
+		ret.type = TType::TNaN;
+	}
+	if (this->type == TType::Tstring)
+	{	
+		ret.type = TType::TNaN;
+	}
+	return ret;
+}
+TValue TValue::operator  <<(const TValue &rx){
+	TValue ret;
+	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	{
+		ret.type = TType::TNaN;
+		return ret;
+	}
+	if (this->type == TType::Tint)
+	{
+		switch (rx.type)
+		{
+			case TType::Tint: {
+				ret.type = TType::Tint;
+				ret.sValue.integer = this->sValue.integer << rx.sValue.integer;
+				break;
+			}
+			case TType::Tdouble: {
+				ret.type = TType::TNaN;
+				break;
+			}
+			case TType::Tstring: {
+				ret.type = TType::TNaN;
+				break;
+			}
+		}
+	}
+	if (this->type == TType::Tdouble)
+	{
+		ret.type = TType::TNaN;
+	}
+	if (this->type == TType::Tstring)
+	{	
+		ret.type = TType::TNaN;
+	}
+	return ret;
+}
+TValue TValue::logicRShift(const TValue &rx){
+	TValue ret;
+	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+	{
+		ret.type = TType::TNaN;
+		return ret;
+	}
+	if (this->type == TType::Tint)
+	{
+		switch (rx.type)
+		{
+			case TType::Tint: {
+				ret.type = TType::Tint;
+				ret.sValue.integer = (unsigned int)this->sValue.integer >> rx.sValue.integer;
+				break;
+			}
+			case TType::Tdouble: {
+				ret.type = TType::TNaN;
+				break;
+			}
+			case TType::Tstring: {
+				ret.type = TType::TNaN;
+				break;
+			}
+		}
+	}
+	if (this->type == TType::Tdouble)
+	{
+		ret.type = TType::TNaN;
+	}
+	if (this->type == TType::Tstring)
+	{	
+		ret.type = TType::TNaN;
+	}
+	return ret;
+}
 

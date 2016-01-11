@@ -68,6 +68,9 @@ struct TValue {
 	TValue operator   |(const TValue &rx);
 	TValue operator   &(const TValue &rx);
 	TValue operator   ^(const TValue &rx);
+	TValue operator   <<(const TValue &rx);
+	TValue operator   >>(const TValue &rx);
+	TValue logicRShift(const TValue &rx);
 	TValue operator   !();
 	TValue operator   -();
 };

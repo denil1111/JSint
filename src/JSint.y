@@ -56,8 +56,8 @@ ast::BinaryOperator* noOp1Exp;
 %token SLASHASSIGN SLASH JEOF IDENTIFIER_NAME
 %token THIS NEW DELETE VOID TYPEOF INSTANCEOF IN VAR IF ELSE DO WHILE FOR CONTINUE BREAK RETURN WITH SWITCH CASE DEFAULT THROW TRY CATCH FINALLY FUNCTION IMPORT
 %token LEFT_BRACKET RIGHT_BRACKET LEFT_PARE RIGHT_PARE LEFT_BRACE RIGHT_BRACE COMMA DOT COLON SEMICOLON
-%token PLUS MINUS MULTI ASSIGN PLUS_PLUS MINUS_MINUS TILDE QUES EXCLAM PERCENT LESS GREATER EQUAL LSHIFT RSHIFT RRSHIFT LESS_EQ GREATER_EQ NOT_EQUAL ALWAYS_EQ ALWAYS_NEQ BIT_AND BIT_OR BIT_XOR AND OR MULTI_ASG MOD_ASG PLUS_ASG MINUS_ASG LSHIFT_ASG RSHIFT_ASG
-%token LLSHIFT_ASG BIT_AND_ASG BIT_NOT_ASG BIT_OR_ASG
+%token PLUS MINUS MULTI ASSIGN PLUS_PLUS MINUS_MINUS TILDE QUES EXCLAM PERCENT LESS GREATER EQUAL LSHIFT RSHIFT RRSHIFT LESS_EQ GREATER_EQ NOT_EQUAL ALWAYS_EQ ALWAYS_NEQ BIT_AND BIT_OR BIT_XOR AND OR MULTI_ASG MOD_ASG PLUS_ASG MINUS_ASG LRSHIFT_ASG LSHIFT_ASG RSHIFT_ASG
+%token BIT_AND_ASG BIT_XOR_ASG BIT_OR_ASG
 %start Program
 
 %type <debug> DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -343,7 +343,7 @@ ShiftOperator	:	LSHIFT {
 	$$ = ast::BinaryOperator::OpType::rsh;
 }
 | RRSHIFT  {
-	$$ = ast::BinaryOperator::OpType::ursh;
+	$$ = ast::BinaryOperator::OpType::lrsh;
 }
 RelationalExpression	:	ShiftExpression RelationalExpressionPart {
 	auto exp = dynamic_cast<ast::BinaryOperator*>($2);
@@ -578,17 +578,39 @@ AssignmentOperator	:	ASSIGN {
 	$$ =ast::BinaryOperator::OpType::assign;
 	//printf("an assign\n");
 }
-| MULTI_ASG
-| SLASHASSIGN
-| MOD_ASG
-| PLUS_ASG
-| MINUS_ASG
-| LSHIFT_ASG
-| RSHIFT_ASG
-| LLSHIFT_ASG
-| BIT_AND_ASG
-| BIT_NOT_ASG
-| BIT_OR_ASG
+| MULTI_ASG {
+	$$ =ast::BinaryOperator::OpType::mul_assign;
+}
+| SLASHASSIGN {
+	$$ =ast::BinaryOperator::OpType::div_assign;
+}
+| MOD_ASG {
+	$$ =ast::BinaryOperator::OpType::mod_assign;
+}
+| PLUS_ASG {
+	$$ =ast::BinaryOperator::OpType::plus_assign;
+}
+| MINUS_ASG {
+	$$ =ast::BinaryOperator::OpType::minus_assign;
+}
+| LSHIFT_ASG {
+	$$ =ast::BinaryOperator::OpType::lsh_assign;
+}
+| RSHIFT_ASG {
+	$$ =ast::BinaryOperator::OpType::rsh_assign;
+}
+| LRSHIFT_ASG {
+	$$ =ast::BinaryOperator::OpType::lrsh_assign;
+}
+| BIT_AND_ASG {
+	$$ =ast::BinaryOperator::OpType::bit_and_assign;
+}
+| BIT_XOR_ASG {
+	$$ =ast::BinaryOperator::OpType::bit_xor_assign;
+}
+| BIT_OR_ASG {
+	$$ =ast::BinaryOperator::OpType::bit_or_assign;
+}
 Expression	:	AssignmentExpression ExpressionPart
 {
 	if ($2 == nullptr){

@@ -39,7 +39,140 @@ void ast::RangeType::run() {
 }
 void ast::BinaryOperator::run() {
 	op2->run();
-	if (op == OpType::assign) {
+	op1->run();
+	bool asgFlag = true;
+	switch (op)
+	{
+		case OpType::assign :{
+			asgFlag = true;
+			value = op2->value;
+			break;
+		}
+		case OpType::plus_assign :{
+			asgFlag = true;
+		}
+		case OpType::plus :{
+			value = op1->value + op2->value;
+			break;
+		}
+		case OpType::minus_assign :{
+			asgFlag = true;
+		}
+		case OpType::minus :{
+			value = op1->value - op2->value;
+			break;
+		}
+		case OpType::mul_assign :{
+			asgFlag = true;
+		}
+		case OpType::mul :{
+			value = op1->value * op2->value;
+			break;
+		}
+		case OpType::div_assign :{
+			asgFlag = true;
+		}
+		case OpType::div :{
+			value = op1->value / op2->value;
+			break;
+		}
+		case OpType::mod_assign :{
+			asgFlag = true;
+		}
+		case OpType::mod :{
+			value = op1->value % op2->value;
+			break;
+		}
+		case OpType::bit_and_assign :{
+			asgFlag = true;
+		}
+		case OpType::bit_and :{
+			value = op1->value & op2->value;
+			break;
+		}
+		case OpType::bit_or_assign :{
+			asgFlag = true;
+		}
+		case OpType::bit_or :{
+			value = op1->value | op2->value;
+			break;
+		}
+		case OpType::land :{
+			value = op1->value && op2->value;
+			break;
+		}
+		case OpType::lor :{
+			value = op1->value || op2->value;
+			break;
+		}
+		case OpType::bit_xor_assign :{
+			asgFlag = true;
+		}
+		case OpType::bit_xor :{
+			value = op1->value ^ op2->value;
+			break;
+		}
+		case OpType::eq :{
+			value = op1->value == op2->value;
+			break;
+		}
+		case OpType::ne :{
+			value = op1->value != op2->value;
+			break;
+		}
+		case OpType::lt :{
+			value = op1->value < op2->value;
+			break;
+		}
+		case OpType::gt :{
+			value = op1->value > op2->value;
+			break;
+		}
+		case OpType::le :{
+			value = op1->value <= op2->value;
+			break;
+		}
+		case OpType::ge :{
+			value = op1->value >= op2->value;
+			break;
+		}
+		case OpType::aeq :{
+			value = op1->value == op2->value;
+			if (op1->value.type != op2->value.type) {
+				value.sValue.integer = 0;
+			}
+			break;
+		}
+		case OpType::ane :{
+			value = op1->value == op2->value;
+			if (op1->value.type != op2->value.type) {
+				value.sValue.integer = 1;
+			}
+			break;
+		}
+		case OpType::lsh_assign :{
+			asgFlag = true;
+		}
+		case OpType::lsh :{
+			value = op1->value << op2->value;
+			break;
+		}
+		case OpType::rsh_assign :{
+			asgFlag = true;
+		}
+		case OpType::rsh :{
+			value = op1->value >> op2->value;
+			break;
+		}
+		case OpType::lrsh_assign :{
+			asgFlag = true;
+		}
+		case OpType::lrsh :{
+			value = op1->value.logicRShift(op2->value);
+			break;
+		}
+	}
+	if (asgFlag) {
 		auto id = dynamic_cast<Identifier*>(op1);
 		if (id == nullptr)
 		{
@@ -47,93 +180,7 @@ void ast::BinaryOperator::run() {
 		}
 		else
 		{
-			value = op2->value;
 			nowList.assignAndNew(id->name,value);
-		}
-	}
-	else
-	{
-		op1->run();
-		switch (op)
-		{
-			case OpType::plus :{
-				value = op1->value + op2->value;
-				break;
-			}
-			case OpType::minus :{
-				value = op1->value - op2->value;
-				break;
-			}
-			case OpType::mul :{
-				value = op1->value * op2->value;
-				break;
-			}
-			case OpType::div :{
-				value = op1->value / op2->value;
-				break;
-			}
-			case OpType::mod :{
-				value = op1->value % op2->value;
-				break;
-			}
-			case OpType::bit_and :{
-				value = op1->value & op2->value;
-				break;
-			}
-			case OpType::bit_or :{
-				value = op1->value | op2->value;
-				break;
-			}
-			case OpType::land :{
-				value = op1->value && op2->value;
-				break;
-			}
-			case OpType::lor :{
-				value = op1->value || op2->value;
-				break;
-			}
-			case OpType::bit_xor :{
-				value = op1->value ^ op2->value;
-				break;
-			}
-			case OpType::eq :{
-				value = op1->value == op2->value;
-				break;
-			}
-			case OpType::ne :{
-				value = op1->value != op2->value;
-				break;
-			}
-			case OpType::lt :{
-				value = op1->value < op2->value;
-				break;
-			}
-			case OpType::gt :{
-				value = op1->value > op2->value;
-				break;
-			}
-			case OpType::le :{
-				value = op1->value <= op2->value;
-				break;
-			}
-			case OpType::ge :{
-				value = op1->value >= op2->value;
-				break;
-			}
-			case OpType::aeq :{
-				value = op1->value == op2->value;
-				if (op1->value.type != op2->value.type) {
-					value.sValue.integer = 0;
-				}
-				break;
-			}
-			case OpType::ane :{
-				value = op1->value == op2->value;
-				if (op1->value.type != op2->value.type) {
-					value.sValue.integer = 1;
-				}
-				break;
-			}
 		}
 	}
 

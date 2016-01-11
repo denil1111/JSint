@@ -533,7 +533,18 @@ public:
 		iin,
 		lsh,
 		rsh,
-		ursh
+		lrsh,
+		plus_assign,
+		minus_assign,
+		mul_assign,
+		div_assign,
+		mod_assign,
+		bit_and_assign,
+		bit_or_assign,
+		bit_xor_assign,
+		lsh_assign,
+		rsh_assign,
+		lrsh_assign
     };
 
     Expression *op1, *op2;
@@ -579,7 +590,18 @@ public:
 			{ OpType::iin, "in"},
 			{ OpType::lsh, "left_shift"},
 			{ OpType::rsh, "right_shift"},
-			{ OpType::ursh, "right_u_shift"},
+			{ OpType::lrsh, "lrshift"},
+			{OpType::plus_assign,"plus_assign"},
+			{OpType::minus_assign,"minus_assign"},
+			{OpType::mul_assign,"mul_assign"},
+			{OpType::div_assign,"div_assign"},
+			{OpType::mod_assign,"mod_assign"},
+			{OpType::bit_and_assign,"bit_and_assign"},
+			{OpType::bit_or_assign,"bit_or_assign"},
+			{OpType::bit_xor_assign,"bit_xor_assign"},
+			{OpType::lsh_assign,"lsh_assign"},
+			{OpType::rsh_assign,"rsh_assign"},
+			{OpType::lrsh_assign,"lrsh_assign"}
         }[op];
     }
     virtual void run();

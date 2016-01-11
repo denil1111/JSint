@@ -1,21 +1,24 @@
-/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
-/* Bison interface for Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
-   
-   This program is free software: you can redistribute it and/or modify
+/* Skeleton interface for Bison's Yacc-like parsers in C
+
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-   
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -26,19 +29,9 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
-
-#ifndef YY_YY_PARSER_HPP_INCLUDED
-# define YY_YY_PARSER_HPP_INCLUDED
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -129,14 +122,96 @@ extern int yydebug;
      BIT_OR_ASG = 338
    };
 #endif
+/* Tokens.  */
+#define DECIMAL_LITERAL 258
+#define HEX_INTEGER_LITERAL 259
+#define STRING_LITERAL 260
+#define BOOLEAN_LITERAL 261
+#define NULL_LITERAL 262
+#define SLASHASSIGN 263
+#define SLASH 264
+#define JEOF 265
+#define IDENTIFIER_NAME 266
+#define THIS 267
+#define NEW 268
+#define DELETE 269
+#define VOID 270
+#define TYPEOF 271
+#define INSTANCEOF 272
+#define IN 273
+#define VAR 274
+#define IF 275
+#define ELSE 276
+#define DO 277
+#define WHILE 278
+#define FOR 279
+#define CONTINUE 280
+#define BREAK 281
+#define RETURN 282
+#define WITH 283
+#define SWITCH 284
+#define CASE 285
+#define DEFAULT 286
+#define THROW 287
+#define TRY 288
+#define CATCH 289
+#define FINALLY 290
+#define FUNCTION 291
+#define IMPORT 292
+#define LEFT_BRACKET 293
+#define RIGHT_BRACKET 294
+#define LEFT_PARE 295
+#define RIGHT_PARE 296
+#define LEFT_BRACE 297
+#define RIGHT_BRACE 298
+#define COMMA 299
+#define DOT 300
+#define COLON 301
+#define SEMICOLON 302
+#define PLUS 303
+#define MINUS 304
+#define MULTI 305
+#define ASSIGN 306
+#define PLUS_PLUS 307
+#define MINUS_MINUS 308
+#define TILDE 309
+#define QUES 310
+#define EXCLAM 311
+#define PERCENT 312
+#define LESS 313
+#define GREATER 314
+#define EQUAL 315
+#define LSHIFT 316
+#define RSHIFT 317
+#define RRSHIFT 318
+#define LESS_EQ 319
+#define GREATER_EQ 320
+#define NOT_EQUAL 321
+#define ALWAYS_EQ 322
+#define ALWAYS_NEQ 323
+#define BIT_AND 324
+#define BIT_OR 325
+#define BIT_XOR 326
+#define AND 327
+#define OR 328
+#define MULTI_ASG 329
+#define MOD_ASG 330
+#define PLUS_ASG 331
+#define MINUS_ASG 332
+#define LSHIFT_ASG 333
+#define RSHIFT_ASG 334
+#define LLSHIFT_ASG 335
+#define BIT_AND_ASG 336
+#define BIT_NOT_ASG 337
+#define BIT_OR_ASG 338
+
+
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-{
-/* Line 2053 of yacc.c  */
 #line 18 "JSint.y"
-
+{
 	char* 					debug;
 
     ast::Node* 				ast_Node;
@@ -166,29 +241,15 @@ typedef union YYSTYPE
     ast::CaseList*          ast_CaseList;
     ast::CaseStmt*          ast_CaseStmt;
 
-
-/* Line 2053 of yacc.c  */
-#line 172 "parser.hpp"
-} YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
+	ast::Block*             ast_Block;
+}
+/* Line 1529 of yacc.c.  */
+#line 248 "parser.hpp"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 extern YYSTYPE yylval;
 
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void *YYPARSE_PARAM);
-#else
-int yyparse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void);
-#else
-int yyparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
-
-#endif /* !YY_YY_PARSER_HPP_INCLUDED  */

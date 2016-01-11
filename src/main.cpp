@@ -21,6 +21,7 @@ int debugFlag = 0;
 extern int yyparse();
 extern ast::StatementList* ast_root;
 VarList nowList;
+VarStack nowStack = VarStack();
 int main(int argc, char** argv) {
 	cout << green("start!") << endl;
 	if (argc>1 && argv[1][0] == 'd')

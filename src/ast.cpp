@@ -10,10 +10,11 @@
 #include "utils.h"
 using namespace std;
 extern VarList nowList;
+extern VarStack nowStack;
 void ast::Identifier::run() {
     std::cout << "Creating identifier: " << name << std::endl;
-	value = nowList.getVar(name);
-    
+	//value = nowList.getVar(name);
+	value = nowStack.getVar(name);
 }
 
 void ast::IntegerType::run() {
@@ -49,7 +50,7 @@ void ast::BinaryOperator::run() {
 		else
 		{
 			value = op2->value;
-			nowList.assignAndNew(id->name,value);
+			nowStack.assignAndNew(id->name,value);
 		}
 	}
 	else
@@ -213,4 +214,18 @@ void ast::ArrayRef::run() {
     
 }
 
+void ast::StatementList::run() {
+	for (auto stmt: list){
+		stmt->run();
+	}
+}
 
+void ast::Block::run() {
+	std::cout << "Enter new block!" << std::endl;
+	nowStack.push_new();
+	this->stmtList->run();
+	nowStack.print();
+	nowStack.pop();
+	std::cout << "Exit from block!" << std::endl;
+	nowStack.print();
+}

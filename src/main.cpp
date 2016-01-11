@@ -20,7 +20,6 @@ std::string green(const std::string& str) {
 int debugFlag = 0;
 extern int yyparse();
 extern ast::StatementList* ast_root;
-VarList nowList;
 VarStack nowStack = VarStack();
 int main(int argc, char** argv) {
 	cout << green("start!") << endl;

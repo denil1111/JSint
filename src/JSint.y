@@ -45,15 +45,11 @@ ast::BinaryOperator* noOp1Exp;
     ast::TypeDeclList*      ast_TypeDeclList;
     ast::CaseList*          ast_CaseList;
     ast::CaseStmt*          ast_CaseStmt;
-
-<<<<<<< HEAD
 	ast::Block*             ast_Block;
-=======
 	ast::ParameterList*     ast_ParameterList;
 	ast::FunctionDeclaration* ast_FunctionDeclaration;
 	ast::ArgumentList*      ast_ArgumentList;
 	ast::CallExpression*    ast_CallExpression;
->>>>>>> 63dfd311f3e2bbccc911f076e2dac11b5a85a62a
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL

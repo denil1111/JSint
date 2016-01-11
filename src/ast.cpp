@@ -9,16 +9,11 @@
 
 #include "utils.h"
 using namespace std;
-extern VarList nowList;
 extern VarStack nowStack;
 void ast::Identifier::run() {
     std::cout << "Creating identifier: " << name << std::endl;
-<<<<<<< HEAD
-	//value = nowList.getVar(name);
+
 	value = nowStack.getVar(name);
-=======
-	value = nowList.getVar(name);
->>>>>>> 63dfd311f3e2bbccc911f076e2dac11b5a85a62a
 }
 
 void ast::IntegerType::run() {
@@ -174,7 +169,7 @@ void ast::FunctionDeclaration::run() {
         std::cout << parameter->name << " ";
     }
     value = TValue(this);
-    nowList.assignAndNew(function_name->name, value);
+    nowStack.assignAndNew(function_name->name, value);
 }
 
 void ast::CallExpression::run() {
@@ -199,7 +194,7 @@ void ast::CallExpression::run() {
             }
         }
     }
-    value = nowList.getVar(function_name->name);
+    value = nowStack.getVar(function_name->name);
     // (value.func)->callWithArguments();
 }
 
@@ -252,7 +247,6 @@ void ast::ArrayType::run() {
 }
 
 void ast::ArrayRef::run() {
-<<<<<<< HEAD
     
 }
 
@@ -270,7 +264,4 @@ void ast::Block::run() {
 	nowStack.pop();
 	std::cout << "Exit from block!" << std::endl;
 	nowStack.print();
-=======
-
->>>>>>> 63dfd311f3e2bbccc911f076e2dac11b5a85a62a
 }

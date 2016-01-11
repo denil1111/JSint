@@ -1,47 +1,71 @@
 #include "varlist.hpp"
+#include <cmath>
 using namespace std;
-
-TValue TValue::operator   +(const TValue &rx){
+TValue TValue::NaN()
+{
+	TValue ret;
+	ret.type = TType::TNaN;
+	return ret;
+}
+TValue TValue::ToDouble()
+{
+	if (type == TType::Tstring)
+	{
+		double x;
+		stringstream ss(sValue.str);
+		if (!(ss>>x))
+		{
+			return TValue::NaN();
+		}
+		else
+		{
+			return TValue(x);	
+		}
+	}
+	else
+	{
+		return *this;
+	}
+}
+TValue TValue::ToBoolean()
+{
+	if (type == TType::Tstring)
+	{
+		if (sValue.str == "")
+		{
+			return TValue(false);
+		}
+		else
+		{
+			return TValue(true);
+		}
+	}
+	if (type == TType::Tdouble)
+	{
+		if (sValue.dou == 0)
+		{
+			return TValue(false);
+		}
+		else
+		{
+			return TValue(true);
+		}
+	}
+	if (type == TType::TNaN)
+	{
+		return TValue(false);
+	}
+}
+TValue TValue::operator   +( TValue &rx){
 	TValue ret;
 	if (this->type == TType::TNaN || rx.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
-	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer + rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.integer + rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::Tstring;
-				stringstream ss;
-				string s1;
-				ss<<this->sValue.integer;
-				ss>>s1;
-				ret.sValue.str = s1 + rx.sValue.str;
-				break;
-			}
-		}
+		return TValue::NaN();
 	}
 	if (this->type == TType::Tdouble)
 	{
 		switch (rx.type)
 		{
-			case TType::Tint: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.dou + rx.sValue.integer;
-				break;
-			}
 			case TType::Tdouble: {
 				ret.type = TType::Tdouble;
 				ret.sValue.dou = this->sValue.dou + rx.sValue.dou;
@@ -63,15 +87,6 @@ TValue TValue::operator   +(const TValue &rx){
 		switch (rx.type)
 		{
 
-			case TType::Tint: {
-				ret.type = TType::Tstring;
-				stringstream ss;
-				string s1;
-				ss<<rx.sValue.integer;
-				ss>>s1;
-				ret.sValue.str = this->sValue.str + s1;
-				break;
-			}
 			case TType::Tdouble: {
 				ret.type = TType::Tstring;
 				stringstream ss;
@@ -91,697 +106,203 @@ TValue TValue::operator   +(const TValue &rx){
 	}
 	return ret;
 }
-TValue TValue::operator   -(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator   -( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue::NaN();
 	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer - rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.integer - rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.dou - rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.dou - rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue(x.sValue.dou - y.sValue.dou);
 }
-TValue TValue::operator  *(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  *( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue::NaN();
 	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer * rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.integer * rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.dou * rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.dou * rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue(x.sValue.dou * y.sValue.dou);
 }
-TValue TValue::operator  /(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  /( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue::NaN();
 	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer / rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.integer / rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.dou / rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.dou / rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue(x.sValue.dou / y.sValue.dou);
 }
-TValue TValue::operator  %(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  %( TValue &rx){
+	double t;
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue::NaN();
 	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer % rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	t = fabs(x.sValue.dou) / fabs(y.sValue.dou);
+	t = fabs(x.sValue.dou) - (int)t*fabs(y.sValue.dou);
+	return TValue(t * (x.sValue.dou >0?1:-1)*(y.sValue.dou >0?1:-1));
 }
-TValue TValue::operator  >(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
-	{
-		ret.type = TType::TNaN;
-		return ret;
-	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer > rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tint;
-				ret.sValue.dou = this->sValue.integer > rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.dou = this->sValue.dou > rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tint;
-				ret.sValue.dou = this->sValue.dou > rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tstring)
-	{
-		switch (rx.type)
-		{
 
-			case TType::Tint: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-
-			}
-			case TType::Tstring: {
-				ret.type = TType::Tstring;
-				ret.sValue.str = this->sValue.str > rx.sValue.str;
-				break;
-			}
-		}
+TValue TValue::operator  >( TValue &rx){
+	if (this->type == TType::Tstring && rx.type == TType::Tstring)
+	{
+		return TValue(this->sValue.str > rx.sValue.str);
 	}
-	return ret;
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
+	{
+		return TValue(false);
+	}
+	return TValue(x.sValue.dou > y.sValue.dou);
 }
-TValue TValue::operator  <(const TValue &rx){
-	TValue ret;
-	ret = *this >= rx;
-	ret = !ret;
-	return ret;
+TValue TValue::operator  <( TValue &rx){
+	return rx > *this;
 }
-TValue TValue::operator  >=(const TValue &rx){
+TValue TValue::operator  >=( TValue &rx){
 	TValue ret,ret2;
 	ret = *this > rx;
 	ret2 = *this == rx;
-	ret = ret | ret2;
+	ret = ret || ret2;
 	return ret;
 }
-TValue TValue::operator  <=(const TValue &rx){
-	TValue ret;
-	ret = *this > rx;
-	ret = !ret;
-	return ret;
+TValue TValue::operator  <=( TValue &rx){
+	return rx >= *this;
 }
-TValue TValue::operator  ==(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  ==( TValue &rx){
+	if (this->type == TType::Tstring && rx.type == TType::Tstring)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue(this->sValue.str == rx.sValue.str);
 	}
-	if (this->type == TType::Tint)
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer == rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tint;
-				ret.sValue.dou = this->sValue.integer == rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
+		return TValue(false);
 	}
-	if (this->type == TType::Tdouble)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.dou = this->sValue.dou == rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::Tint;
-				ret.sValue.dou = this->sValue.dou == rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tstring)
-	{
-		switch (rx.type)
-		{
-
-			case TType::Tint: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-
-			}
-			case TType::Tstring: {
-				ret.type = TType::Tstring;
-				ret.sValue.str = this->sValue.str == rx.sValue.str;
-				break;
-			}
-		}
-	}
-	return ret;
+	return TValue(x.sValue.dou == y.sValue.dou);
 }
-TValue TValue::operator  !=(const TValue &rx){
+TValue TValue::operator  !=( TValue &rx){
 	TValue ret;
 	ret = *this == rx;
 	ret = !ret;
 	return ret;
 }
-TValue TValue::operator  ||(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  ||( TValue &rx){
+	TValue x = this->ToBoolean();
+	if (x.sValue.dou)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return *this;
 	}
-	if (this->type == TType::Tint)
+	else
 	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer || rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
+		return rx;
 	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
 }
-TValue TValue::operator  &&(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  &&( TValue &rx){
+	TValue x = this->ToBoolean();
+	if (!x.sValue.dou)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return *this;
 	}
-	if (this->type == TType::Tint)
+	else
 	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer && rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
+		return rx;TValue x = this->ToBoolean();
+	if (x.sValue.dou)
 	{
-		ret.type = TType::TNaN;
+		return *this;
 	}
-	if (this->type == TType::Tstring)
+	else
 	{
-		ret.type = TType::TNaN;
+		return rx;
 	}
-	return ret;
+	}
 }
-TValue TValue::operator  |(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  |( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		x = TValue(0);
 	}
-	if (this->type == TType::Tint)
+	if (y.type == TType::TNaN)
 	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer | rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
+		y = TValue(0);
 	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue((int)x.sValue.dou | (int)y.sValue.dou);
 }
-TValue TValue::operator  ^(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  ^( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		x = TValue(0);
 	}
-	if (this->type == TType::Tint)
+	if (y.type == TType::TNaN)
 	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer ^ rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
+		y = TValue(0);
 	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue((int)x.sValue.dou ^ (int)y.sValue.dou);
 }
-TValue TValue::operator  &(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN)
+TValue TValue::operator  &( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		x = TValue(0);
 	}
-	if (this->type == TType::Tint)
+	if (y.type == TType::TNaN)
 	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer & rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
+		y = TValue(0);
 	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue((int)x.sValue.dou & (int)y.sValue.dou);
 }
-TValue TValue::operator  !(){
-	TValue ret;
-	if (this->type == TType::TNaN )
+TValue TValue::operator !(){
+	if (ToBoolean().sValue.dou)
 	{
-		ret.type = TType::TNaN;
-		return ret;
-	}
-	if (this->type == TType::Tint)
+		return TValue(false);
+	}	
+	else
 	{
-		ret.type = TType::Tint;
-		ret.sValue.integer = !(this->sValue.integer);
+		return TValue(true);
 	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
 }
 TValue TValue::operator  -(){
-	TValue ret;
-	if (this->type == TNaN )
+	TValue x = this->ToDouble();
+	if (x.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue::NaN();
 	}
-	if (this->type == TType::Tint)
-	{
-		ret.type = TType::Tint;
-		ret.sValue.integer = -this->sValue.integer;
-	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::Tdouble;
-		ret.sValue.dou = -this->sValue.dou;
-	}
-	if (this->type == TType::Tstring)
-	{
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue(-x.sValue.dou);
 }
-TValue TValue::operator  >>(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+TValue TValue::operator  >>( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue::NaN();
 	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer >> rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{	
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue((int)x.sValue.dou >> (int)y.sValue.dou);
 }
-TValue TValue::operator  <<(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+TValue TValue::operator  <<( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue::NaN();
 	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = this->sValue.integer << rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{	
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue((int)x.sValue.dou << (int)y.sValue.dou);
 }
-TValue TValue::logicRShift(const TValue &rx){
-	TValue ret;
-	if (this->type == TType::TNaN || rx.type == TType::TNaN) 
+TValue TValue::logicRShift( TValue &rx){
+	TValue x = this->ToDouble();
+	TValue y = rx.ToDouble();
+	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
-		ret.type = TType::TNaN;
-		return ret;
+		return TValue::NaN();
 	}
-	if (this->type == TType::Tint)
-	{
-		switch (rx.type)
-		{
-			case TType::Tint: {
-				ret.type = TType::Tint;
-				ret.sValue.integer = (unsigned int)this->sValue.integer >> rx.sValue.integer;
-				break;
-			}
-			case TType::Tdouble: {
-				ret.type = TType::TNaN;
-				break;
-			}
-			case TType::Tstring: {
-				ret.type = TType::TNaN;
-				break;
-			}
-		}
-	}
-	if (this->type == TType::Tdouble)
-	{
-		ret.type = TType::TNaN;
-	}
-	if (this->type == TType::Tstring)
-	{	
-		ret.type = TType::TNaN;
-	}
-	return ret;
+	return TValue((unsigned int)x.sValue.dou >> (int)y.sValue.dou);
 }
 

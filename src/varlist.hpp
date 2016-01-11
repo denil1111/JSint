@@ -13,73 +13,108 @@
 extern std::string green(const std::string& str);
 extern std::string red(const std::string& str);
 struct TValue {
+	static TValue NaN();
 	struct TSValue{
 		std::string str;
-		int integer;
-		double dou;
+		int dou;
 	};
 	enum TType {
 		Tfunction,
 		Tstring,
-		Tint,
 		Tdouble,
 		Tarray,
-		TNaN
+		TNaN,
+		Tbool
 	};
 	ast::FunctionDeclaration *func;
 	TSValue sValue;
+	bool boolFlag = false;
 	TType type;
+	TValue ToDouble() ;
+	TValue ToBoolean() ;
 	TValue(){}
+	TValue(unsigned int x) {
+		type = TType::Tdouble;
+		sValue.dou = x;
+	}
 	TValue(int x) {
-		type = TType::Tint;
-		sValue.integer = x;
+		type = TType::Tdouble;
+		sValue.dou = x;
 	}
 	TValue(double x) {
 		type = TType::Tdouble;
 		sValue.dou = x;
 	}
+	TValue(bool x) {
+		type = TType::Tdouble;
+		sValue.dou = x;
+		boolFlag = true;
+	}
 	TValue(std::string x) {
-		type = TType::Tint;
+		type = TType::Tstring;
 		sValue.str = x;
 	}
 	TValue(ast::FunctionDeclaration* function) {
 		type = TType::Tfunction;
 		func = function;
 	}
-	void print() const{
+	TType getType()
+	{
+		if (boolFlag) return TType::Tbool;
+		else return type;
+
+	}
+	void print() {
 		std::cout<<green(this->toString())<<std::endl;
 	}
-    std::string toString() const {
+    std::string toString()  {
 		std::stringstream  ss;
 		std::string st;
-		if (type == TType::Tint) {
-			ss << sValue.integer;
+		if (type == TType::Tdouble) {
+			if (boolFlag)
+			{
+				if (sValue.dou)
+				{
+					ss<<"true";
+				}
+				else
+				{
+					ss<<"false";
+				}
+			}
+			else
+			{
+				ss << sValue.dou;
+			}
 		}
 		if (type == TType::Tstring) {
 			ss << "\""<<sValue.str<<"\"";
 		}
+		if (type == TType::TNaN) {
+			ss<<"NaN";
+		}
 		ss >> st;
 		return st;
 	}
-	TValue operator   +(const TValue &rx);
-	TValue operator   -(const TValue &rx);
-	TValue operator   *(const TValue &rx);
-	TValue operator   /(const TValue &rx);
-	TValue operator   %(const TValue &rx);
-	TValue operator   >(const TValue &rx);
-	TValue operator   <(const TValue &rx);
-	TValue operator   >=(const TValue &rx);
-	TValue operator   <=(const TValue &rx);
-	TValue operator   !=(const TValue &rx);
-	TValue operator   ==(const TValue &rx);
-	TValue operator   ||(const TValue &rx);
-	TValue operator   &&(const TValue &rx);
-	TValue operator   |(const TValue &rx);
-	TValue operator   &(const TValue &rx);
-	TValue operator   ^(const TValue &rx);
-	TValue operator   <<(const TValue &rx);
-	TValue operator   >>(const TValue &rx);
-	TValue logicRShift(const TValue &rx);
+	TValue operator   +( TValue &rx);
+	TValue operator   -( TValue &rx);
+	TValue operator   *( TValue &rx);
+	TValue operator   /( TValue &rx);
+	TValue operator   %( TValue &rx);
+	TValue operator   >( TValue &rx);
+	TValue operator   <( TValue &rx);
+	TValue operator   >=( TValue &rx);
+	TValue operator   <=( TValue &rx);
+	TValue operator   !=( TValue &rx);
+	TValue operator   ==( TValue &rx);
+	TValue operator   ||( TValue &rx);
+	TValue operator   &&( TValue &rx);
+	TValue operator   |( TValue &rx);
+	TValue operator   &( TValue &rx);
+	TValue operator   ^( TValue &rx);
+	TValue operator   <<( TValue &rx);
+	TValue operator   >>( TValue &rx);
+	TValue logicRShift( TValue &rx);
 	TValue operator   !();
 	TValue operator   -();
 };

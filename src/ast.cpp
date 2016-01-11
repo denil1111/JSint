@@ -18,11 +18,11 @@ void ast::Identifier::run() {
 
 void ast::IntegerType::run() {
     std::cout << "Creating integer: " << val << std::endl;
-	value.type = TValue::TType::Tint;
-	value.sValue.integer = val;
 }
 void ast::RealType::run() {
     std::cout << "Creating real: " << val << std::endl;
+    value.type = TValue::TType::Tdouble;
+	value.sValue.dou = val;
 }
 void ast::CharType::run() {
     std::cout << "Creating char: " << val << std::endl;
@@ -34,6 +34,7 @@ void ast::StringType::run() {
 }
 void ast::BooleanType::run() {
     std::cout << "Creating boolean: " << val << std::endl;
+    value = TValue(val);
 }
 void ast::RangeType::run() {
     std::cout << "Creating subscript range from " << this->low << " to " << this->high << std::endl;
@@ -41,7 +42,7 @@ void ast::RangeType::run() {
 void ast::BinaryOperator::run() {
 	op2->run();
 	op1->run();
-	bool asgFlag = true;
+	bool asgFlag = false;
 	switch (op)
 	{
 		case OpType::assign :{
@@ -139,15 +140,15 @@ void ast::BinaryOperator::run() {
 		}
 		case OpType::aeq :{
 			value = op1->value == op2->value;
-			if (op1->value.type != op2->value.type) {
-				value.sValue.integer = 0;
+			if (op1->value.getType() != op2->value.getType()) {
+				value = TValue(false);
 			}
 			break;
 		}
 		case OpType::ane :{
 			value = op1->value == op2->value;
-			if (op1->value.type != op2->value.type) {
-				value.sValue.integer = 1;
+			if (op1->value.getType() != op2->value.getType()) {
+				value = TValue(true);
 			}
 			break;
 		}
@@ -227,10 +228,6 @@ void ast::CallExpression::run() {
     std::cout << "with arguments: ";
     for (auto arg : *argument_list) {
         switch (arg->value.type) {
-            case TValue::TType::Tint: {
-                std::cout << arg->value.sValue.integer << " ";
-                break;
-            }
             case TValue::TType::Tstring: {
                 std::cout << arg->value.sValue.str << " ";
                 break;

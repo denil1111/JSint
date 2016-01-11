@@ -5,7 +5,11 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+<<<<<<< HEAD
 
+=======
+#include "declared_function.h"
+>>>>>>> 63dfd311f3e2bbccc911f076e2dac11b5a85a62a
 extern std::string green(const std::string& str);
 extern std::string red(const std::string& str);
 struct TValue {
@@ -15,12 +19,14 @@ struct TValue {
 		double dou;
 	};
 	enum TType {
+		Tfunction,
 		Tstring,
 		Tint,
 		Tdouble,
 		Tarray,
 		TNaN
 	};
+	DeclaredFunction *func;
 	TSValue sValue;
 	TType type;
 	TValue(){}
@@ -36,6 +42,10 @@ struct TValue {
 		type = TType::Tint;
 		sValue.str = x;
 	}
+	TValue(DeclaredFunction* function) {
+		type = TType::Tfunction;
+		func = function;
+	}
 	void print() const{
 		std::cout<<green(this->toString())<<std::endl;
 	}
@@ -43,7 +53,7 @@ struct TValue {
 		std::stringstream  ss;
 		std::string st;
 		if (type == TType::Tint) {
-			ss << sValue.integer;	
+			ss << sValue.integer;
 		}
 		if (type == TType::Tstring) {
 			ss << "\""<<sValue.str<<"\"";

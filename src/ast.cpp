@@ -13,8 +13,12 @@ extern VarList nowList;
 extern VarStack nowStack;
 void ast::Identifier::run() {
     std::cout << "Creating identifier: " << name << std::endl;
+<<<<<<< HEAD
 	//value = nowList.getVar(name);
 	value = nowStack.getVar(name);
+=======
+	value = nowList.getVar(name);
+>>>>>>> 63dfd311f3e2bbccc911f076e2dac11b5a85a62a
 }
 
 void ast::IntegerType::run() {
@@ -138,36 +142,74 @@ void ast::BinaryOperator::run() {
 			}
 		}
 	}
-	
-	
+
+
 }
 
 void ast::AssignmentStmt::run() {
-    
+
 }
 
 void ast::ConstDecl::run() {
-    
+
 }
 
 
 void ast::VarDecl::run() {
-    
+
 }
 
 void ast::Program::run() {
-    
+
 }
 
 void ast::Routine::run() {
-   
+
 }
+
+void ast::FunctionDeclaration::run() {
+    std::cout << "declaring function: " << function_name->name << std::endl;
+    std::cout << "with parameters: ";
+    for (auto parameter : *parameter_list) {
+        std::cout << parameter->name << " ";
+    }
+    DeclaredFunction* func = new DeclaredFunction();
+    value = TValue(func);
+    nowList.assignAndNew(function_name->name, value);
+}
+
+void ast::CallExpression::run() {
+    std::cout << "calling function: " << function_name->name << std::endl;
+    for (auto arg : *argument_list) {
+        arg->run();
+    }
+    std::cout << "with arguments: ";
+    for (auto arg : *argument_list) {
+        switch (arg->value.type) {
+            case TValue::TType::Tint: {
+                std::cout << arg->value.sValue.integer << " ";
+                break;
+            }
+            case TValue::TType::Tstring: {
+                std::cout << arg->value.sValue.str << " ";
+                break;
+            }
+            case TValue::TType::Tdouble: {
+                std::cout << arg->value.sValue.dou << " ";
+                break;
+            }
+        }
+    }
+    value = nowList.getVar(function_name->name);
+    (value.func)->callWithArguments();
+}
+
 void ast::FuncCall::run() {
-   
+
 }
 
 void ast::ProcCall::run() {
-   
+
 }
 
 void ast::SysFuncCall::run() {}
@@ -175,7 +217,7 @@ void ast::SysFuncCall::run() {}
 
 
 void ast::SysProcCall::run() {
-    
+
 }
 
 void ast::TypeDecl::run() {}
@@ -183,34 +225,35 @@ void ast::TypeDecl::run() {}
 void ast::Expression::run() {}
 
 void ast::IfStmt::run() {
-    
+
 }
 void ast::WhileStmt::run() {
-   
+
 }
 void ast::RepeatStmt::run() {
-    
+
 }
 void ast::ForStmt::run() {
-    
+
 }
 void ast::CaseStmt::run() {
-    
+
 }
 void ast::SwitchStmt::run() {
-   
+
 }
 void ast::GotoStmt::run(){
-   
+
 }
 void ast::LabelStmt::run(){
-    
+
 }
 
 void ast::ArrayType::run() {
 }
 
 void ast::ArrayRef::run() {
+<<<<<<< HEAD
     
 }
 
@@ -228,4 +271,7 @@ void ast::Block::run() {
 	nowStack.pop();
 	std::cout << "Exit from block!" << std::endl;
 	nowStack.print();
+=======
+
+>>>>>>> 63dfd311f3e2bbccc911f076e2dac11b5a85a62a
 }

@@ -14,6 +14,8 @@ extern std::string green(const std::string& str);
 extern std::string red(const std::string& str);
 struct TValue {
 	static TValue NaN();
+	static TValue undefined();
+	static TValue null();
 	struct TSValue{
 		std::string str;
 		int dou;
@@ -24,15 +26,19 @@ struct TValue {
 		Tdouble,
 		Tarray,
 		TNaN,
-		Tbool
+		Tbool,
+		Tundefined,
+		Tnull
 	};
 	ast::FunctionDeclaration *func;
 	TSValue sValue;
 	bool boolFlag = false;
 	TType type;
-	TValue ToDouble() ;
-	TValue ToBoolean() ;
-	TValue(){}
+	TValue toDouble() ;
+	TValue toBoolean() ;
+	TValue(){
+		type = TType::Tundefined;
+	}
 	TValue(unsigned int x) {
 		type = TType::Tdouble;
 		sValue.dou = x;
@@ -67,35 +73,7 @@ struct TValue {
 	void print() {
 		std::cout<<green(this->toString())<<std::endl;
 	}
-    std::string toString()  {
-		std::stringstream  ss;
-		std::string st;
-		if (type == TType::Tdouble) {
-			if (boolFlag)
-			{
-				if (sValue.dou)
-				{
-					ss<<"true";
-				}
-				else
-				{
-					ss<<"false";
-				}
-			}
-			else
-			{
-				ss << sValue.dou;
-			}
-		}
-		if (type == TType::Tstring) {
-			ss << "\""<<sValue.str<<"\"";
-		}
-		if (type == TType::TNaN) {
-			ss<<"NaN";
-		}
-		ss >> st;
-		return st;
-	}
+    std::string toString();
 	TValue operator   +( TValue &rx);
 	TValue operator   -( TValue &rx);
 	TValue operator   *( TValue &rx);

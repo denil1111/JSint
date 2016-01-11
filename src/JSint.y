@@ -124,6 +124,9 @@ ast::BinaryOperator* noOp1Exp;
 PrimaryExpression	:	THIS
 |	ObjectLiteral
 |	LEFT_PARE Expression RIGHT_PARE
+{
+	$$ = $2;
+}
 |	Identifier {
 /*	//printf("identifier\n");*/
 	$$ = $1;

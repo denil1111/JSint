@@ -40,11 +40,35 @@ void ast::RangeType::run() {
     std::cout << "Creating subscript range from " << this->low << " to " << this->high << std::endl;
 }
 void ast::BinaryOperator::run() {
-	op2->run();
 	op1->run();
 	bool asgFlag = false;
 	switch (op)
 	{
+		case OpType::land :{
+			if (op1->value.toBoolean().sValue.dou)
+			{
+				op2->run();
+				value = op2->value;
+			}
+			else
+			{
+				value = op1->value;
+			}
+			break;
+		}
+		case OpType::lor :{
+			if (!op1->value.toBoolean().sValue.dou)
+			{
+				op2->run();
+				value = op2->value;
+			}
+			else
+			{
+				value = op1->value;
+			}
+			break;
+		}
+		op2->run();
 		case OpType::assign :{
 			asgFlag = true;
 			value = op2->value;
@@ -97,14 +121,6 @@ void ast::BinaryOperator::run() {
 		}
 		case OpType::bit_or :{
 			value = op1->value | op2->value;
-			break;
-		}
-		case OpType::land :{
-			value = op1->value && op2->value;
-			break;
-		}
-		case OpType::lor :{
-			value = op1->value || op2->value;
 			break;
 		}
 		case OpType::bit_xor_assign :{

@@ -1,13 +1,61 @@
 #include "varlist.hpp"
 #include <cmath>
 using namespace std;
+string TValue::toString() 
+{
+	std::stringstream  ss;
+	std::string st;
+	if (type == TType::Tdouble) {
+		if (boolFlag)
+		{
+			if (sValue.dou)
+			{
+				ss<<"true";
+			}
+			else
+			{
+				ss<<"false";
+			}
+		}
+		else
+		{
+			ss << sValue.dou;
+		}
+	}
+	if (type == TType::Tstring) {
+		ss << "\""<<sValue.str<<"\"";
+	}
+	if (type == TType::TNaN) {
+		ss<<"NaN";
+	}
+	if (type == TType::Tundefined) {
+		ss<<"undefined";
+	}
+	if (type == TType::Tnull) {
+		ss<<"null";
+	}
+	ss >> st;
+	return st;
+}
 TValue TValue::NaN()
 {
 	TValue ret;
 	ret.type = TType::TNaN;
 	return ret;
 }
-TValue TValue::ToDouble()
+TValue TValue::null()
+{
+	TValue ret;
+	ret.type = TType::Tnull;
+	return ret;
+}
+TValue TValue::undefined()
+{
+	TValue ret;
+	ret.type = TType::Tundefined;
+	return ret;
+}
+TValue TValue::toDouble()
 {
 	if (type == TType::Tstring)
 	{
@@ -22,12 +70,13 @@ TValue TValue::ToDouble()
 			return TValue(x);	
 		}
 	}
-	else
+	if (type == TType::Tdouble)
 	{
 		return *this;
 	}
+	return TType::TNaN;
 }
-TValue TValue::ToBoolean()
+TValue TValue::toBoolean()
 {
 	if (type == TType::Tstring)
 	{
@@ -52,6 +101,14 @@ TValue TValue::ToBoolean()
 		}
 	}
 	if (type == TType::TNaN)
+	{
+		return TValue(false);
+	}
+	if (type == TType::Tnull)
+	{
+		return TValue(false);
+	}
+	if (type == TType::Tundefined)
 	{
 		return TValue(false);
 	}
@@ -107,8 +164,8 @@ TValue TValue::operator   +( TValue &rx){
 	return ret;
 }
 TValue TValue::operator   -( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue::NaN();
@@ -116,8 +173,8 @@ TValue TValue::operator   -( TValue &rx){
 	return TValue(x.sValue.dou - y.sValue.dou);
 }
 TValue TValue::operator  *( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue::NaN();
@@ -125,8 +182,8 @@ TValue TValue::operator  *( TValue &rx){
 	return TValue(x.sValue.dou * y.sValue.dou);
 }
 TValue TValue::operator  /( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue::NaN();
@@ -135,8 +192,8 @@ TValue TValue::operator  /( TValue &rx){
 }
 TValue TValue::operator  %( TValue &rx){
 	double t;
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue::NaN();
@@ -151,8 +208,8 @@ TValue TValue::operator  >( TValue &rx){
 	{
 		return TValue(this->sValue.str > rx.sValue.str);
 	}
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue(false);
@@ -177,8 +234,8 @@ TValue TValue::operator  ==( TValue &rx){
 	{
 		return TValue(this->sValue.str == rx.sValue.str);
 	}
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue(false);
@@ -192,7 +249,7 @@ TValue TValue::operator  !=( TValue &rx){
 	return ret;
 }
 TValue TValue::operator  ||( TValue &rx){
-	TValue x = this->ToBoolean();
+	TValue x = this->toBoolean();
 	if (x.sValue.dou)
 	{
 		return *this;
@@ -203,14 +260,14 @@ TValue TValue::operator  ||( TValue &rx){
 	}
 }
 TValue TValue::operator  &&( TValue &rx){
-	TValue x = this->ToBoolean();
+	TValue x = this->toBoolean();
 	if (!x.sValue.dou)
 	{
 		return *this;
 	}
 	else
 	{
-		return rx;TValue x = this->ToBoolean();
+		return rx;TValue x = this->toBoolean();
 	if (x.sValue.dou)
 	{
 		return *this;
@@ -222,8 +279,8 @@ TValue TValue::operator  &&( TValue &rx){
 	}
 }
 TValue TValue::operator  |( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN)
 	{
 		x = TValue(0);
@@ -235,8 +292,8 @@ TValue TValue::operator  |( TValue &rx){
 	return TValue((int)x.sValue.dou | (int)y.sValue.dou);
 }
 TValue TValue::operator  ^( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN)
 	{
 		x = TValue(0);
@@ -248,8 +305,8 @@ TValue TValue::operator  ^( TValue &rx){
 	return TValue((int)x.sValue.dou ^ (int)y.sValue.dou);
 }
 TValue TValue::operator  &( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN)
 	{
 		x = TValue(0);
@@ -261,7 +318,7 @@ TValue TValue::operator  &( TValue &rx){
 	return TValue((int)x.sValue.dou & (int)y.sValue.dou);
 }
 TValue TValue::operator !(){
-	if (ToBoolean().sValue.dou)
+	if (toBoolean().sValue.dou)
 	{
 		return TValue(false);
 	}	
@@ -271,7 +328,7 @@ TValue TValue::operator !(){
 	}
 }
 TValue TValue::operator  -(){
-	TValue x = this->ToDouble();
+	TValue x = this->toDouble();
 	if (x.type == TType::TNaN)
 	{
 		return TValue::NaN();
@@ -279,8 +336,8 @@ TValue TValue::operator  -(){
 	return TValue(-x.sValue.dou);
 }
 TValue TValue::operator  >>( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue::NaN();
@@ -288,8 +345,8 @@ TValue TValue::operator  >>( TValue &rx){
 	return TValue((int)x.sValue.dou >> (int)y.sValue.dou);
 }
 TValue TValue::operator  <<( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue::NaN();
@@ -297,8 +354,8 @@ TValue TValue::operator  <<( TValue &rx){
 	return TValue((int)x.sValue.dou << (int)y.sValue.dou);
 }
 TValue TValue::logicRShift( TValue &rx){
-	TValue x = this->ToDouble();
-	TValue y = rx.ToDouble();
+	TValue x = this->toDouble();
+	TValue y = rx.toDouble();
 	if (x.type == TType::TNaN || y.type == TType::TNaN)
 	{
 		return TValue::NaN();

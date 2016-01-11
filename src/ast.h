@@ -33,7 +33,10 @@ class RecordType;
 class TypeConst;
 class CaseStmt;
 class Block;
-
+class CatchStmt;
+class ThrowStmt;
+class FinallyStmt;
+class TryStmt;
 
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
@@ -649,45 +652,39 @@ class WhileStmt : public Statement {
 public:
     Expression* condition;
     Statement* loopStmt;
-    WhileStmt(Expression* condition,Statement* loopStmt):condition(condition),loopStmt(loopStmt){}
+    bool ifDo;
+    WhileStmt(Expression* condition,Statement* loopStmt,bool ifDo):condition(condition),loopStmt(loopStmt),ifDo(ifDo){}
     virtual void run();
     virtual std::string toString() { return "while"; }
-
-
 };
-class RepeatStmt : public Statement {
-public:
-    Expression* condition;
-    Statement* loopStmt;
-    RepeatStmt(Expression* condition,StatementList* loopStmt):condition(condition),loopStmt(loopStmt){}
-    virtual void run();
-    virtual std::string toString() { return "repeat"; }
-};
+
 // namespace ast end
 class ForStmt : public Statement {
 public:
-    Identifier* loopVar;
+    Expression* loopVar;
     Expression* startExp;
     Expression* endExp;
-    int direction;
+    // int direction;
     Statement* loopStmt;
-    ForStmt(Identifier* loopVar, Expression* startExp, Expression* endExp, int direction,Statement* loopStmt):
+    ForStmt(Expression* loopVar, Expression* startExp, Expression* endExp,Statement* loopStmt):
         loopVar(loopVar),
         startExp(startExp),
         endExp(endExp),
-        loopStmt(loopStmt),
-        direction(direction){}
+        loopStmt(loopStmt){}
     virtual void run();
     virtual std::string toString() { return "for"; }
 };
+
 class CaseStmt : public Statement {
 public:
     Expression* condition;
     Statement* thenStmt;
-    CaseStmt(Expression* condition,Statement* thenStmt):condition(condition),thenStmt(thenStmt){}
+    bool isDefault;
+    CaseStmt(Expression* condition,Statement* thenStmt,bool isDefault):condition(condition),thenStmt(thenStmt),isDefault(isDefault){}
     virtual void run();
-    virtual std::string toString() { return "case statement"; }
+    virtual std::string toString() { return "case/default statement"; }
 };
+
 class SwitchStmt : public Statement {
 public:
     Expression* exp;
@@ -696,22 +693,65 @@ public:
     virtual void run();
     virtual std::string toString() { return "switch statement"; }
 };
-class LabelStmt : public Statement {
-public:
-    int label;
-    Statement* statement;
-    LabelStmt(int label,Statement* statement):label(label),statement(statement){}
-    virtual void run();
-    virtual std::string toString() { return "label statement"; }
 
+class ReturnStmt : public Statement {
+public:
+    Expression* exp;
+    CaseList* list;
+    ReturnStmt(Expression* exp,CaseList* list):exp(exp),list(list){}
+    virtual void run();
+    virtual std::string toString() { return "return statement"; }
 };
-class GotoStmt : public Statement {
-public:
-    int label;
-    GotoStmt(int label):label(label){}
-    virtual void run();
-    virtual std::string toString() { return "label statement"; }
 
+class BreakStmt : public Statement {
+public:
+    Identifier * label;
+    BreakStmt(Identifier * label):label(label){}
+    virtual void run();
+    virtual std::string toString() { return "break statement"; }
+};
+
+class ContinueStmt : public Statement {
+public:
+    Identifier * label;
+    ContinueStmt(Identifier * label):label(label){}
+    virtual void run();
+    virtual std::string toString() { return "continue statement"; }
+};
+
+class TryStmt : public Statement {
+public:
+    Block*blockstmt;
+    CatchStmt*catchstmt;
+    FinallyStmt*finallystmt;
+    TryStmt(CatchStmt*catchstmt,FinallyStmt*finallystmt):catchstmt(catchstmt),finallystmt(finallystmt){}
+    virtual void run();
+    virtual std::string toString() { return "try statement"; }
+};
+
+class ThrowStmt : public Statement {
+public:
+    Expression* exp;
+    ThrowStmt(Expression* exp):exp(exp){}
+    virtual void run();
+    virtual std::string toString() { return "throw statement"; }
+};
+
+class FinallyStmt : public Statement{
+public:   
+    Block * stmt;
+    FinallyStmt(Block * stmt):stmt(stmt){}
+    virtual void run();
+    virtual std::string toString() { return "finally statement"; }
+};
+
+class CatchStmt : public Statement {
+public:
+    Identifier * identifier;    
+    Block * stmt;
+    CatchStmt(Identifier * identifier,Block * stmt):identifier(identifier),stmt(stmt){}
+    virtual void run();
+    virtual std::string toString() { return "catch statement"; }
 };
 
 class Block : public Statement {
@@ -722,5 +762,6 @@ public:
     virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }	
 	virtual void run();
 };
+
 }
 #endif

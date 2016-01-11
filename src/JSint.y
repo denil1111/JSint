@@ -45,11 +45,18 @@ ast::BinaryOperator* noOp1Exp;
     ast::TypeDeclList*      ast_TypeDeclList;
     ast::CaseList*          ast_CaseList;
     ast::CaseStmt*          ast_CaseStmt;
-	ast::Block*             ast_Block;
+	ast::ContinueStmt*      ast_ContinueStmt;
+	ast::BreakStmt*         ast_BreakStmt;
+	ast::Block*         	ast_Block;
+	ast::TryStmt*         	ast_TryStmt;
+	ast::ThrowStmt*        	ast_ThrowStmt;
+	ast::CatchStmt*        	ast_CatchStmt;
+	ast::FinallyStmt*       ast_FinallyStmt;
 	ast::ParameterList*     ast_ParameterList;
 	ast::FunctionDeclaration* ast_FunctionDeclaration;
 	ast::ArgumentList*      ast_ArgumentList;
 	ast::CallExpression*    ast_CallExpression;
+	std::vector<ast::CaseStmt*>*		ast_CaseStmtVector;
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -103,12 +110,18 @@ ast::BinaryOperator* noOp1Exp;
 %type <ast_Node> Initialiser InitialiserNoIn
 %type <ast_Statement> EmptyStatement ExpressionStatement
 %type <ast_Node> IfStatement IterationStatement
-%type <ast_Node> IdentifierComma
-%type <ast_Node> ContinueStatement BreakStatement ReturnStatement
+%type <ast_Identifier> IdentifierComma
+%type <ast_ContinueStmt> ContinueStatement 
+%type <ast_BreakStmt> BreakStatement 
+%type <ast_Node> ReturnStatement
 %type <ast_Node> WithStatement SwitchStatement
-%type <ast_Node> CaseBlock CaseBlockPart CaseClauses CaseClause DefaultClause
-%type <ast_Node> LabelledStatement ThrowStatement
-%type <ast_Node> TryStatement TryStatementPart Catch Finally
+%type <ast_CaseStmtVector> CaseBlock CaseBlockPart CaseClauses 
+%type <ast_CaseStmt>CaseClause DefaultClause
+%type <ast_Node> LabelledStatement 
+%type <ast_ThrowStmt> ThrowStatement
+%type <ast_TryStmt> TryStatement TryStatementPart 
+%type <ast_CatchStmt> Catch 
+%type <ast_FinallyStmt> Finally
 %type <ast_ParameterList> FormalParameterListInPare FormalParameterList
 %type <ast_FunctionDeclaration> FunctionDeclaration FunctionExpression
 %type <ast_StatementList> FunctionBody
@@ -696,46 +709,141 @@ ExpressionStatement	:	Expression {
 | Expression SEMICOLON{
 	$$ = $1;
 }
-IfStatement	:	IF LEFT_PARE Expression RIGHT_PARE Statement
-| IF LEFT_PARE Expression RIGHT_PARE Statement ELSE Statement
-IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE
-|   DO Statement WHILE LEFT_PARE Expression RIGHT_PARE SEMICOLON
-|	WHILE LEFT_PARE Expression RIGHT_PARE Statement
-|	FOR LEFT_PARE SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement
-|	FOR LEFT_PARE ExpressionNoIn SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement
-|	FOR LEFT_PARE VAR VariableDeclarationList SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement
+IfStatement	:	IF LEFT_PARE Expression RIGHT_PARE Statement{
+	$$=new ast::IfStmt($3,$5,nullptr);
+}
+| IF LEFT_PARE Expression RIGHT_PARE Statement ELSE Statement{
+	$$=new ast::IfStmt($3,$5,$7);
+}
+IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE{
+	$$=new ast::WhileStmt($5,$2,true);
+}
+|   DO Statement WHILE LEFT_PARE Expression RIGHT_PARE SEMICOLON{
+	$$=new ast::WhileStmt($5,$2,true);
+}
+|	WHILE LEFT_PARE Expression RIGHT_PARE Statement{
+	$$=new ast::WhileStmt($3,$5,false);
+}
+|	FOR LEFT_PARE SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
+	//$$=new ast::ForStmt(nullptr,$4,$6,$8);
+}
+|	FOR LEFT_PARE ExpressionNoIn SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
+	//$$=new ast::ForStmt($3,$5,$7,$9);
+}
+|	FOR LEFT_PARE VAR VariableDeclarationList SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
+	//$$=new ast::ForStmt($4,$6,$8,$10);
+}	
 |	FOR LEFT_PARE VAR VariableDeclarationNoIn IN Expression RIGHT_PARE Statement
 |	FOR LEFT_PARE LeftHandSideExpressionForIn IN Expression RIGHT_PARE Statement
-IdentifierComma  :
-| Identifier
-| SEMICOLON
-| Identifier SEMICOLON
-ContinueStatement	:	CONTINUE IdentifierComma
-BreakStatement	:	BREAK IdentifierComma
+
+IdentifierComma  :{
+	$$=nullptr;
+}
+| Identifier{
+	$$=$1;
+}
+| SEMICOLON{
+	$$=nullptr;
+}
+| Identifier SEMICOLON{
+	$$=$1;
+}
+
+ContinueStatement	:	CONTINUE IdentifierComma{
+	$$=new ast::ContinueStmt($2);
+}
+BreakStatement	:	BREAK IdentifierComma{
+	$$=new ast::BreakStmt($2);
+}
+
 ReturnStatement	:	RETURN ExpressionOrNull
 | RETURN ExpressionOrNull SEMICOLON
 WithStatement	:	WITH LEFT_PARE Expression RIGHT_PARE Statement
-SwitchStatement	:	SWITCH LEFT_PARE Expression RIGHT_PARE CaseBlock
-CaseBlock	    :	LEFT_BRACE CaseBlockPart
-| LEFT_BRACE CaseClauses CaseBlockPart
-CaseBlockPart   :   RIGHT_BRACE
-| DefaultClause RIGHT_BRACE
-| DefaultClause CaseClauses RIGHT_BRACE
-CaseClauses	    :	CaseClause
-| CaseClauses CaseClause
-CaseClause	    :	CASE Expression COLON
-| CASE Expression COLON StatementList
-DefaultClause	:	DEFAULT COLON
-| DEFAULT COLON StatementList
-LabelledStatement	:	Identifier COLON Statement
-ThrowStatement	:	THROW Expression
-| THROW Expression SEMICOLON
-TryStatement	:	TRY Block TryStatementPart
-TryStatementPart:   Finally
-| Catch
-| Catch Finally
-Catch	:	CATCH LEFT_PARE Identifier RIGHT_PARE Block
-Finally	:	FINALLY Block
+
+SwitchStatement	:	SWITCH LEFT_PARE Expression RIGHT_PARE CaseBlock{
+	//$$=new ast::SwitchStmt($3,$5);
+}
+
+CaseBlock	    :	LEFT_BRACE CaseBlockPart{
+	$$=$2;
+}
+| LEFT_BRACE CaseClauses CaseBlockPart{
+	$$=$2;
+	//for(int i=0;i<$2->size();i++){
+	//	$$->push_back($2[i]);
+	//}
+}
+
+CaseBlockPart   :   RIGHT_BRACE{
+	$$=nullptr;
+}
+| DefaultClause RIGHT_BRACE{
+	$$=new std::vector <ast::CaseStmt*>;
+	$$->push_back($1);
+}
+| DefaultClause CaseClauses RIGHT_BRACE{
+	$$=$2;
+	$$->push_back($1);
+}
+
+CaseClauses	    :	CaseClause{
+	$$=new std::vector <ast::CaseStmt*>;
+	$$->push_back($1);
+}
+| CaseClauses CaseClause{
+	$$=$1;
+	$$->push_back($2);
+	delete $1;
+}
+
+CaseClause	    :	CASE Expression COLON{
+	$$=new ast::CaseStmt($2,nullptr,false);
+}
+| CASE Expression COLON StatementList{
+	$$=new ast::CaseStmt($2,$4,false);
+}
+
+DefaultClause	:	DEFAULT COLON{
+	$$=new ast::CaseStmt(nullptr,nullptr,true);
+}
+| DEFAULT COLON StatementList{
+	$$=new ast::CaseStmt(nullptr,$3,true);
+}
+
+LabelledStatement	:	Identifier COLON Statement{
+
+}
+
+ThrowStatement	:	THROW Expression{
+	$$=new ast::ThrowStmt($2);
+}
+| THROW Expression SEMICOLON{
+	$$=new ast::ThrowStmt($2);
+}
+
+TryStatement	:	TRY Block TryStatementPart{
+	$$=$3;
+	$$->blockstmt=$2;
+	delete $3;
+}
+
+TryStatementPart:   Finally{
+	$$=new ast::TryStmt(nullptr,$1);
+}
+| Catch{
+	$$=new ast::TryStmt($1,nullptr);
+}
+| Catch Finally{
+	$$=new ast::TryStmt($1,$2);
+}
+
+Catch	:	CATCH LEFT_PARE Identifier RIGHT_PARE Block{
+	$$ = new ast::CatchStmt($3,$5);
+}
+
+Finally	:	FINALLY Block{
+	$$ = new ast::FinallyStmt($2);
+}
 
 FormalParameterListInPare: LEFT_PARE RIGHT_PARE {
 	$$ = new ast::ParameterList();

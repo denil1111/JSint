@@ -345,9 +345,6 @@ void ast::IfStmt::run() {
 void ast::WhileStmt::run() {
 
 }
-void ast::RepeatStmt::run() {
-
-}
 void ast::ForStmt::run() {
 
 }
@@ -357,17 +354,31 @@ void ast::CaseStmt::run() {
 void ast::SwitchStmt::run() {
 
 }
-void ast::GotoStmt::run(){
-
-}
-void ast::LabelStmt::run(){
-
-}
-
 void ast::ArrayType::run() {
 }
 
 void ast::ArrayRef::run() {
+    
+}
+
+void ast::ContinueStmt::run() {
+    
+}
+
+void ast::BreakStmt::run() {
+    
+}
+
+void ast::TryStmt::run() {
+    
+}
+void ast::ThrowStmt::run() {
+    
+}
+void ast::FinallyStmt::run() {
+    
+}
+void ast::CatchStmt::run() {
     
 }
 

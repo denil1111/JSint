@@ -1,0 +1,3 @@
+namespace ast{
+	class FunctionDeclaration;
+}

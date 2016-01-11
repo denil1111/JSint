@@ -1,10 +1,12 @@
 #ifndef VARLIST_H_
 #define VARLIST_H_
+
 #include <string>
 #include <map>
 #include <sstream>
 #include <iostream>
-#include "declared_function.h"
+#include "Declaration.h"
+
 extern std::string green(const std::string& str);
 struct TValue {
 	struct TSValue{
@@ -20,7 +22,7 @@ struct TValue {
 		Tarray,
 		TNaN
 	};
-	DeclaredFunction *func;
+	ast::FunctionDeclaration *func;
 	TSValue sValue;
 	TType type;
 	TValue(){}
@@ -36,7 +38,7 @@ struct TValue {
 		type = TType::Tint;
 		sValue.str = x;
 	}
-	TValue(DeclaredFunction* function) {
+	TValue(ast::FunctionDeclaration* function) {
 		type = TType::Tfunction;
 		func = function;
 	}

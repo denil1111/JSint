@@ -173,8 +173,7 @@ void ast::FunctionDeclaration::run() {
     for (auto parameter : *parameter_list) {
         std::cout << parameter->name << " ";
     }
-    DeclaredFunction* func = new DeclaredFunction();
-    value = TValue(func);
+    value = TValue(this);
     nowList.assignAndNew(function_name->name, value);
 }
 
@@ -201,7 +200,7 @@ void ast::CallExpression::run() {
         }
     }
     value = nowList.getVar(function_name->name);
-    (value.func)->callWithArguments();
+    // (value.func)->callWithArguments();
 }
 
 void ast::FuncCall::run() {

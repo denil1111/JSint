@@ -1,7 +1,6 @@
 #ifndef __AST_H__
 #define __AST_H__
 
-
 #include <string>
 #include <map>
 #include <vector>
@@ -10,7 +9,6 @@
 #include "varlist.hpp"
 
 //used forward-declaration to deal with cross-reference issue
-
 // namespace ast start
 namespace ast {
 // forward declaration
@@ -34,18 +32,12 @@ class FieldDecl;
 class RecordType;
 class TypeConst;
 class CaseStmt;
-<<<<<<< HEAD
 class Block;
 
-
-=======
-class FunctionDeclaration;
 
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
 typedef StatementList FunctionBody;
->>>>>>> 63dfd311f3e2bbccc911f076e2dac11b5a85a62a
-
 typedef std::vector<VarDecl *>      VarDeclList;
 typedef std::vector<Identifier *>   IdentifierList;
 typedef std::vector<Routine *>      RoutineList;

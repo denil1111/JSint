@@ -114,7 +114,7 @@ TValue ast::Operator::run() {
         	tempO.run();
         	value = tempO.value;
         	break;
-        } 
+        }
         case OpType::rpplus :{
         	value = op1->value;
         	RealType tempE(1);
@@ -128,7 +128,7 @@ TValue ast::Operator::run() {
         	Operator tempO(op1,OpType::minus_assign,&tempE);
         	tempO.run();
         	break;
-        }         
+        }
         case OpType::type :{
         	value = TValue(op1->value.getTypeString());
         	break;
@@ -393,10 +393,10 @@ TValue ast::SwitchStmt::run() {
 
 	return value;
 }
-TValue ast::ArrayType::run() {
+// TValue ast::ArrayType::run() {
 
-	return value;
-}
+// 	return value;
+// }
 
 TValue ast::ArrayRef::run() {
     
@@ -436,6 +436,29 @@ TValue ast::CatchStmt::run() {
 
 	return value;
 }
+
+
+TValue ast::ArrayType::run() {
+
+	for (auto expPtr : elList) {
+		expPtr->run();
+	}
+
+	std::vector<TValue> values = std::vector<TValue>(elList.size());
+	for (int i=0; i<elList.size(); i++) {
+		values[i] = elList[i]->value;
+	}
+	value.arr = values;
+	value.type = TValue::TType::Tarray;
+
+	std::cout << "Creating array: " << "values" << std::endl;
+	for (auto val : value.arr) {
+		std::cout << val.toString() << ", ";
+	}
+	std::cout << std::endl;
+	return value;
+}
+
 
 TValue ast::StatementList::run() {
 	for (auto stmt: list){

@@ -8,8 +8,9 @@
 #include <iostream>
 #include "utils.h"
 
-
-#include "Declaration.h"
+namespace ast {
+	class FunctionDeclaration;
+}
 
 extern void yyerror(char *s, ...);
 extern std::string green(const std::string& str);
@@ -32,6 +33,7 @@ struct TValue {
 		Tundefined,
 		Tnull
 	};
+	std::vector<TValue> arr;
 	ast::FunctionDeclaration *func;
 	TSValue sValue;
 	bool boolFlag = false;

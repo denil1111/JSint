@@ -333,19 +333,18 @@ TValue ast::CallExpression::run() {
 
         std::cout << "with arguments: ";
         for (auto arg : *argument_list) {
-            switch (arg->value.type) {          case TValue::TType::Tstring: {
+            switch (arg->value.type) {
+                case TValue::TType::Tstring: {
                     std::cout << arg->value.sValue.str << " ";
-                    nowStack.assignAndNew(pl->at(index)->name, arg->value);
-                    index++;
                     break;
                 }
                 case TValue::TType::Tdouble: {
                     std::cout << arg->value.sValue.dou << " ";
-                    nowStack.assignAndNew(pl->at(index)->name, arg->value);
-                    index++;
                     break;
                 }
             }
+            nowStack.assignAndNew(pl->at(index)->name, arg->value);
+            index++;
         }
         std::cout << std::endl;
     }

@@ -1,3 +1,3 @@
-namespace ast{
+namespace ast {
 	class FunctionDeclaration;
 }

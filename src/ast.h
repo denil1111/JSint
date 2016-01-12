@@ -37,6 +37,7 @@ class Block;
 
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
+typedef std::vector<Expression*> ElementList;
 typedef StatementList FunctionBody;
 typedef std::vector<VarDecl *>      VarDeclList;
 typedef std::vector<Identifier *>   IdentifierList;
@@ -100,7 +101,7 @@ public:
 		std::vector<Node *> rlist;
 		for(auto i : list) rlist.push_back((Node *)i);
 		return rlist;
-	}
+ 	}
 };
 
 class FunctionDeclaration : StatementList {
@@ -247,16 +248,6 @@ public:
     }
 
     virtual std::string toString() { return raw_name; }
-    virtual void run();
-};
-
-class ArrayType: public Statement {
-public:
-    TypeDecl*   subscript = nullptr;
-    TypeDecl*   array_type = nullptr;
-
-    ArrayType(TypeDecl* ss, TypeDecl* at) : subscript(ss), array_type(at) {}
-    virtual std::string toString() { return "Array of " + (array_type ? array_type->raw_name : "#error"); }
     virtual void run();
 };
 
@@ -444,6 +435,30 @@ public:
     RangeType(std::string low_s, std::string high_s) : low_s(low_s), high_s(high_s), isNameRange(true) {}
     size_t size() { return high - low + 1; }
     virtual std::string toString() { std::stringstream oss; oss << "[" << low << "," << high << "]"; return oss.str(); }
+    virtual void run();
+};
+
+class ArrayType: public ConstValue {
+private:
+	TValue value;
+	ElementList elList;
+public:
+    ArrayType() : elList(ElementList()){}
+    ArrayType(ElementList* elListPtr) {
+		elList = ElementList(elListPtr->size());
+		for (int i=0; i<elList.size(); i++) {
+			elList[i] = elListPtr->at(i);
+		}
+	}
+    virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
+	virtual int toRange() { return 1; }
+	
+    virtual std::string toString() { return "Array"; }
+    virtual std::vector<Node *> getChildren() {
+		std::vector<Node *> rlist;
+		for(auto el : elList) rlist.push_back((Node *)el); 		
+		return rlist;
+	}	
     virtual void run();
 };
 

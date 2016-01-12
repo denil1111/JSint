@@ -26,6 +26,7 @@ struct TValue {
 		Tarray,
 		TNaN
 	};
+	std::vector<TValue> arr;
 	ast::FunctionDeclaration *func;
 	TSValue sValue;
 	TType type;

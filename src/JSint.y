@@ -10,12 +10,17 @@
 #include "utils.h"
 #include "parser.hpp"
 #include "ccalc.h"
+#include "helper.h"
+	
 using namespace std;
 extern VarStack nowStack;
+extern vector<ast::Expression*> concat(vector<ast::Expression*>, vector<ast::Expression*>);
+extern vector<ast::Expression*> concat(ast::Expression*, vector<ast::Expression*>);
 int yydebug = 1;
 ast::Node* ast_root;
 ast::BinaryOperator* noOp1Exp;
 %}
+
 %union{
 	char* 					debug;
 
@@ -50,6 +55,7 @@ ast::BinaryOperator* noOp1Exp;
 	ast::FunctionDeclaration* ast_FunctionDeclaration;
 	ast::ArgumentList*      ast_ArgumentList;
 	ast::CallExpression*    ast_CallExpression;
+	ast::ElementList*       ast_ElementList;
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -67,7 +73,8 @@ ast::BinaryOperator* noOp1Exp;
 // default type is ast node
 %type <ast_Identifier> Identifier
 %type <ast_Expression> PrimaryExpression Literal ArrayLiteral
-%type <ast_Node> ElementList ElementListPart Elision ObjectLiteral
+%type <ast_ElementList> ElementList ElementListPart
+%type <ast_Node> Elision ObjectLiteral
 %type <ast_Node> PropertyNameAndValueList PropertyNameAndValueListPart
 %type <ast_Node> PropertyNameAndValue PropertyName
 %type <ast_Expression> MemberExpression MemberExpressionForIn
@@ -129,6 +136,9 @@ PrimaryExpression	:	THIS
 	$$ = $1;
 }
 |	ArrayLiteral
+{
+	$$ = $1;
+}
 |	Literal {
 /*	//printf("Literal\n");*/
 	$$ = $1;
@@ -152,11 +162,26 @@ Identifier	:	IDENTIFIER_NAME {
 ArrayLiteral    :  LEFT_BRACKET Elision RIGHT_BRACKET
 |   LEFT_BRACKET ElementList Elision RIGHT_BRACKET
 |   LEFT_BRACKET ElementList RIGHT_BRACKET
+{
+	$$ = new ast::ArrayType($2);
+}
 |   LEFT_BRACKET RIGHT_BRACKET
+{
+	$$ = new ast::ArrayType();
+}
 ElementList	:	Elision AssignmentExpression ElementListPart
 |   AssignmentExpression ElementListPart
-ElementListPart :   ElementListPart Elision AssignmentExpression
+{
+	$$ = concat($1, $2);
+}
+ElementListPart :   Elision AssignmentExpression ElementListPart
+{
+	$$ = concat($2, $3);
+}
 |
+{
+	$$ = new ast::ElementList();
+}
 Elision	:   COMMA
 |   Elision COMMA
 ObjectLiteral	:	LEFT_BRACE PropertyNameAndValueList RIGHT_BRACE

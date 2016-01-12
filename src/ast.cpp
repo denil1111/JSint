@@ -244,6 +244,23 @@ void ast::LabelStmt::run(){
 }
 
 void ast::ArrayType::run() {
+
+	for (auto expPtr : elList) {
+		expPtr->run();
+	}
+	
+	std::vector<TValue> values = std::vector<TValue>(elList.size());
+	for (int i=0; i<elList.size(); i++) {
+		values[i] = elList[i]->value;
+	}
+	value.arr = values;
+	value.type = TValue::TType::Tarray;
+
+	std::cout << "Creating array: " << "values" << std::endl;
+	for (auto val : value.arr) {
+		std::cout << val.toString() << ", ";
+	}
+	std::cout << std::endl; 
 }
 
 void ast::ArrayRef::run() {

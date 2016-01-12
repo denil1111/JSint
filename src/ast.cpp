@@ -385,11 +385,6 @@ TValue ast::Expression::run() {
 	return value;
 }
 
-TValue ast::IfStmt::run() {
-
-
-	return value;
-}
 TValue ast::WhileStmt::run() {
 
 
@@ -402,9 +397,21 @@ TValue ast::ForStmt::run() {
 }
 TValue ast::CaseStmt::run() {
 
-
 	return value;
 }
+
+TValue ast::IfStmt::run() {
+	condition->run();
+	if(condition->value.toBoolean() == TValue(1).toBoolean()){
+		thenStmt->run();
+	}else{
+		if(elseStmt!=nullptr){
+			elseStmt->run();
+		}
+	}
+	return value;
+}
+
 TValue ast::SwitchStmt::run() {
 
 

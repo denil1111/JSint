@@ -133,8 +133,8 @@ ast::Operator* noOp1Exp;
 %type <ast_FunctionDeclaration> FunctionDeclaration FunctionExpression
 %type <ast_StatementList> FunctionBody
 %type <ast_StatementList> Program
-%type <ast_StatementList> SourceElements
-%type <ast_Statement> SourceElement
+%type <ast_StatementList> SourceElements InFuncSourceElements
+%type <ast_Statement> SourceElement InFuncSourceElement
 %type <ast_Node> ImportStatement Name
 %type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
 
@@ -754,12 +754,14 @@ ExpressionStatement	:	Expression {
 | Expression SEMICOLON{
 	$$ = $1;
 }
+
 IfStatement	:	IF LEFT_PARE Expression RIGHT_PARE Statement{
 	$$=new ast::IfStmt($3,$5,nullptr);
 }
 | IF LEFT_PARE Expression RIGHT_PARE Statement ELSE Statement{
 	$$=new ast::IfStmt($3,$5,$7);
 }
+
 IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE{
 	$$=new ast::WhileStmt($5,$2,true);
 }
@@ -806,7 +808,7 @@ ReturnStatement	:	RETURN ExpressionOrNull
 WithStatement	:	WITH LEFT_PARE Expression RIGHT_PARE Statement
 
 SwitchStatement	:	SWITCH LEFT_PARE Expression RIGHT_PARE CaseBlock{
-	//$$=new ast::SwitchStmt($3,$5);
+	$$=new ast::SwitchStmt($3,$5);
 }
 
 CaseBlock	    :	LEFT_BRACE CaseBlockPart{
@@ -916,13 +918,26 @@ FormalParameterList	:	Identifier {
 FunctionBody	:	LEFT_BRACE RIGHT_BRACE {
 	$$ = nullptr;
 }
-| LEFT_BRACE SourceElements RIGHT_BRACE {
+| LEFT_BRACE InFuncSourceElements RIGHT_BRACE {
 	$$ = $2;
 }
 
 Program	:	JEOF
 | SourceElements JEOF
 {
+	$$ = $1;
+	//cout << "program End"<<endl;
+}
+InFuncSourceElements	:	InFuncSourceElement {
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+	//printf("To InFuncSourceElements\n");
+}
+| InFuncSourceElements InFuncSourceElement {
+	$1->list.push_back($2);
+	$$ = $1;
+}
+| InFuncSourceElements error {
 	$$ = $1;
 }
 SourceElements	:	SourceElement {
@@ -936,8 +951,6 @@ SourceElements	:	SourceElement {
 }
 | SourceElements error {
 	$$ = $1;
-}
-| error {
 }
 SourceElement	:	FunctionDeclaration {
 	extern int parseError;
@@ -997,6 +1010,10 @@ SourceElement	:	FunctionDeclaration {
 		}
 
 	}
+}
+InFuncSourceElement	:	FunctionDeclaration
+|	Statement {
+	$$ = $1;
 }
 ImportStatement	:	IMPORT Name SEMICOLON
 | IMPORT Name DOT MULTI  SEMICOLON

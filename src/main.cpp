@@ -30,8 +30,8 @@ int main(int argc, char** argv) {
 	init_buffer();
 	yyparse();
 	extern int parseError;
-	// if (parseError) return 0;
+	if (parseError) return 0;
 	// cout<<"!!"<<endl;
-	cout << green("syntax check success!") << endl;
+	cout << green("-----success run-----") << endl;
 	return 0;
 }

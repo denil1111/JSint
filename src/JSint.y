@@ -861,6 +861,9 @@ Statement	:	Block
 |	JScriptVarStatement
 |	VariableStatement
 |	EmptyStatement
+{
+	$$ = new ast::Statement();
+}
 |	LabelledStatement
 |	ExpressionStatement
 {
@@ -903,6 +906,7 @@ VariableDeclarationNoIn	:	Identifier
 Initialiser	:	ASSIGN AssignmentExpression
 InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn
 EmptyStatement	:	SEMICOLON
+|
 ExpressionStatement	:	Expression {
 	$$ = $1;
 }

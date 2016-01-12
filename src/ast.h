@@ -78,8 +78,11 @@ public:
 };
 class Statement : public Node {
 public:
-    Statement() {};
-    virtual TValue run() {}
+    Statement() { value = TValue::undefined(); };
+    virtual TValue run() 
+    {
+        return value;
+    }
     virtual std::vector<Statement*> *getlist(){}
 	virtual std::string toString() { return "Statement"; }
 };

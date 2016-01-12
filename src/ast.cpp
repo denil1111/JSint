@@ -489,8 +489,7 @@ TValue ast::ArrayType::run() {
 
 TValue ast::StatementList::run() {
 	for (auto stmt: list){
-		stmt->run();
-
+		value = stmt->run();
 	}
 	return value;
 }

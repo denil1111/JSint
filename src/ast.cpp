@@ -341,7 +341,7 @@ void ast::Expression::run() {}
 
 void ast::IfStmt::run() {
 	condition->run();
-	if(condition->value == TValue(1)){
+	if((condition->value == TValue(1)).dou){
 		thenStmt->run();
 	}else{
 		if(elseStmt!=nullptr){

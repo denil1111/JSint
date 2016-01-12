@@ -18,6 +18,7 @@ std::string green(const std::string& str) {
 	return red_b + str + red_e;
 }
 int debugFlag = 0;
+ast::LabelMap labelMap;
 extern int yyparse();
 extern ast::StatementList* ast_root;
 VarStack nowStack = VarStack();

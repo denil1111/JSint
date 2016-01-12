@@ -55,6 +55,7 @@ ast::Operator* noOp1Exp;
 	ast::ContinueStmt*      ast_ContinueStmt;
 	ast::BreakStmt*         ast_BreakStmt;
 	ast::Block*         	ast_Block;
+	ast::LabeledStmt*       ast_LabeledStmt;
 	ast::TryStmt*         	ast_TryStmt;
 	ast::ThrowStmt*        	ast_ThrowStmt;
 	ast::CatchStmt*        	ast_CatchStmt;
@@ -127,7 +128,7 @@ ast::Operator* noOp1Exp;
 %type <ast_SwitchStmt> SwitchStatement
 %type <ast_CaseList> CaseBlock CaseBlockPart CaseClauses 
 %type <ast_CaseStmt> CaseClause DefaultClause
-%type <ast_Node> LabelledStatement 
+%type <ast_LabeledStmt> LabelledStatement 
 %type <ast_ThrowStmt> ThrowStatement
 %type <ast_TryStmt> TryStatement TryStatementPart 
 %type <ast_CatchStmt> Catch 
@@ -705,7 +706,9 @@ Statement	:	Block
 |	JScriptVarStatement
 |	VariableStatement
 |	EmptyStatement
-|	LabelledStatement
+|	LabelledStatement{
+	$$=$1;
+}
 |	ExpressionStatement{
 	$$ = $1;
 }
@@ -733,8 +736,9 @@ Statement	:	Block
 |	TryStatement{
 	$$=$1;
 }
-Block	:	LEFT_BRACE RIGHT_BRACE
-{}
+Block	:	LEFT_BRACE RIGHT_BRACE{
+
+}
 |   LEFT_BRACE StatementList RIGHT_BRACE
 {
 	$$ = new ast::Block($2);
@@ -874,7 +878,7 @@ DefaultClause	:	DEFAULT COLON{
 }
 
 LabelledStatement	:	Identifier COLON Statement{
-
+	$$=new ast::LabeledStmt($1,$3);
 }
 
 ThrowStatement	:	THROW Expression{

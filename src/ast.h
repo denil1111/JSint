@@ -40,6 +40,7 @@ class FinallyStmt;
 class TryStmt;
 class BreakException;
 class ContinueException;
+class LabeledStmt;
 
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
@@ -786,6 +787,15 @@ public:
     ContinueStmt(Identifier * label):label(label){}
     virtual TValue run();
     virtual std::string toString() { return "continue statement"; }
+};
+
+class LabeledStmt : public Statement {
+public:
+    Identifier * label;
+    Statement * stmt;
+    LabeledStmt(Identifier * label,Statement* stmt):label(label),stmt(stmt){}
+    virtual TValue run();
+    virtual std::string toString() { return "LabeledStmt statement"; }
 };
 
 class TryStmt : public Statement {

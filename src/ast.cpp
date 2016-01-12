@@ -10,6 +10,7 @@
 #include "utils.h"
 using namespace std;
 extern VarStack nowStack;
+extern ast::LabelMap labelMap;
 TValue ast::Identifier::run() {
     std::cout << "Creating identifier: " << name << std::endl;
 
@@ -427,7 +428,6 @@ TValue ast::SwitchStmt::run() {
 					// 如果最后没有任何匹配，就进入default那句往后执行，所以记下编号；
 					defaultIndex=i;	
 				}
-						
 			}else{
 				if(!firstFlag){
 					stmt->run();
@@ -496,6 +496,11 @@ TValue ast::BreakStmt::run() {
 		throw BreakException("");
 	}
 
+	return value;
+}
+
+TValue ast::LabeledStmt::run() {
+    labelMap[label->name]=stmt;
 	return value;
 }
 

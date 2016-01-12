@@ -715,12 +715,14 @@ ExpressionStatement	:	Expression {
 | Expression SEMICOLON{
 	$$ = $1;
 }
+
 IfStatement	:	IF LEFT_PARE Expression RIGHT_PARE Statement{
 	$$=new ast::IfStmt($3,$5,nullptr);
 }
 | IF LEFT_PARE Expression RIGHT_PARE Statement ELSE Statement{
 	$$=new ast::IfStmt($3,$5,$7);
 }
+
 IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE{
 	$$=new ast::WhileStmt($5,$2,true);
 }
@@ -767,7 +769,7 @@ ReturnStatement	:	RETURN ExpressionOrNull
 WithStatement	:	WITH LEFT_PARE Expression RIGHT_PARE Statement
 
 SwitchStatement	:	SWITCH LEFT_PARE Expression RIGHT_PARE CaseBlock{
-	//$$=new ast::SwitchStmt($3,$5);
+	$$=new ast::SwitchStmt($3,$5);
 }
 
 CaseBlock	    :	LEFT_BRACE CaseBlockPart{

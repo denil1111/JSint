@@ -279,7 +279,14 @@ void ast::TypeDecl::run() {}
 void ast::Expression::run() {}
 
 void ast::IfStmt::run() {
-
+	condition->run();
+	if(condition->value == TValue(1)){
+		thenStmt->run();
+	}else{
+		if(elseStmt!=nullptr){
+			elseStmt->run();
+		}
+	}
 }
 void ast::WhileStmt::run() {
 

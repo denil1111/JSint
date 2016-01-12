@@ -24,7 +24,7 @@ Object(std::map<std::string, TValue> prop): TValue(TType::Tobject), prop(prop), 
 	virtual TValue toDouble() {
 		if (isArr && prop.size() == 1 && prop["0"].toDouble().type != TType::TNaN) {
 			return prop["0"].toDouble();
-		} else return this->toString();
+		} else return TValue::NaN();
 	}
 	virtual bool toBoolean() {
 		return true;

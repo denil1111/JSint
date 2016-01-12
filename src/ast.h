@@ -73,12 +73,12 @@ public:
     virtual std::string toString(){
         return "node";
     };
-    virtual void run() = 0;
+    virtual TValue run() = 0;
 };
 class Statement : public Node {
 public:
     Statement() {};
-    virtual void run() {}
+    virtual TValue run() {}
     virtual std::vector<Statement*> *getlist(){}
 	virtual std::string toString() { return "Statement"; }
 };
@@ -96,7 +96,7 @@ public:
 			list.push_back(stmt);
 		}
 	}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString(){ return "stmt_list";}
     virtual std::vector<Statement*> *getlist(){ return &list;}
 	virtual std::vector<Node *> getChildren() {
@@ -113,7 +113,7 @@ public:
     FunctionBody* function_body;
     FunctionDeclaration(Identifier* id, ParameterList* args, FunctionBody* body) : function_name(id), parameter_list(args), function_body(body) {}
     virtual std::string toString(){ return "function_declaration"; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class Program : public Node {
@@ -143,7 +143,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "Program start"; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class Routine : public Program {
@@ -186,12 +186,12 @@ public:
         return list;
     }
     virtual std::string toString() { return routine_type == RoutineType::function ? "Function" : "Procedure"; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class Expression : public Statement {
 public:
-    virtual void run();
+    virtual TValue run();
 };
 
 class CallExpression : public Expression {
@@ -200,7 +200,7 @@ public:
     ArgumentList* argument_list;
     CallExpression(Identifier* id, ArgumentList* args) : function_name(id), argument_list(args) {}
     virtual std::string toString(){ return "function_called"; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class LabelDecl : public Statement {
@@ -250,7 +250,7 @@ public:
     }
 
     virtual std::string toString() { return raw_name; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class ArrayType: public Statement {
@@ -260,7 +260,7 @@ public:
 
     ArrayType(TypeDecl* ss, TypeDecl* at) : subscript(ss), array_type(at) {}
     virtual std::string toString() { return "Array of " + (array_type ? array_type->raw_name : "#error"); }
-    virtual void run();
+    virtual TValue run();
 };
 
 class FieldDecl: public Statement {
@@ -269,7 +269,7 @@ public:
     TypeDecl*   second;
     FieldDecl(Identifier* first, TypeDecl* second) : first(first), second(second) {}
     virtual std::string toString() { return "FieldDecl"; }
-    virtual void run() {}
+    virtual TValue run() {}
 };
 
 class RecordType: public Statement {
@@ -278,7 +278,7 @@ public:
 
     RecordType(FieldDeclList* list) : field_list(list)  {}
     virtual std::string toString() { return "RecordType"; }
-    virtual void run() {}
+    virtual TValue run() {}
 };
 class Identifier : public Expression {
 public:
@@ -287,7 +287,7 @@ public:
     Identifier(const std::string& name) : name(name) {}
     Identifier(const char * ptr_s) : name(*(new std::string(ptr_s))) {}
     virtual std::string toString() { return "Identifier: " + name; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class ArrayRef : public Expression {
@@ -297,7 +297,7 @@ public:
 
     ArrayRef(Identifier* array, Expression* index) : array(array), index(index) {}
     virtual std::string toString() { return "ArrayRef: " + array->name; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class RecordRef : public Expression {
@@ -307,7 +307,7 @@ public:
 
     RecordRef(Identifier* record, Identifier* field) : record(record), field(field) {}
     virtual std::string toString() { return "RecordRef"; }
-    virtual void run() {}
+    virtual TValue run() {}
 };
 
 
@@ -334,7 +334,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "TypeConst"; }
-    virtual void run() {}
+    virtual TValue run() {}
 };
 
 
@@ -358,7 +358,7 @@ public:
         return list;
     }
     virtual std::string toString() { std::stringstream oss; oss << "Const " << name->name << ":" << val->toRange(); return oss.str(); }
-    virtual void run();
+    virtual TValue run();
 };
 
 
@@ -376,7 +376,7 @@ public:
         return list;
     }
     std::string toString() { return "VarDecl"; }
-    virtual void run();
+    virtual TValue run();
 };
 class IntegerType : public ConstValue {
 public:
@@ -386,7 +386,7 @@ public:
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::integer; }
     virtual int toRange() { return val; }
     virtual std::string toString() { return [=]() {std::stringstream oss; oss << val; return oss.str(); }(); }
-    virtual void run();
+    virtual TValue run();
 };
 
 class RealType : public ConstValue {
@@ -399,7 +399,7 @@ public:
     virtual int toRange() { return 0; }
     virtual bool notRange() { return true; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
-    virtual void run();
+    virtual TValue run();
 };
 
 class CharType : public ConstValue {
@@ -410,7 +410,7 @@ public:
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::character; }
     virtual int toRange() { return (int)val; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
-    virtual void run();
+    virtual TValue run();
 };
 
 class StringType : public ConstValue {
@@ -422,7 +422,7 @@ public:
 	virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::string; }
 	virtual int toRange() { return 0; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
-    virtual void run();
+    virtual TValue run();
 };
 
 class BooleanType : public ConstValue {
@@ -433,7 +433,7 @@ public:
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::boolean; }
     virtual int toRange() { return val; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
-    virtual void run();
+    virtual TValue run();
 };
 
 class RangeType : public Expression {
@@ -447,7 +447,7 @@ public:
     RangeType(std::string low_s, std::string high_s) : low_s(low_s), high_s(high_s), isNameRange(true) {}
     size_t size() { return high - low + 1; }
     virtual std::string toString() { std::stringstream oss; oss << "[" << low << "," << high << "]"; return oss.str(); }
-    virtual void run();
+    virtual TValue run();
 };
 
 class FuncCall : public Expression{
@@ -469,7 +469,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "FuncCall " + id->name; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class ProcCall : public Statement {
@@ -491,7 +491,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "ProcCall " + id->name; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class SysProcCall : public ProcCall {
@@ -501,7 +501,7 @@ public:
 
 
     virtual std::string toString() { return "System Porcedure Call " + id->name; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class SysFuncCall : public FuncCall {
@@ -510,7 +510,7 @@ public:
     SysFuncCall(Identifier* id, ExpressionList* al) : FuncCall(id, al) {}
 
     virtual std::string toString() { return "System Function Call " + id->name; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class Operator : public Expression {
@@ -635,7 +635,7 @@ public:
             { OpType::del, "delete"}
         }[op];
     }
-    virtual void run();
+    virtual TValue run();
 };
 
 class AssignmentStmt : public Statement {
@@ -658,7 +658,7 @@ public:
         return list;
     }
     virtual std::string toString() { return "Assignment"; }
-    virtual void run();
+    virtual TValue run();
 };
 
 class IfStmt : public Statement {
@@ -669,7 +669,7 @@ public:
     Statement* thenStmt;
     Statement* elseStmt;
     IfStmt(Expression* condition,Statement* thenStmt,Statement* elseStmt) : condition(condition),thenStmt(thenStmt),elseStmt(elseStmt) {};
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "If"; }
 };
 class WhileStmt : public Statement {
@@ -678,7 +678,7 @@ public:
     Statement* loopStmt;
     bool ifDo;
     WhileStmt(Expression* condition,Statement* loopStmt,bool ifDo):condition(condition),loopStmt(loopStmt),ifDo(ifDo){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "while"; }
 };
 
@@ -695,7 +695,7 @@ public:
         startExp(startExp),
         endExp(endExp),
         loopStmt(loopStmt){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "for"; }
 };
 
@@ -705,7 +705,7 @@ public:
     Statement* thenStmt;
     bool isDefault;
     CaseStmt(Expression* condition,Statement* thenStmt,bool isDefault):condition(condition),thenStmt(thenStmt),isDefault(isDefault){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "case/default statement"; }
 };
 
@@ -714,7 +714,7 @@ public:
     Expression* exp;
     CaseList* list;
     SwitchStmt(Expression* exp,CaseList* list):exp(exp),list(list){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "switch statement"; }
 };
 
@@ -723,7 +723,7 @@ public:
     Expression* exp;
     CaseList* list;
     ReturnStmt(Expression* exp,CaseList* list):exp(exp),list(list){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "return statement"; }
 };
 
@@ -731,7 +731,7 @@ class BreakStmt : public Statement {
 public:
     Identifier * label;
     BreakStmt(Identifier * label):label(label){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "break statement"; }
 };
 
@@ -739,7 +739,7 @@ class ContinueStmt : public Statement {
 public:
     Identifier * label;
     ContinueStmt(Identifier * label):label(label){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "continue statement"; }
 };
 
@@ -749,7 +749,7 @@ public:
     CatchStmt*catchstmt;
     FinallyStmt*finallystmt;
     TryStmt(CatchStmt*catchstmt,FinallyStmt*finallystmt):catchstmt(catchstmt),finallystmt(finallystmt){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "try statement"; }
 };
 
@@ -757,7 +757,7 @@ class ThrowStmt : public Statement {
 public:
     Expression* exp;
     ThrowStmt(Expression* exp):exp(exp){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "throw statement"; }
 };
 
@@ -765,7 +765,7 @@ class FinallyStmt : public Statement{
 public:   
     Block * stmt;
     FinallyStmt(Block * stmt):stmt(stmt){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "finally statement"; }
 };
 
@@ -774,7 +774,7 @@ public:
     Identifier * identifier;    
     Block * stmt;
     CatchStmt(Identifier * identifier,Block * stmt):identifier(identifier),stmt(stmt){}
-    virtual void run();
+    virtual TValue run();
     virtual std::string toString() { return "catch statement"; }
 };
 
@@ -784,7 +784,7 @@ public:
     Block(StatementList* stmtList) : stmtList(stmtList) {}
 	virtual std::string toString() { return "block"; }
     virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }	
-	virtual void run();
+	virtual TValue run();
 };
 
 }

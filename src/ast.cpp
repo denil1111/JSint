@@ -10,36 +10,50 @@
 #include "utils.h"
 using namespace std;
 extern VarStack nowStack;
-void ast::Identifier::run() {
+TValue ast::Identifier::run() {
     std::cout << "Creating identifier: " << name << std::endl;
 
 	value = nowStack.getVar(name);
+
+	return value;
 }
 
-void ast::IntegerType::run() {
+TValue ast::IntegerType::run() {
     std::cout << "Creating integer: " << val << std::endl;
+    return value;
 }
-void ast::RealType::run() {
+
+TValue ast::RealType::run() {
     std::cout << "Creating real: " << val << std::endl;
     value.type = TValue::TType::Tdouble;
 	value.sValue.dou = val;
+	return value;
 }
-void ast::CharType::run() {
+
+TValue ast::CharType::run() {
     std::cout << "Creating char: " << val << std::endl;
+    return value;
 }
-void ast::StringType::run() {
+
+TValue ast::StringType::run() {
     std::cout << "Creating String: " << val << std::endl;
 	value.type = TValue::TType::Tstring;
 	value.sValue.str = val;
+	return value;
 }
-void ast::BooleanType::run() {
+
+TValue ast::BooleanType::run() {
     std::cout << "Creating boolean: " << val << std::endl;
     value = TValue(val);
+    return value;
+
 }
-void ast::RangeType::run() {
+TValue ast::RangeType::run() {
     std::cout << "Creating subscript range from " << this->low << " to " << this->high << std::endl;
+    return value;
+
 }
-void ast::Operator::run() {
+TValue ast::Operator::run() {
 	if (op!= OpType::assign)
 	{
 		op1->run();
@@ -48,7 +62,7 @@ void ast::Operator::run() {
 	switch (op)
 	{
 		case OpType::land :{
-			if (op1->value.toBoolean().sValue.dou)
+			if (op1->value.toBoolean())
 			{
 				op2->run();
 				value = op2->value;
@@ -60,7 +74,7 @@ void ast::Operator::run() {
 			break;
 		}
 		case OpType::lor :{
-			if (!op1->value.toBoolean().sValue.dou)
+			if (!op1->value.toBoolean())
 			{
 				op2->run();
 				value = op2->value;
@@ -263,31 +277,31 @@ void ast::Operator::run() {
 		}
 	}
 
-
+	return value;
 }
 
-void ast::AssignmentStmt::run() {
-
+TValue ast::AssignmentStmt::run() {
+	return value;
 }
 
-void ast::ConstDecl::run() {
-
+TValue ast::ConstDecl::run() {
+	return value;
 }
 
 
-void ast::VarDecl::run() {
-
+TValue ast::VarDecl::run() {
+	return value;
 }
 
-void ast::Program::run() {
-
+TValue ast::Program::run() {
+	return value;
 }
 
-void ast::Routine::run() {
-
+TValue ast::Routine::run() {
+	return value;
 }
 
-void ast::FunctionDeclaration::run() {
+TValue ast::FunctionDeclaration::run() {
     std::cout << "declaring function: " << function_name->name << std::endl;
     std::cout << "with parameters: ";
     for (auto parameter : *parameter_list) {
@@ -295,9 +309,11 @@ void ast::FunctionDeclaration::run() {
     }
     value = TValue(this);
     nowStack.assignAndNew(function_name->name, value);
+    return value;
 }
 
-void ast::CallExpression::run() {
+
+TValue ast::CallExpression::run() {
     std::cout << "calling function: " << function_name->name << std::endl;
     for (auto arg : *argument_list) {
         arg->run();
@@ -317,78 +333,119 @@ void ast::CallExpression::run() {
     }
     value = nowStack.getVar(function_name->name);
     // (value.func)->callWithArguments();
+    return value;
 }
 
-void ast::FuncCall::run() {
+TValue ast::FuncCall::run() {
 
+
+	return value;
 }
 
-void ast::ProcCall::run() {
+TValue ast::ProcCall::run() {
 
+
+	return value;
 }
 
-void ast::SysFuncCall::run() {}
-
-
-
-void ast::SysProcCall::run() {
-
+TValue ast::SysFuncCall::run() {
+	return value;
 }
 
-void ast::TypeDecl::run() {}
 
-void ast::Expression::run() {}
 
-void ast::IfStmt::run() {
+TValue ast::SysProcCall::run() {
 
-}
-void ast::WhileStmt::run() {
 
-}
-void ast::ForStmt::run() {
-
-}
-void ast::CaseStmt::run() {
-
-}
-void ast::SwitchStmt::run() {
-
-}
-void ast::ArrayType::run() {
+	return value;
 }
 
-void ast::ArrayRef::run() {
+TValue ast::TypeDecl::run() {
+	return value;
+}
+
+TValue ast::Expression::run() {
+	return value;
+}
+
+TValue ast::IfStmt::run() {
+
+
+	return value;
+}
+TValue ast::WhileStmt::run() {
+
+
+	return value;
+}
+TValue ast::ForStmt::run() {
+
+
+	return value;
+}
+TValue ast::CaseStmt::run() {
+
+
+	return value;
+}
+TValue ast::SwitchStmt::run() {
+
+
+	return value;
+}
+TValue ast::ArrayType::run() {
+
+	return value;
+}
+
+TValue ast::ArrayRef::run() {
     
+
+	return value;
 }
 
-void ast::ContinueStmt::run() {
+TValue ast::ContinueStmt::run() {
     
+
+	return value;
 }
 
-void ast::BreakStmt::run() {
+TValue ast::BreakStmt::run() {
     
+
+	return value;
 }
 
-void ast::TryStmt::run() {
+TValue ast::TryStmt::run() {
     
+
+	return value;
 }
-void ast::ThrowStmt::run() {
+TValue ast::ThrowStmt::run() {
     
+
+	return value;
 }
-void ast::FinallyStmt::run() {
+TValue ast::FinallyStmt::run() {
     
+
+	return value;
 }
-void ast::CatchStmt::run() {
+TValue ast::CatchStmt::run() {
     
+
+	return value;
 }
 
-void ast::StatementList::run() {
+TValue ast::StatementList::run() {
 	for (auto stmt: list){
 		stmt->run();
+	
 	}
+	return value;
 }
 
-void ast::Block::run() {
+TValue ast::Block::run() {
 	std::cout << "Enter new block!" << std::endl;
 	nowStack.push_new();
 	this->stmtList->run();
@@ -396,4 +453,5 @@ void ast::Block::run() {
 	nowStack.pop();
 	std::cout << "Exit from block!" << std::endl;
 	nowStack.print();
+	return value;
 }

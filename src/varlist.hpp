@@ -39,7 +39,7 @@ struct TValue {
 	bool boolFlag = false;
 	TType type;
 	TValue toDouble() ;
-	TValue toBoolean() ;
+	bool toBoolean() ;
 	TValue(){
 		type = TType::Tundefined;
 	}
@@ -118,7 +118,6 @@ struct TValue {
 	TValue operator   ~();
 
 };
-
 class VarList {
 	std::map<std::string,TValue> list;
 public:

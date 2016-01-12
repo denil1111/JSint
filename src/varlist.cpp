@@ -79,41 +79,41 @@ TValue TValue::toDouble()
 	}
 	return TType::TNaN;
 }
-TValue TValue::toBoolean()
+bool TValue::toBoolean()
 {
 	if (type == TType::Tstring)
 	{
 		if (sValue.str == "")
 		{
-			return TValue(false);
+			return false;
 		}
 		else
 		{
-			return TValue(true);
+			return true;
 		}
 	}
 	if (type == TType::Tdouble)
 	{
 		if (sValue.dou == 0)
 		{
-			return TValue(false);
+			return false;
 		}
 		else
 		{
-			return TValue(true);
+			return true;
 		}
 	}
 	if (type == TType::TNaN)
 	{
-		return TValue(false);
+		return false;
 	}
 	if (type == TType::Tnull)
 	{
-		return TValue(false);
+		return false;
 	}
 	if (type == TType::Tundefined)
 	{
-		return TValue(false);
+		return false;
 	}
 }
 TValue TValue::operator   +( TValue &rx){
@@ -252,8 +252,7 @@ TValue TValue::operator  !=( TValue &rx){
 	return ret;
 }
 TValue TValue::operator  ||( TValue &rx){
-	TValue x = this->toBoolean();
-	if (x.sValue.dou)
+	if (this->toBoolean())
 	{
 		return *this;
 	}
@@ -263,22 +262,13 @@ TValue TValue::operator  ||( TValue &rx){
 	}
 }
 TValue TValue::operator  &&( TValue &rx){
-	TValue x = this->toBoolean();
-	if (!x.sValue.dou)
-	{
-		return *this;
-	}
-	else
-	{
-		return rx;TValue x = this->toBoolean();
-	if (x.sValue.dou)
+	if (this->toBoolean())
 	{
 		return *this;
 	}
 	else
 	{
 		return rx;
-	}
 	}
 }
 TValue TValue::operator  |( TValue &rx){
@@ -321,14 +311,7 @@ TValue TValue::operator  &( TValue &rx){
 	return TValue((int)x.sValue.dou & (int)y.sValue.dou);
 }
 TValue TValue::operator !(){
-	if (toBoolean().sValue.dou)
-	{
-		return TValue(false);
-	}
-	else
-	{
-		return TValue(true);
-	}
+	return TValue(!toBoolean());
 }
 TValue TValue::operator  -(){
 	TValue x = this->toDouble();

@@ -133,8 +133,8 @@ ast::Operator* noOp1Exp;
 %type <ast_FunctionDeclaration> FunctionDeclaration FunctionExpression
 %type <ast_StatementList> FunctionBody
 %type <ast_StatementList> Program
-%type <ast_StatementList> SourceElements
-%type <ast_Statement> SourceElement
+%type <ast_StatementList> SourceElements InFuncSourceElements
+%type <ast_Statement> SourceElement InFuncSourceElement
 %type <ast_Node> ImportStatement Name
 %type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
 
@@ -914,7 +914,7 @@ FormalParameterList	:	Identifier {
 FunctionBody	:	LEFT_BRACE RIGHT_BRACE {
 	$$ = nullptr;
 }
-| LEFT_BRACE SourceElements RIGHT_BRACE {
+| LEFT_BRACE InFuncSourceElements RIGHT_BRACE {
 	$$ = $2;
 }
 
@@ -923,6 +923,18 @@ Program	:	JEOF
 {
 	$$ = $1;
 	//cout << "program End"<<endl;
+}
+InFuncSourceElements	:	InFuncSourceElement {
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+	//printf("To InFuncSourceElements\n");
+}
+| InFuncSourceElements InFuncSourceElement {
+	$1->list.push_back($2);
+	$$ = $1;
+}
+| InFuncSourceElements error {
+	$$ = $1;
 }
 SourceElements	:	SourceElement {
 	$$ = new ast::StatementList;
@@ -935,8 +947,6 @@ SourceElements	:	SourceElement {
 }
 | SourceElements error {
 	$$ = $1;
-}
-| error {
 }
 SourceElement	:	FunctionDeclaration
 |	Statement {
@@ -968,6 +978,10 @@ SourceElement	:	FunctionDeclaration
 		}
 			
 	}
+}
+InFuncSourceElement	:	FunctionDeclaration
+|	Statement {
+	$$ = $1;
 }
 ImportStatement	:	IMPORT Name SEMICOLON
 | IMPORT Name DOT MULTI  SEMICOLON

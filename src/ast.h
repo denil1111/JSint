@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include "varlist.hpp"
+#include "Object.h"
 
 //used forward-declaration to deal with cross-reference issue
 // namespace ast start
@@ -42,6 +43,7 @@ class BreakException;
 class ContinueException;
 class LabeledStmt;
 
+typedef std::string PropertyName;
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
 typedef std::vector<Expression*> ElementList;
@@ -99,8 +101,11 @@ public:
 };
 class Statement : public Node {
 public:
-    Statement() {};
-    virtual TValue run() {}
+    Statement() { value = TValue::undefined(); };
+    virtual TValue run() 
+    {
+        return value;
+    }
     virtual std::vector<Statement*> *getlist(){}
 	virtual std::string toString() { return "Statement"; }
 };
@@ -128,7 +133,7 @@ public:
  	}
 };
 
-class FunctionDeclaration : StatementList {
+class FunctionDeclaration : public StatementList {
 public:
     Identifier* function_name;
     ParameterList* parameter_list;
@@ -472,30 +477,6 @@ public:
     virtual TValue run();
 };
 
-class ArrayType: public ConstValue {
-private:
-	TValue value;
-	ElementList elList;
-public:
-    ArrayType() : elList(ElementList()){}
-    ArrayType(ElementList* elListPtr) {
-		elList = ElementList(elListPtr->size());
-		for (int i=0; i<elList.size(); i++) {
-			elList[i] = elListPtr->at(i);
-		}
-	}
-    virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
-	virtual int toRange() { return 1; }
-	
-    virtual std::string toString() { return "Array"; }
-    virtual std::vector<Node *> getChildren() {
-		std::vector<Node *> rlist;
-		for(auto el : elList) rlist.push_back((Node *)el); 		
-		return rlist;
-	}	
-    virtual TValue run();
-};
-
 class FuncCall : public Expression{
 public:
     Identifier* id;
@@ -817,7 +798,7 @@ public:
 };
 
 class FinallyStmt : public Statement{
-public:   
+public:
     Block * stmt;
     FinallyStmt(Block * stmt):stmt(stmt){}
     virtual TValue run();
@@ -826,11 +807,79 @@ public:
 
 class CatchStmt : public Statement {
 public:
-    Identifier * identifier;    
+    Identifier * identifier;
     Block * stmt;
     CatchStmt(Identifier * identifier,Block * stmt):identifier(identifier),stmt(stmt){}
     virtual TValue run();
     virtual std::string toString() { return "catch statement"; }
+};
+
+class PropertyNameAndValue: public Statement {
+public:
+	std::string name;
+	ast::Expression* valueExp;
+	PropertyNameAndValue() {}
+PropertyNameAndValue(std::string* name, ast::Expression* valueExp) : name(*name), valueExp(valueExp) {}
+	virtual std::string toString() { return "Property"; }
+	virtual std::vector<Node *> getChildren() { return std::vector<Node*>{valueExp}; }
+	virtual TValue run();
+};
+
+class PropertyNameAndValueList : public StatementList {
+public:
+	PropertyNameAndValueList() {}
+    PropertyNameAndValueList(PropertyNameAndValue* property): StatementList(property) {}
+	PropertyNameAndValueList(PropertyNameAndValue* property,
+							 PropertyNameAndValueList* propertyList):
+	StatementList(property, propertyList) {}
+	
+	virtual std::string toString() { return "PropertyList"; }
+	virtual std::vector<Node *> getChildren() {
+		std::vector<Node *> rlist;
+		for(auto el : list) rlist.push_back((Node *)el); 		
+		return rlist;
+	}
+	virtual TValue run();	
+};
+
+class ArrayType: public ConstValue {
+private:
+	ElementList elList;
+	Object arrayValue;
+public:
+    ArrayType() : elList(ElementList()){}
+    ArrayType(ElementList* elListPtr) {
+		elList = ElementList(elListPtr->size());
+		for (int i=0; i<elList.size(); i++) {
+			elList[i] = elListPtr->at(i);
+		}
+	}
+    virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
+	virtual int toRange() { return 1; }
+	
+    virtual std::string toString() { return "Array"; }
+    virtual std::vector<Node *> getChildren() {
+		std::vector<Node *> rlist;
+		for(auto el : elList) rlist.push_back((Node *)el); 		
+		return rlist;
+	}	
+    virtual TValue run();
+};
+
+class ObjectType : public ConstValue {
+private:
+	PropertyNameAndValueList* propList;
+	Object objectValue;
+public:
+    ObjectType(): propList(new PropertyNameAndValueList()) {}
+    ObjectType(PropertyNameAndValueList* pList): propList(pList) {}
+
+    virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
+	virtual int toRange() { return 1; }
+	
+	virtual std::string toString() { return "Object"; }
+	virtual std::vector<Node*> getChildren() { return std::vector<Node*>{propList}; }
+	virtual TValue run();
 };
 
 class Block : public Statement {
@@ -838,7 +887,7 @@ class Block : public Statement {
 public:
     Block(StatementList* stmtList) : stmtList(stmtList) {}
 	virtual std::string toString() { return "block"; }
-    virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }	
+    virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }
 	virtual TValue run();
 };
 

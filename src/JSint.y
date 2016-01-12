@@ -11,7 +11,7 @@
 #include "parser.hpp"
 #include "ccalc.h"
 #include "helper.h"
-	
+
 using namespace std;
 extern VarStack nowStack;
 extern vector<ast::Expression*> concat(vector<ast::Expression*>, vector<ast::Expression*>);
@@ -65,6 +65,10 @@ ast::Operator* noOp1Exp;
 	ast::ArgumentList*      ast_ArgumentList;
 	ast::CallExpression*    ast_CallExpression;
 	ast::ElementList*       ast_ElementList;
+	ast::PropertyName*       ast_PropertyName;
+	ast::PropertyNameAndValue* ast_PropertyNameAndValue;
+	ast::PropertyNameAndValueList* ast_PropertyNameAndValueList;
+	ast::ObjectType*         ast_ObjectType;
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -72,20 +76,22 @@ ast::Operator* noOp1Exp;
 %token THIS NEW DELETE VOID TYPEOF INSTANCEOF IN VAR IF ELSE DO WHILE FOR CONTINUE BREAK RETURN WITH SWITCH CASE DEFAULT THROW TRY CATCH FINALLY FUNCTION IMPORT
 %token LEFT_BRACKET RIGHT_BRACKET LEFT_PARE RIGHT_PARE LEFT_BRACE RIGHT_BRACE COMMA DOT COLON SEMICOLON
 %token PLUS MINUS MULTI ASSIGN PLUS_PLUS MINUS_MINUS TILDE QUES EXCLAM PERCENT LESS GREATER EQUAL LSHIFT RSHIFT RRSHIFT LESS_EQ GREATER_EQ NOT_EQUAL ALWAYS_EQ ALWAYS_NEQ BIT_AND BIT_OR BIT_XOR AND OR MULTI_ASG MOD_ASG PLUS_ASG MINUS_ASG LRSHIFT_ASG LSHIFT_ASG RSHIFT_ASG
-%token BIT_AND_ASG BIT_XOR_ASG BIT_OR_ASG
+%token BIT_AND_ASG BIT_XOR_ASG BIT_OR_ASG NL
 %start Program
 
 %type <debug> DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
-%type <debug> SLASHASSIGN SLASH JEOF IDENTIFIER_NAME
+%type <debug> SLASHASSIGN SLASH JEOF IDENTIFIER_NAME NL
 
 
 // default type is ast node
 %type <ast_Identifier> Identifier
 %type <ast_Expression> PrimaryExpression Literal ArrayLiteral
 %type <ast_ElementList> ElementList ElementListPart
-%type <ast_Node> Elision ObjectLiteral
-%type <ast_Node> PropertyNameAndValueList PropertyNameAndValueListPart
-%type <ast_Node> PropertyNameAndValue PropertyName
+%type <ast_Node> Elision
+%type <ast_ObjectType> ObjectLiteral
+%type <ast_PropertyName> PropertyName
+%type <ast_PropertyNameAndValue> PropertyNameAndValue
+%type <ast_PropertyNameAndValueList> PropertyNameAndValueList
 %type <ast_Expression> MemberExpression MemberExpressionForIn
 %type <ast_Expression> AllocationExpression AllocationExpressionBody
 %type <ast_Expression> MemberExpressionParts MemberExpressionPart
@@ -93,8 +99,8 @@ ast::Operator* noOp1Exp;
 %type <ast_CallExpression> CallExpression
 %type <ast_ArgumentList> Arguments ArgumentList
 %type <ast_Expression> LeftHandSideExpression LeftHandSideExpressionForIn
-%type <ast_Expression> PostfixExpression 
-%type <ast_Expression> UnaryExpression 
+%type <ast_Expression> PostfixExpression
+%type <ast_Expression> UnaryExpression
 %type <ast_Expression> MultiplicativeExpression MultiplicativeExpressionPart
 %type <ast_Expression> AdditiveExpression AdditiveExpressionPart
 %type <ast_Expression> ShiftExpression ShiftExpressionPart
@@ -121,8 +127,8 @@ ast::Operator* noOp1Exp;
 %type <ast_IfStmt> IfStatement 
 %type <ast_Statement> IterationStatement
 %type <ast_Identifier> IdentifierComma
-%type <ast_ContinueStmt> ContinueStatement 
-%type <ast_BreakStmt> BreakStatement 
+%type <ast_ContinueStmt> ContinueStatement
+%type <ast_BreakStmt> BreakStatement
 %type <ast_Node> ReturnStatement
 %type <ast_Node> WithStatement 
 %type <ast_SwitchStmt> SwitchStatement
@@ -130,15 +136,15 @@ ast::Operator* noOp1Exp;
 %type <ast_CaseStmt> CaseClause DefaultClause
 %type <ast_LabeledStmt> LabelledStatement 
 %type <ast_ThrowStmt> ThrowStatement
-%type <ast_TryStmt> TryStatement TryStatementPart 
-%type <ast_CatchStmt> Catch 
+%type <ast_TryStmt> TryStatement TryStatementPart
+%type <ast_CatchStmt> Catch
 %type <ast_FinallyStmt> Finally
 %type <ast_ParameterList> FormalParameterListInPare FormalParameterList
 %type <ast_FunctionDeclaration> FunctionDeclaration FunctionExpression
 %type <ast_StatementList> FunctionBody
 %type <ast_StatementList> Program
-%type <ast_StatementList> SourceElements
-%type <ast_Statement> SourceElement
+%type <ast_StatementList> SourceElements InFuncSourceElements SourceElementsNL
+%type <ast_Statement> SourceElement InFuncSourceElement
 %type <ast_Node> ImportStatement Name
 %type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
 
@@ -147,6 +153,9 @@ ast::Operator* noOp1Exp;
 //张宇昊
 PrimaryExpression	:	THIS
 |	ObjectLiteral
+{
+	$$ = $1;
+}
 |	LEFT_PARE Expression RIGHT_PARE
 {
 	$$ = $2;
@@ -164,7 +173,7 @@ PrimaryExpression	:	THIS
 	$$ = $1;
 }
 Literal	:	DECIMAL_LITERAL {
-	$$ = new ast::RealType(atof($1)); 
+	$$ = new ast::RealType(atof($1));
 	//printf("number\n");
 }
 | HEX_INTEGER_LITERAL
@@ -176,7 +185,7 @@ Literal	:	DECIMAL_LITERAL {
 	$$ = new ast::StringType(a);
 }
 | BOOLEAN_LITERAL {
-	$$ = new ast::BooleanType($1); 
+	$$ = new ast::BooleanType($1);
 
 }| NULL_LITERAL
 Identifier	:	IDENTIFIER_NAME {
@@ -208,16 +217,44 @@ ElementListPart :   Elision AssignmentExpression ElementListPart
 Elision	:   COMMA
 |   Elision COMMA
 ObjectLiteral	:	LEFT_BRACE PropertyNameAndValueList RIGHT_BRACE
+{
+	$$ = new ast::ObjectType($2);
+}
 |   LEFT_BRACE  RIGHT_BRACE
-PropertyNameAndValueList	:	PropertyNameAndValue PropertyNameAndValueListPart
-PropertyNameAndValueListPart    :   PropertyNameAndValueListPart COMMA
+{
+	$$ = new ast::ObjectType();
+}
+PropertyNameAndValueList	:	PropertyNameAndValue COMMA PropertyNameAndValueList
+{
+	$$ = new ast::PropertyNameAndValueList($1, $3);
+}
+| PropertyNameAndValue
+{
+	$$ = new ast::PropertyNameAndValueList($1);
+}
+/*PropertyNameAndValueListPart    :   PropertyNameAndValueListPart COMMA
 |   PropertyNameAndValueListPart COMMA PropertyNameAndValue
-|
+{
+	$$ = new ast::PropertyNameAndValueList()
+}
+|*/
 
 PropertyNameAndValue	:	PropertyName COLON AssignmentExpression
+{
+	$$ = new ast::PropertyNameAndValue($1, $3);
+}
 PropertyName	:	Identifier
+{
+	$$ = &($1->name);
+}
 |	STRING_LITERAL
+{
+	$$ = new std::string($1);
+}
 |	DECIMAL_LITERAL
+{
+	$$ = new std::string($1);
+}
 MemberExpression	:  FunctionExpression MemberExpressionParts
 |   PrimaryExpression MemberExpressionParts{
 	if ($2 == nullptr)
@@ -265,8 +302,12 @@ Arguments	:	LEFT_PARE ArgumentList RIGHT_PARE {
 }
 
 ArgumentList	:	AssignmentExpression {
-	$$ = new ast::ArgumentList();
-	$$->push_back($1);
+	if ($1) {
+		$$ = new ast::ArgumentList();
+		$$->push_back($1);
+	} else {
+		$$ = nullptr;
+	}
 }
 | ArgumentList COMMA AssignmentExpression {
 	$1->push_back($3);
@@ -442,14 +483,41 @@ RelationalOperator	:	LESS {
 | IN {
 	$$ = ast::Operator::OpType::iin;
 }
-RelationalExpressionNoIn	:	ShiftExpression RelationalExpressionNoInPart
-RelationalExpressionNoInPart  :   RelationalExpressionNoInPart RelationalNoInOperator ShiftExpression
-|
-RelationalNoInOperator	:	LESS
-| GREATER
-| LESS_EQ
-| GREATER_EQ
-| INSTANCEOF
+RelationalExpressionNoIn	:	ShiftExpression RelationalExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+RelationalExpressionNoInPart  :   RelationalExpressionNoInPart RelationalNoInOperator ShiftExpression {
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
+RelationalNoInOperator	:	LESS {
+	$$ = ast::Operator::OpType::lt;
+}
+| GREATER {
+	$$ = ast::Operator::OpType::gt;
+}
+| LESS_EQ {
+	$$ = ast::Operator::OpType::le;
+}
+| GREATER_EQ {
+	$$ = ast::Operator::OpType::ge;
+}
+| INSTANCEOF {
+	$$ = ast::Operator::OpType::iof;
+}
 EqualityExpression	:	RelationalExpression EqualityExpressionPart {
 	auto exp = dynamic_cast<ast::Operator*>($2);
 	if (exp == nullptr) {
@@ -470,9 +538,26 @@ EqualityExpressionPart  :   EqualityExpressionPart EqualityOperator RelationalEx
 | {
 	$$ = nullptr;
 }
-EqualityExpressionNoIn	:	RelationalExpressionNoIn EqualityExpressionNoInPart
-EqualityExpressionNoInPart  :   EqualityExpressionNoInPart EqualityOperator RelationalExpressionNoIn
-|
+EqualityExpressionNoIn	:	RelationalExpressionNoIn EqualityExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+EqualityExpressionNoInPart  :   EqualityExpressionNoInPart EqualityOperator RelationalExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 EqualityOperator	:	EQUAL {
 	$$ = ast::Operator::OpType::eq;
 }
@@ -505,9 +590,26 @@ BitwiseANDExpressionPart  :   BitwiseANDExpressionPart BitwiseANDOperator Equali
 | {
 	$$ = nullptr;
 }
-BitwiseANDExpressionNoIn	:	EqualityExpressionNoIn BitwiseANDExpressionNoInPart
-BitwiseANDExpressionNoInPart  :   BitwiseANDExpressionNoInPart BitwiseANDOperator EqualityExpressionNoIn
-|
+BitwiseANDExpressionNoIn	:	EqualityExpressionNoIn BitwiseANDExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+BitwiseANDExpressionNoInPart  :   BitwiseANDExpressionNoInPart BitwiseANDOperator EqualityExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 BitwiseANDOperator	:	BIT_AND {
 	$$ = ast::Operator::OpType::bit_and;
 }
@@ -531,9 +633,26 @@ BitwiseXORExpressionPart   :   BitwiseXORExpressionPart BitwiseXOROperator Bitwi
 | {
 	$$ = nullptr;
 }
-BitwiseXORExpressionNoIn	:	BitwiseANDExpressionNoIn BitwiseXORExpressionNoInPart
-BitwiseXORExpressionNoInPart   :   BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseANDExpressionNoIn
-|
+BitwiseXORExpressionNoIn	:	BitwiseANDExpressionNoIn BitwiseXORExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+BitwiseXORExpressionNoInPart   :   BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseANDExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 BitwiseXOROperator	:	BIT_XOR {
 	$$ = ast::Operator::OpType::bit_xor;
 }
@@ -557,9 +676,26 @@ BitwiseORExpressionPart   :   BitwiseORExpressionPart BitwiseOROperator BitwiseX
 | {
 	$$ = nullptr;
 }
-BitwiseORExpressionNoIn	:	BitwiseXORExpressionNoIn BitwiseORExpressionNoInPart
-BitwiseORExpressionNoInPart   :   BitwiseORExpressionNoInPart BitwiseOROperator BitwiseXORExpressionNoIn
-|
+BitwiseORExpressionNoIn	:	BitwiseXORExpressionNoIn BitwiseORExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+BitwiseORExpressionNoInPart   :   BitwiseORExpressionNoInPart BitwiseOROperator BitwiseXORExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 BitwiseOROperator	:	BIT_OR {
 	$$ = ast::Operator::OpType::bit_or;
 }
@@ -583,9 +719,26 @@ LogicalANDExpressionPart   :   LogicalANDExpressionPart LogicalANDOperator Bitwi
 | {
 	$$ = nullptr;
 }
-LogicalANDExpressionNoIn	:	BitwiseORExpressionNoIn LogicalANDExpressionNoInPart
-LogicalANDExpressionNoInPart   :   LogicalANDExpressionNoInPart LogicalANDOperator BitwiseORExpressionNoIn
-|
+LogicalANDExpressionNoIn	:	BitwiseORExpressionNoIn LogicalANDExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+LogicalANDExpressionNoInPart   :   LogicalANDExpressionNoInPart LogicalANDOperator BitwiseORExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 LogicalANDOperator	:	AND {
 	$$ = ast::Operator::OpType::land;
 }
@@ -609,9 +762,26 @@ LogicalORExpressionPart   :   LogicalORExpressionPart LogicalOROperator LogicalA
 | {
 	$$ = nullptr;
 }
-LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart
-LogicalORExpressionNoInPart   :   LogicalORExpressionNoInPart LogicalOROperator LogicalANDExpressionNoIn
-|
+LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+LogicalORExpressionNoInPart   :   LogicalORExpressionNoInPart LogicalOROperator LogicalANDExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 LogicalOROperator	:	OR {
 	$$ = ast::Operator::OpType::lor;
 }
@@ -620,8 +790,11 @@ ConditionalExpression	:	LogicalORExpression{
 }
 |LogicalORExpression QUES AssignmentExpression COLON AssignmentExpression {
 }
-ConditionalExpressionNoIn	:	LogicalORExpressionNoIn
-|LogicalORExpressionNoIn QUES AssignmentExpression COLON AssignmentExpressionNoIn
+ConditionalExpressionNoIn	:	LogicalORExpressionNoIn {
+	$$ = $1;
+}
+|LogicalORExpressionNoIn QUES AssignmentExpression COLON AssignmentExpressionNoIn {
+}
 AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression
 {
 	$$ = new ast::Operator($1,$2,$3);
@@ -631,8 +804,14 @@ AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpre
 	$$ = $1;
 	//printf("an assign exp from condition\n");
 }
-AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn {}
-| ConditionalExpressionNoIn
+AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn {
+	$$ = new ast::Operator($1,$2,$3);
+/*	//printf("an assign exp\n");*/
+}
+| ConditionalExpressionNoIn {
+	$$ = $1;
+	//printf("an assign exp from condition\n");
+}
 AssignmentOperator	:	ASSIGN {
 	$$ =ast::Operator::OpType::assign;
 	//printf("an assign\n");
@@ -681,7 +860,7 @@ Expression	:	AssignmentExpression ExpressionPart
 
 
 }
-ExpressionPart   :    COMMA AssignmentExpression ExpressionPart{
+ExpressionPart   :    COMMA AssignmentExpression ExpressionPart {
 	if ($3 == nullptr) {
 		$$ = $2;
 	} else {
@@ -692,10 +871,27 @@ ExpressionPart   :    COMMA AssignmentExpression ExpressionPart{
 | {
 	$$ = nullptr;
 }
-ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart
-ExpressionNoInPart   :   ExpressionNoInPart COMMA AssignmentExpressionNoIn
-|
+ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart {
+	if ($2 == nullptr){
+		$$ = $1;
+	}
+	else {
+		$$ = new ast::Operator($1,ast::Operator::OpType::comma,$2);
+	}
 
+
+}
+ExpressionNoInPart   :   COMMA ExpressionNoInPart AssignmentExpressionNoIn {
+	if ($3 == nullptr) {
+		$$ = $2;
+	} else {
+		$$ = new ast::Operator($2,ast::Operator::OpType::comma,$3);
+	}
+
+}
+| {
+	$$ = nullptr;
+}
 //陈睿
 ExpressionOrNull:
 | Expression
@@ -706,10 +902,14 @@ Statement	:	Block
 |	JScriptVarStatement
 |	VariableStatement
 |	EmptyStatement
+{
+	$$ = new ast::Statement();
+}
 |	LabelledStatement{
 	$$=$1;
 }
-|	ExpressionStatement{
+|	ExpressionStatement
+{
 	$$ = $1;
 }
 |	IfStatement{
@@ -764,6 +964,7 @@ VariableDeclarationNoIn	:	Identifier
 Initialiser	:	ASSIGN AssignmentExpression
 InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn
 EmptyStatement	:	SEMICOLON
+|
 ExpressionStatement	:	Expression {
 	$$ = $1;
 }
@@ -795,7 +996,7 @@ IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE{
 }
 |	FOR LEFT_PARE VAR VariableDeclarationList SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
 	//$$=new ast::ForStmt($4,$6,$8,$10);
-}	
+}
 |	FOR LEFT_PARE VAR VariableDeclarationNoIn IN Expression RIGHT_PARE Statement
 |	FOR LEFT_PARE LeftHandSideExpressionForIn IN Expression RIGHT_PARE Statement
 
@@ -938,13 +1139,98 @@ FormalParameterList	:	Identifier {
 FunctionBody	:	LEFT_BRACE RIGHT_BRACE {
 	$$ = nullptr;
 }
-| LEFT_BRACE SourceElements RIGHT_BRACE {
+| LEFT_BRACE InFuncSourceElements RIGHT_BRACE {
 	$$ = $2;
 }
 
 Program	:	JEOF
-| SourceElements JEOF
+| SourceElementsNL JEOF
 {
+	$$ = $1;
+	//cout << "program End"<<endl;
+}
+SourceElementsNL	:	SourceElements NL
+{
+	extern int parseError;
+	$$ = $1;
+
+	if (!parseError)
+	{	
+		extern int debugFlag;
+		if (debugFlag)
+			$1 -> print_node("", true, true);
+		ast_root = $1;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;
+		} catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+
+		if (!parseError)
+		{
+			extern int valueFlag;
+			if (valueFlag)
+				ast_root->value.print();
+			parseError = 0;
+		}
+		else
+		{
+			parseError = 0;
+		}
+
+	}
+}
+| SourceElementsNL  SourceElements NL
+{
+	extern int parseError;
+	$$ = $2;
+
+	if (!parseError)
+	{	
+		extern int debugFlag;
+		if (debugFlag)
+			$2 -> print_node("", true, true);
+		ast_root = $2;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;
+		} catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+
+		if (!parseError)
+		{
+			extern int valueFlag;
+			if (valueFlag)
+				ast_root->value.print();
+			parseError = 0;
+		}
+		else
+		{
+			parseError = 0;
+		}
+
+	}
+}
+
+
+InFuncSourceElements	:	InFuncSourceElement {
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+	//printf("To InFuncSourceElements\n");
+}
+| InFuncSourceElements InFuncSourceElement {
+	$1->list.push_back($2);
+	$$ = $1;
+}
+| InFuncSourceElements error {
 	$$ = $1;
 }
 SourceElements	:	SourceElement {
@@ -956,41 +1242,16 @@ SourceElements	:	SourceElement {
 	$1->list.push_back($2);
 	$$ = $1;
 }
-| SourceElements error {
-	$$ = $1;
-}
-| error {
-}
-SourceElement	:	FunctionDeclaration
-|	Statement {
-	extern int parseError;
-	$$ = $1;
 
-	if (!parseError)
-	{	
-		$1 -> print_node("", true, true);
-		ast_root = $1;
-		try {
-			ast_root->run();
-		} catch (const std::domain_error &de) {
-			cout << de.what() << endl;
-		} catch (const std::logic_error &le) {
-			cout << le.what() << endl;
-		} catch (...) {
-			cout << "other uncaught error" << endl;
-		}
-		
-		if (!parseError)
-		{
-			ast_root->value.print();
-			parseError = 0;
-		}
-		else
-		{
-			parseError = 0;
-		}
-			
-	}
+SourceElement	:	FunctionDeclaration {
+	$$ = $1;
+}
+|	Statement {
+	$$ = $1;
+}
+InFuncSourceElement	:	FunctionDeclaration
+|	Statement {
+	$$ = $1;
 }
 ImportStatement	:	IMPORT Name SEMICOLON
 | IMPORT Name DOT MULTI  SEMICOLON

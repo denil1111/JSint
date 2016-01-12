@@ -1,27 +1,21 @@
 SRC_DIR = src
-
-#all: compiler
-#	 make ll test2.pas
-#	 make ll test3.pas
-#	 make ll test4.pas
-#	 make ll test5.pas
-#	 make ll test6.pas
-#	 make ll test7.pas
+FILES=`ls test/*.js`
+define test_all_file
+@for file in $(FILES); do \
+( make ll $$file ) \
+done;
+endef
+all: compiler
+	 @$(test_all_file)
 
 compiler:
 	$(MAKE) -C $(SRC_DIR) -j
-	mv $(SRC_DIR)/JSint .
+	@mv $(SRC_DIR)/JSint .
 
-#ll:
-#	./pascal < test/$(filter-out ll asm,$(MAKECMDGOALS)) 2> $(basename $(filter-out ll asm,$(MAKECMDGOALS))).ll
-
-#asm: ll
-#	$(LLC) -march=x86-64 $(basename $(filter-out asm,$(MAKECMDGOALS))).ll
-
-#gen:
-#	clang *.s -o $(basename $(filter-out gen,$(MAKECMDGOALS)))
-
-
+ll:
+	@./Jsint -a < $(filter-out ll asm,$(MAKECMDGOALS)) > $(basename $(filter-out ll asm,$(MAKECMDGOALS))).res
+	@echo "\033[1m" Test "\033[0m" $(filter-out ll asm,$(MAKECMDGOALS)) : "\c"
+	@./compare $(basename $(filter-out ll asm,$(MAKECMDGOALS))).res $(basename $(filter-out ll asm,$(MAKECMDGOALS))).out
 %:
 	@:
 
@@ -31,4 +25,3 @@ clean:
 
 clean-all: clean
 	$(RM) JSint
-	

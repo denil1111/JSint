@@ -22,6 +22,7 @@ int yycolumn = 1;
 	yylloc.first_column = yycolumn; yylloc.last_column = yycolumn + yyleng - 1; \
     yycolumn += yyleng;
 %}
+%x REALLYEND
 DecimalDigit [0-9]
 DecimalDigits [0-9]+
 NonZeroDigit [1-9]
@@ -119,9 +120,10 @@ IdentifierPart {IdentifierStart}|[0-9]
 "^" { BeginToken(yytext);YYLVAL_DEBUG return BIT_XOR; }
 "&&" { BeginToken(yytext);YYLVAL_DEBUG return AND; }
 "||" { BeginToken(yytext);YYLVAL_DEBUG return OR; }
-<<EOF>> { BeginToken(yytext);YYLVAL_DEBUG return JEOF; }
+<INITIAL><<EOF>> { BEGIN(REALLYEND);BeginToken(yytext);YYLVAL_DEBUG return JEOF; }
+<REALLYEND><<EOF>>      { return 0; }                    
 {IdentifierStart}{IdentifierPart}*  { BeginToken(yytext);YYLVAL_DEBUG return IDENTIFIER_NAME; }
-
-[ \n\t]+ { BeginToken(yytext); }
+(\n)	{BeginToken(yytext);YYLVAL_DEBUG return NL;}
+[ \t]+ { BeginToken(yytext); }
 .		{ printf("Invalid character\n"); }
 %%

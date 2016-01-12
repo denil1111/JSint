@@ -160,7 +160,7 @@ simple_type_decl:
 ;
 
 array_type_decl:
-	ARRAY LB simple_type_decl RB OF type_decl 	{ $$ = new ast::TypeDecl(new ast::ArrayType($3, $6)); std::cout << "finished here" << std::endl;}
+	ARRAY LB simple_type_decl RB OF type_decl 	{ $$ = new ast::TypeDecl(new ast::ArrayType($3, $6)); debugOut << "finished here" << std::endl;}
 ;
 
 record_type_decl:

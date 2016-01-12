@@ -21,6 +21,7 @@ public:
 	static TValue NaN();
 	static TValue undefined();
 	static TValue null();
+	
 	struct TSValue{
 		std::string str;
 		double dou;
@@ -40,10 +41,6 @@ public:
 	TSValue sValue;
 	bool boolFlag = false;
 	TType type;
-
-	static TValue NaN();
-	static TValue undefined();
-	static TValue null();
 	
 	TValue(){
 		type = TType::Tundefined;

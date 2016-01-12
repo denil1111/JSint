@@ -10,6 +10,7 @@
 #include "Object.h"
 
 //used forward-declaration to deal with cross-reference issue
+class TValue;
 // namespace ast start
 namespace ast {
 // forward declaration
@@ -81,7 +82,7 @@ public:
 class Statement : public Node {
 public:
     Statement() { value = TValue::undefined(); };
-    virtual TValue run() 
+    virtual TValue run()
     {
         return value;
     }
@@ -802,14 +803,14 @@ public:
 	PropertyNameAndValueList(PropertyNameAndValue* property,
 							 PropertyNameAndValueList* propertyList):
 	StatementList(property, propertyList) {}
-	
+
 	virtual std::string toString() { return "PropertyList"; }
 	virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;
-		for(auto el : list) rlist.push_back((Node *)el); 		
+		for(auto el : list) rlist.push_back((Node *)el);
 		return rlist;
 	}
-	virtual TValue run();	
+	virtual TValue run();
 };
 
 class ArrayType: public ConstValue {
@@ -826,13 +827,13 @@ public:
 	}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
 	virtual int toRange() { return 1; }
-	
+
     virtual std::string toString() { return "Array"; }
     virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;
-		for(auto el : elList) rlist.push_back((Node *)el); 		
+		for(auto el : elList) rlist.push_back((Node *)el);
 		return rlist;
-	}	
+	}
     virtual TValue run();
 };
 
@@ -846,7 +847,7 @@ public:
 
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
 	virtual int toRange() { return 1; }
-	
+
 	virtual std::string toString() { return "Object"; }
 	virtual std::vector<Node*> getChildren() { return std::vector<Node*>{propList}; }
 	virtual TValue run();

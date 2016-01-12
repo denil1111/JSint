@@ -7,7 +7,7 @@ NO_WARNING =  -Wno-return-type \
 
 CXXFLAGS = -std=c++11 $(NO_WARNING)
 
-OBJS = parser.o tokenizer.o ast.o utils.o main.o  ccalc.o varlist.o
+OBJS = parser.o tokenizer.o ast.o utils.o main.o  ccalc.o varlist.o DeclaredFunction.o Object.o
 
 all: $(NAME)
 
@@ -20,7 +20,7 @@ tokenizer.cpp: ${NAME}.l
 	flex -o tokenizer.cpp ${NAME}.l
 
 %.o: %.cpp ast.h utils.h ccalc.h varlist.hpp
-	g++ -c $(CXXFLAGS) -g -o $@ $< 
+	g++ -c $(CXXFLAGS) -g -o $@ $<
 
 
 $(NAME): $(OBJS)

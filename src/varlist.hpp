@@ -8,8 +8,9 @@
 #include <iostream>
 #include "utils.h"
 
-
-#include "Declaration.h"
+namespace ast {
+	class FunctionDeclaration;
+}
 
 extern void yyerror(char *s, ...);
 extern std::string green(const std::string& str);
@@ -38,7 +39,7 @@ struct TValue {
 	bool boolFlag = false;
 	TType type;
 	TValue toDouble() ;
-	TValue toBoolean() ;
+	bool toBoolean() ;
 	TValue(){
 		type = TType::Tundefined;
 	}
@@ -117,7 +118,6 @@ struct TValue {
 	TValue operator   ~();
 
 };
-
 class VarList {
 	std::map<std::string,TValue> list;
 public:

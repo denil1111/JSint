@@ -500,30 +500,21 @@ TValue ast::ArrayRef::run() {
 }
 
 TValue ast::ContinueStmt::run() {
-<<<<<<< HEAD
 	if(label!=nullptr){
 		throw ContinueException(label->name);
 	}else{
 		throw ContinueException("");
 	}
-    
-=======
-
-
->>>>>>> 73201c9f9a93639cf8d712af274e0d5e0ff4bfd8
+   
 	return value;
 }
 
 TValue ast::BreakStmt::run() {
-<<<<<<< HEAD
     if(label!=nullptr){
 		throw BreakException(label->name);
 	}else{
 		throw BreakException("");
 	}
-=======
-
->>>>>>> 73201c9f9a93639cf8d712af274e0d5e0ff4bfd8
 
 	return value;
 }
@@ -592,9 +583,6 @@ TValue ast::ObjectType::run() {
 TValue ast::StatementList::run() {
 	std::cout << "StatementList" << std::endl;
 	for (auto stmt: list){
-<<<<<<< HEAD
-		stmt->run();
-=======
 		value = stmt->run();
 	}
 	return value;
@@ -609,7 +597,6 @@ TValue ast::PropertyNameAndValueList::run() {
 	for (auto stmt: list) {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);		
 		value = property->run();
->>>>>>> 73201c9f9a93639cf8d712af274e0d5e0ff4bfd8
 	}
 	return value;
 }

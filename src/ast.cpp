@@ -100,7 +100,7 @@ void ast::Operator::run() {
         	tempO.run();
         	value = tempO.value;
         	break;
-        } 
+        }
         case OpType::rpplus :{
         	value = op1->value;
         	RealType tempE(1);
@@ -114,7 +114,7 @@ void ast::Operator::run() {
         	Operator tempO(op1,OpType::minus_assign,&tempE);
         	tempO.run();
         	break;
-        }         
+        }
         case OpType::type :{
         	value = TValue(op1->value.getTypeString());
         	break;
@@ -354,15 +354,13 @@ void ast::CaseStmt::run() {
 void ast::SwitchStmt::run() {
 
 }
-void ast::ArrayType::run() {
-}
 
 void ast::ArrayRef::run() {
-    
+
 }
 
 void ast::ContinueStmt::run() {
-    
+
 }
 
 
@@ -371,7 +369,7 @@ void ast::ArrayType::run() {
 	for (auto expPtr : elList) {
 		expPtr->run();
 	}
-	
+
 	std::vector<TValue> values = std::vector<TValue>(elList.size());
 	for (int i=0; i<elList.size(); i++) {
 		values[i] = elList[i]->value;
@@ -390,16 +388,16 @@ void ast::BreakStmt::run() {
 }
 
 void ast::TryStmt::run() {
-    
+
 }
 void ast::ThrowStmt::run() {
-    
+
 }
 void ast::FinallyStmt::run() {
-    
+
 }
 void ast::CatchStmt::run() {
-    
+
 }
 
 void ast::StatementList::run() {

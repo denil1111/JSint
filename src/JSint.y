@@ -922,6 +922,7 @@ Program	:	JEOF
 | SourceElements JEOF
 {
 	$$ = $1;
+	//cout << "program End"<<endl;
 }
 SourceElements	:	SourceElement {
 	$$ = new ast::StatementList;

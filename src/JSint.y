@@ -442,14 +442,41 @@ RelationalOperator	:	LESS {
 | IN {
 	$$ = ast::Operator::OpType::iin;
 }
-RelationalExpressionNoIn	:	ShiftExpression RelationalExpressionNoInPart
-RelationalExpressionNoInPart  :   RelationalExpressionNoInPart RelationalNoInOperator ShiftExpression
-|
-RelationalNoInOperator	:	LESS
-| GREATER
-| LESS_EQ
-| GREATER_EQ
-| INSTANCEOF
+RelationalExpressionNoIn	:	ShiftExpression RelationalExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+RelationalExpressionNoInPart  :   RelationalExpressionNoInPart RelationalNoInOperator ShiftExpression {
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
+RelationalNoInOperator	:	LESS {
+	$$ = ast::Operator::OpType::lt;
+}
+| GREATER {
+	$$ = ast::Operator::OpType::gt;
+}
+| LESS_EQ {
+	$$ = ast::Operator::OpType::le;
+}
+| GREATER_EQ {
+	$$ = ast::Operator::OpType::ge;
+}
+| INSTANCEOF {
+	$$ = ast::Operator::OpType::iof;
+}
 EqualityExpression	:	RelationalExpression EqualityExpressionPart {
 	auto exp = dynamic_cast<ast::Operator*>($2);
 	if (exp == nullptr) {
@@ -470,9 +497,26 @@ EqualityExpressionPart  :   EqualityExpressionPart EqualityOperator RelationalEx
 | {
 	$$ = nullptr;
 }
-EqualityExpressionNoIn	:	RelationalExpressionNoIn EqualityExpressionNoInPart
-EqualityExpressionNoInPart  :   EqualityExpressionNoInPart EqualityOperator RelationalExpressionNoIn
-|
+EqualityExpressionNoIn	:	RelationalExpressionNoIn EqualityExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+EqualityExpressionNoInPart  :   EqualityExpressionNoInPart EqualityOperator RelationalExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 EqualityOperator	:	EQUAL {
 	$$ = ast::Operator::OpType::eq;
 }
@@ -505,9 +549,26 @@ BitwiseANDExpressionPart  :   BitwiseANDExpressionPart BitwiseANDOperator Equali
 | {
 	$$ = nullptr;
 }
-BitwiseANDExpressionNoIn	:	EqualityExpressionNoIn BitwiseANDExpressionNoInPart
-BitwiseANDExpressionNoInPart  :   BitwiseANDExpressionNoInPart BitwiseANDOperator EqualityExpressionNoIn
-|
+BitwiseANDExpressionNoIn	:	EqualityExpressionNoIn BitwiseANDExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+BitwiseANDExpressionNoInPart  :   BitwiseANDExpressionNoInPart BitwiseANDOperator EqualityExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 BitwiseANDOperator	:	BIT_AND {
 	$$ = ast::Operator::OpType::bit_and;
 }
@@ -531,9 +592,26 @@ BitwiseXORExpressionPart   :   BitwiseXORExpressionPart BitwiseXOROperator Bitwi
 | {
 	$$ = nullptr;
 }
-BitwiseXORExpressionNoIn	:	BitwiseANDExpressionNoIn BitwiseXORExpressionNoInPart
-BitwiseXORExpressionNoInPart   :   BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseANDExpressionNoIn
-|
+BitwiseXORExpressionNoIn	:	BitwiseANDExpressionNoIn BitwiseXORExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+BitwiseXORExpressionNoInPart   :   BitwiseXORExpressionNoInPart BitwiseXOROperator BitwiseANDExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 BitwiseXOROperator	:	BIT_XOR {
 	$$ = ast::Operator::OpType::bit_xor;
 }
@@ -557,9 +635,26 @@ BitwiseORExpressionPart   :   BitwiseORExpressionPart BitwiseOROperator BitwiseX
 | {
 	$$ = nullptr;
 }
-BitwiseORExpressionNoIn	:	BitwiseXORExpressionNoIn BitwiseORExpressionNoInPart
-BitwiseORExpressionNoInPart   :   BitwiseORExpressionNoInPart BitwiseOROperator BitwiseXORExpressionNoIn
-|
+BitwiseORExpressionNoIn	:	BitwiseXORExpressionNoIn BitwiseORExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+BitwiseORExpressionNoInPart   :   BitwiseORExpressionNoInPart BitwiseOROperator BitwiseXORExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 BitwiseOROperator	:	BIT_OR {
 	$$ = ast::Operator::OpType::bit_or;
 }
@@ -583,9 +678,26 @@ LogicalANDExpressionPart   :   LogicalANDExpressionPart LogicalANDOperator Bitwi
 | {
 	$$ = nullptr;
 }
-LogicalANDExpressionNoIn	:	BitwiseORExpressionNoIn LogicalANDExpressionNoInPart
-LogicalANDExpressionNoInPart   :   LogicalANDExpressionNoInPart LogicalANDOperator BitwiseORExpressionNoIn
-|
+LogicalANDExpressionNoIn	:	BitwiseORExpressionNoIn LogicalANDExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+LogicalANDExpressionNoInPart   :   LogicalANDExpressionNoInPart LogicalANDOperator BitwiseORExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 LogicalANDOperator	:	AND {
 	$$ = ast::Operator::OpType::land;
 }
@@ -609,9 +721,26 @@ LogicalORExpressionPart   :   LogicalORExpressionPart LogicalOROperator LogicalA
 | {
 	$$ = nullptr;
 }
-LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart
-LogicalORExpressionNoInPart   :   LogicalORExpressionNoInPart LogicalOROperator LogicalANDExpressionNoIn
-|
+LogicalORExpressionNoIn	:	LogicalANDExpressionNoIn LogicalORExpressionNoInPart {
+	auto exp = dynamic_cast<ast::Operator*>($2);
+	if (exp == nullptr) {
+		$$ = $1;
+	}
+	else {
+		$$ = exp;
+		noOp1Exp ->op1 = $1;
+	}
+}
+LogicalORExpressionNoInPart   :   LogicalORExpressionNoInPart LogicalOROperator LogicalANDExpressionNoIn{
+	$$ = new ast::Operator($1,$2,$3);
+	if ($1 == nullptr)
+	{
+		noOp1Exp = dynamic_cast<ast::Operator*>($$);
+	}
+}
+| {
+	$$ = nullptr;
+}
 LogicalOROperator	:	OR {
 	$$ = ast::Operator::OpType::lor;
 }
@@ -620,8 +749,11 @@ ConditionalExpression	:	LogicalORExpression{
 }
 |LogicalORExpression QUES AssignmentExpression COLON AssignmentExpression {
 }
-ConditionalExpressionNoIn	:	LogicalORExpressionNoIn
-|LogicalORExpressionNoIn QUES AssignmentExpression COLON AssignmentExpressionNoIn
+ConditionalExpressionNoIn	:	LogicalORExpressionNoIn {
+	$$ = $1;
+}
+|LogicalORExpressionNoIn QUES AssignmentExpression COLON AssignmentExpressionNoIn {
+}
 AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression
 {
 	$$ = new ast::Operator($1,$2,$3);
@@ -631,8 +763,14 @@ AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpre
 	$$ = $1;
 	//printf("an assign exp from condition\n");
 }
-AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn {}
-| ConditionalExpressionNoIn
+AssignmentExpressionNoIn	:	LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn {
+	$$ = new ast::Operator($1,$2,$3);
+/*	//printf("an assign exp\n");*/
+}
+| ConditionalExpressionNoIn {
+	$$ = $1;
+	//printf("an assign exp from condition\n");
+}
 AssignmentOperator	:	ASSIGN {
 	$$ =ast::Operator::OpType::assign;
 	//printf("an assign\n");
@@ -681,7 +819,7 @@ Expression	:	AssignmentExpression ExpressionPart
 
 
 }
-ExpressionPart   :    COMMA AssignmentExpression ExpressionPart{
+ExpressionPart   :    COMMA AssignmentExpression ExpressionPart {
 	if ($3 == nullptr) {
 		$$ = $2;
 	} else {
@@ -692,10 +830,27 @@ ExpressionPart   :    COMMA AssignmentExpression ExpressionPart{
 | {
 	$$ = nullptr;
 }
-ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart
-ExpressionNoInPart   :   ExpressionNoInPart COMMA AssignmentExpressionNoIn
-|
+ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart {
+	if ($2 == nullptr){
+		$$ = $1;
+	}
+	else {
+		$$ = new ast::Operator($1,ast::Operator::OpType::comma,$2);
+	}
 
+
+}
+ExpressionNoInPart   :   COMMA ExpressionNoInPart AssignmentExpressionNoIn {
+	if ($3 == nullptr) {
+		$$ = $2;
+	} else {
+		$$ = new ast::Operator($2,ast::Operator::OpType::comma,$3);
+	}
+
+}
+| {
+	$$ = nullptr;
+}
 //陈睿
 ExpressionOrNull:
 | Expression

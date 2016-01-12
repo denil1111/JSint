@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <sstream>
 #include "varlist.hpp"
@@ -39,6 +40,9 @@ class CatchStmt;
 class ThrowStmt;
 class FinallyStmt;
 class TryStmt;
+class BreakException;
+class ContinueException;
+class LabeledStmt;
 
 typedef std::string PropertyName;
 typedef std::vector<Identifier*> ParameterList;
@@ -54,6 +58,23 @@ typedef std::vector<ConstDecl *>    ConstDeclList;
 typedef std::vector<FieldDecl *>    FieldDeclList;
 typedef std::vector<TypeConst *>    TypeDeclList;
 typedef std::vector<CaseStmt *>     CaseList;
+typedef std::map<std::string,Statement*> LabelMap;
+
+class BreakException:public std::exception{
+public:
+    std::string label;
+    // ~BreakException();
+    BreakException(std::string label):label(label){}
+};
+
+class ContinueException:public std::exception{
+public:
+    std::string label;
+    // ~ContinueException();
+    ContinueException(std::string label):label(label){}
+};
+
+
 // pure virtual class for all ast noxdes
 class Node {
 public:
@@ -748,6 +769,15 @@ public:
     ContinueStmt(Identifier * label):label(label){}
     virtual TValue run();
     virtual std::string toString() { return "continue statement"; }
+};
+
+class LabeledStmt : public Statement {
+public:
+    Identifier * label;
+    Statement * stmt;
+    LabeledStmt(Identifier * label,Statement* stmt):label(label),stmt(stmt){}
+    virtual TValue run();
+    virtual std::string toString() { return "LabeledStmt statement"; }
 };
 
 class TryStmt : public Statement {

@@ -12,6 +12,7 @@
 
 using namespace std;
 extern VarStack nowStack;
+extern ast::LabelMap labelMap;
 TValue ast::Identifier::run() {
     debugOut << "Creating identifier: " << name << std::endl;
 
@@ -362,7 +363,15 @@ TValue ast::Expression::run() {
 }
 
 TValue ast::WhileStmt::run() {
+	if(ifDo){
+		loopStmt->run();
+	}
 
+	condition->run();
+	while(condition->value.toBoolean()){
+		loopStmt->run();
+		condition->run();
+	}
 
 	return value;
 }
@@ -372,12 +381,18 @@ TValue ast::ForStmt::run() {
 	return value;
 }
 TValue ast::CaseStmt::run() {
-
+	std::cout<<"CaseStmt::run"<<std::endl;
+	// try{
+		thenStmt->run();
+	// }catch(BreakException &exception){
+	// 	std::cout<<"case stmt exception"<<std::endl;
+	// }
 	return value;
 }
 
 TValue ast::IfStmt::run() {
 	condition->run();
+	std::cout <<"IfStmt::run::"<<condition->value.toBoolean()<<std::endl;
 	if(condition->value.toBoolean() == TValue(1).toBoolean()){
 		thenStmt->run();
 	}else{
@@ -389,9 +404,62 @@ TValue ast::IfStmt::run() {
 }
 
 TValue ast::SwitchStmt::run() {
+	
+	CaseStmt* stmt;
+	bool firstFlag=true;
+	int defaultIndex=-1;
+	for(int i=0;i<list->size();i++){
+		try{
+			std::cout<<"for try::i="<<i<<std::endl;
+			stmt=(*list)[i];
+			if(stmt->isDefault){
+				//如果已经匹配过了case，那么就要执行default语句
+				if(!firstFlag){
+					stmt->run();
+				}else{
+					//如果还没有匹配，那么就要先跳过default语句；
+					// 如果最后没有任何匹配，就进入default那句往后执行，所以记下编号；
+					defaultIndex=i;	
+				}
+			}else{
+				if(!firstFlag){
+					stmt->run();
+				}
 
+				stmt->condition->run();
 
-	return value;
+				exp->run();
+				auto res=exp->value;
+
+				if((stmt->condition->value==res).toBoolean()){
+
+					stmt->run();
+					firstFlag=false;
+				}	
+			}
+			
+		}catch(BreakException &exception){
+			std::cout<<"switch stmt exception"<<std::endl;
+			return value;
+		}
+	}
+
+	// 如果最后没有任何匹配，就进入default那句往后执行
+	if(firstFlag && defaultIndex!=-1){
+		for(int i=defaultIndex;i<list->size();i++){
+			try{
+				std::cout<<"switch default try::i="<<i<<std::endl;
+				stmt=(*list)[i];
+				stmt->run();			
+			}catch(BreakException &exception){
+				std::cout<<"switch stmt exception"<<std::endl;
+				return value;
+			}
+		}
+	}else{
+		//如果没有任何匹配，并且也没有default
+		return value;
+	}	
 }
 // TValue ast::ArrayType::run() {
 
@@ -405,14 +473,27 @@ TValue ast::ArrayRef::run() {
 }
 
 TValue ast::ContinueStmt::run() {
-
-
+	if(label!=nullptr){
+		throw ContinueException(label->name);
+	}else{
+		throw ContinueException("");
+	}
+   
 	return value;
 }
 
 TValue ast::BreakStmt::run() {
+    if(label!=nullptr){
+		throw BreakException(label->name);
+	}else{
+		throw BreakException("");
+	}
 
+	return value;
+}
 
+TValue ast::LabeledStmt::run() {
+    labelMap[label->name]=stmt;
 	return value;
 }
 
@@ -473,6 +554,7 @@ TValue ast::ObjectType::run() {
 }
 
 TValue ast::StatementList::run() {
+	std::cout << "StatementList" << std::endl;
 	for (auto stmt: list){
 		value = stmt->run();
 	}

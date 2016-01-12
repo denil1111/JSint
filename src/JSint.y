@@ -48,11 +48,14 @@ ast::Operator* noOp1Exp;
     ast::ConstDeclList*     ast_ConstDeclList;
     ast::FieldDeclList*     ast_FieldDeclList;
     ast::TypeDeclList*      ast_TypeDeclList;
+    ast::IfStmt*          	ast_IfStmt;
     ast::CaseList*          ast_CaseList;
     ast::CaseStmt*          ast_CaseStmt;
+    ast::SwitchStmt*          ast_SwitchStmt;
 	ast::ContinueStmt*      ast_ContinueStmt;
 	ast::BreakStmt*         ast_BreakStmt;
 	ast::Block*         	ast_Block;
+	ast::LabeledStmt*       ast_LabeledStmt;
 	ast::TryStmt*         	ast_TryStmt;
 	ast::ThrowStmt*        	ast_ThrowStmt;
 	ast::CatchStmt*        	ast_CatchStmt;
@@ -62,7 +65,6 @@ ast::Operator* noOp1Exp;
 	ast::ArgumentList*      ast_ArgumentList;
 	ast::CallExpression*    ast_CallExpression;
 	ast::ElementList*       ast_ElementList;
-	std::vector<ast::CaseStmt*>*		ast_CaseStmtVector;
 	ast::PropertyName*       ast_PropertyName;
 	ast::PropertyNameAndValue* ast_PropertyNameAndValue;
 	ast::PropertyNameAndValueList* ast_PropertyNameAndValueList;
@@ -122,15 +124,17 @@ ast::Operator* noOp1Exp;
 %type <ast_Node> VariableDeclaration VariableDeclarationNoIn
 %type <ast_Node> Initialiser InitialiserNoIn
 %type <ast_Statement> EmptyStatement ExpressionStatement
-%type <ast_Node> IfStatement IterationStatement
+%type <ast_IfStmt> IfStatement 
+%type <ast_Statement> IterationStatement
 %type <ast_Identifier> IdentifierComma
 %type <ast_ContinueStmt> ContinueStatement
 %type <ast_BreakStmt> BreakStatement
 %type <ast_Node> ReturnStatement
-%type <ast_Node> WithStatement SwitchStatement
-%type <ast_CaseStmtVector> CaseBlock CaseBlockPart CaseClauses
-%type <ast_CaseStmt>CaseClause DefaultClause
-%type <ast_Node> LabelledStatement
+%type <ast_Node> WithStatement 
+%type <ast_SwitchStmt> SwitchStatement
+%type <ast_CaseList> CaseBlock CaseBlockPart CaseClauses 
+%type <ast_CaseStmt> CaseClause DefaultClause
+%type <ast_LabeledStmt> LabelledStatement 
 %type <ast_ThrowStmt> ThrowStatement
 %type <ast_TryStmt> TryStatement TryStatementPart
 %type <ast_CatchStmt> Catch
@@ -901,23 +905,40 @@ Statement	:	Block
 {
 	$$ = new ast::Statement();
 }
-|	LabelledStatement
+|	LabelledStatement{
+	$$=$1;
+}
 |	ExpressionStatement
 {
 	$$ = $1;
 }
-|	IfStatement
-|	IterationStatement
-|	ContinueStatement
-|	BreakStatement
+|	IfStatement{
+	$$=$1;
+}
+|	IterationStatement{
+	$$=$1;
+}
+|	ContinueStatement{
+	$$=$1;
+}
+|	BreakStatement{
+	$$=$1;
+}
 |	ImportStatement
 |	ReturnStatement
 |	WithStatement
-|	SwitchStatement
-|	ThrowStatement
-|	TryStatement
-Block	:	LEFT_BRACE RIGHT_BRACE
-{}
+|	SwitchStatement{
+	$$=$1;
+}
+|	ThrowStatement{
+	$$=$1;
+}
+|	TryStatement{
+	$$=$1;
+}
+Block	:	LEFT_BRACE RIGHT_BRACE{
+
+}
 |   LEFT_BRACE StatementList RIGHT_BRACE
 {
 	$$ = new ast::Block($2);
@@ -1011,32 +1032,36 @@ CaseBlock	    :	LEFT_BRACE CaseBlockPart{
 	$$=$2;
 }
 | LEFT_BRACE CaseClauses CaseBlockPart{
+	
 	$$=$2;
-	//for(int i=0;i<$2->size();i++){
-	//	$$->push_back($2[i]);
-	//}
+	for(int i=0;i<$3->size();i++){
+		$$->push_back((*$3)[i]);
+	}
 }
 
 CaseBlockPart   :   RIGHT_BRACE{
-	$$=nullptr;
+	$$=new ast::CaseList();
 }
 | DefaultClause RIGHT_BRACE{
-	$$=new std::vector <ast::CaseStmt*>;
+	$$=new ast::CaseList();
 	$$->push_back($1);
 }
 | DefaultClause CaseClauses RIGHT_BRACE{
-	$$=$2;
+	$$=new ast::CaseList();
 	$$->push_back($1);
+	for(int i=0;i<$2->size();i++){
+		$$->push_back((*$2)[i]);
+	}
 }
 
 CaseClauses	    :	CaseClause{
-	$$=new std::vector <ast::CaseStmt*>;
+	$$=new ast::CaseList();
 	$$->push_back($1);
 }
 | CaseClauses CaseClause{
 	$$=$1;
 	$$->push_back($2);
-	delete $1;
+	//delete $1;
 }
 
 CaseClause	    :	CASE Expression COLON{
@@ -1054,7 +1079,7 @@ DefaultClause	:	DEFAULT COLON{
 }
 
 LabelledStatement	:	Identifier COLON Statement{
-
+	$$=new ast::LabeledStmt($1,$3);
 }
 
 ThrowStatement	:	THROW Expression{

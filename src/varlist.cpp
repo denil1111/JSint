@@ -1,7 +1,7 @@
 #include "varlist.hpp"
 #include <cmath>
 using namespace std;
-string TValue::toString() 
+string TValue::toString()
 {
 	std::stringstream  ss;
 	std::string st;
@@ -33,6 +33,9 @@ string TValue::toString()
 	}
 	if (type == TType::Tnull) {
 		ss<<"null";
+	}
+	if (type == TType::Tfunction) {
+		ss<<"function";
 	}
 	ss >> st;
 	return st;
@@ -67,7 +70,7 @@ TValue TValue::toDouble()
 		}
 		else
 		{
-			return TValue(x);	
+			return TValue(x);
 		}
 	}
 	if (type == TType::Tdouble)
@@ -321,7 +324,7 @@ TValue TValue::operator !(){
 	if (toBoolean().sValue.dou)
 	{
 		return TValue(false);
-	}	
+	}
 	else
 	{
 		return TValue(true);
@@ -370,4 +373,3 @@ TValue TValue::operator  ~(){
 	}
 	return TValue(~(int)x.sValue.dou);
 }
-

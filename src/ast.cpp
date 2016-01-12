@@ -293,30 +293,48 @@ void ast::FunctionDeclaration::run() {
     for (auto parameter : *parameter_list) {
         std::cout << parameter->name << " ";
     }
+    std::cout << std::endl;
     value = TValue(this);
     nowStack.assignAndNew(function_name->name, value);
 }
 
 void ast::CallExpression::run() {
     std::cout << "calling function: " << function_name->name << std::endl;
-    for (auto arg : *argument_list) {
-        arg->run();
-    }
-    std::cout << "with arguments: ";
-    for (auto arg : *argument_list) {
-        switch (arg->value.type) {
-            case TValue::TType::Tstring: {
-                std::cout << arg->value.sValue.str << " ";
-                break;
-            }
-            case TValue::TType::Tdouble: {
-                std::cout << arg->value.sValue.dou << " ";
-                break;
+    value = nowStack.getVar(function_name->name);
+    FunctionDeclaration *function = value.func;
+    ParameterList *pl = function->parameter_list;
+    FunctionBody *fb = function->function_body;
+
+    if (argument_list) {
+        int index = 0;
+
+        if (pl->size() != argument_list->size()) {
+            yyerror("wrong number of arguments");
+        }
+        for (auto arg : *argument_list) {
+            arg->run();
+        }
+
+        std::cout << "with arguments: ";
+        for (auto arg : *argument_list) {
+            switch (arg->value.type) {
+                case TValue::TType::Tstring: {
+                    std::cout << arg->value.sValue.str << " ";
+                    nowStack.assignAndNew(pl->at(index)->name, arg->value);
+                    index++;
+                    break;
+                }
+                case TValue::TType::Tdouble: {
+                    std::cout << arg->value.sValue.dou << " ";
+                    nowStack.assignAndNew(pl->at(index)->name, arg->value);
+                    index++;
+                    break;
+                }
             }
         }
+        std::cout << std::endl;
     }
-    value = nowStack.getVar(function_name->name);
-    // (value.func)->callWithArguments();
+    fb->run();
 }
 
 void ast::FuncCall::run() {

@@ -107,7 +107,7 @@ public:
  	}
 };
 
-class FunctionDeclaration : StatementList {
+class FunctionDeclaration : public StatementList {
 public:
     Identifier* function_name;
     ParameterList* parameter_list;
@@ -455,13 +455,13 @@ public:
 	}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
 	virtual int toRange() { return 1; }
-	
+
     virtual std::string toString() { return "Array"; }
     virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;
-		for(auto el : elList) rlist.push_back((Node *)el); 		
+		for(auto el : elList) rlist.push_back((Node *)el);
 		return rlist;
-	}	
+	}
     virtual void run();
 };
 
@@ -777,7 +777,7 @@ public:
 };
 
 class FinallyStmt : public Statement{
-public:   
+public:
     Block * stmt;
     FinallyStmt(Block * stmt):stmt(stmt){}
     virtual void run();
@@ -786,7 +786,7 @@ public:
 
 class CatchStmt : public Statement {
 public:
-    Identifier * identifier;    
+    Identifier * identifier;
     Block * stmt;
     CatchStmt(Identifier * identifier,Block * stmt):identifier(identifier),stmt(stmt){}
     virtual void run();
@@ -798,7 +798,7 @@ class Block : public Statement {
 public:
     Block(StatementList* stmtList) : stmtList(stmtList) {}
 	virtual std::string toString() { return "block"; }
-    virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }	
+    virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }
 	virtual void run();
 };
 

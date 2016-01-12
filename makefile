@@ -13,7 +13,7 @@ compiler:
 	@mv $(SRC_DIR)/JSint .
 
 ll:
-	@./Jsint < $(filter-out ll asm,$(MAKECMDGOALS)) > $(basename $(filter-out ll asm,$(MAKECMDGOALS))).res
+	@./Jsint debug < $(filter-out ll asm,$(MAKECMDGOALS)) > $(basename $(filter-out ll asm,$(MAKECMDGOALS))).res
 	@echo "\033[1m" Test "\033[0m" $(filter-out ll asm,$(MAKECMDGOALS)) : "\c"
 	@./compare $(basename $(filter-out ll asm,$(MAKECMDGOALS))).res $(basename $(filter-out ll asm,$(MAKECMDGOALS))).out
 %:

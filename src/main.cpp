@@ -17,16 +17,13 @@ std::string green(const std::string& str) {
 	std::string red_e = "\033[0m";
 	return red_b + str + red_e;
 }
-int debugFlag = 0;
+int debugFlag = 1;
 extern int yyparse();
 extern ast::StatementList* ast_root;
 VarStack nowStack = VarStack();
 int main(int argc, char** argv) {
-	cout << green("start!") << endl;
-	if (argc>1 && argv[1][0] == 'd')
-	{
-		debugFlag = 1;
-	}
+	if (argc>1) {debugFlag = 0;}
+	debugOut <<green("start!") << endl;
 	init_buffer();
 	yyparse();
 	extern int parseError;

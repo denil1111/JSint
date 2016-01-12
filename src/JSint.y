@@ -955,7 +955,9 @@ SourceElement	:	FunctionDeclaration
 
 	if (!parseError)
 	{	
-		$1 -> print_node("", true, true);
+		extern int debugFlag;
+		if (debugFlag)
+			$1 -> print_node("", true, true);
 		ast_root = $1;
 		try {
 			ast_root->run();
@@ -969,7 +971,8 @@ SourceElement	:	FunctionDeclaration
 		
 		if (!parseError)
 		{
-			ast_root->value.print();
+			if (debugFlag)
+				ast_root->value.print();
 			parseError = 0;
 		}
 		else

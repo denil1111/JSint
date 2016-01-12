@@ -11,7 +11,7 @@
 using namespace std;
 extern VarStack nowStack;
 TValue ast::Identifier::run() {
-    std::cout << "Creating identifier: " << name << std::endl;
+    debugOut << "Creating identifier: " << name << std::endl;
 
 	value = nowStack.getVar(name);
 
@@ -19,37 +19,37 @@ TValue ast::Identifier::run() {
 }
 
 TValue ast::IntegerType::run() {
-    std::cout << "Creating integer: " << val << std::endl;
+    debugOut << "Creating integer: " << val << std::endl;
     return value;
 }
 
 TValue ast::RealType::run() {
-    std::cout << "Creating real: " << val << std::endl;
+    debugOut << "Creating real: " << val << std::endl;
     value.type = TValue::TType::Tdouble;
 	value.sValue.dou = val;
 	return value;
 }
 
 TValue ast::CharType::run() {
-    std::cout << "Creating char: " << val << std::endl;
+    debugOut << "Creating char: " << val << std::endl;
     return value;
 }
 
 TValue ast::StringType::run() {
-    std::cout << "Creating String: " << val << std::endl;
+    debugOut << "Creating String: " << val << std::endl;
 	value.type = TValue::TType::Tstring;
 	value.sValue.str = val;
 	return value;
 }
 
 TValue ast::BooleanType::run() {
-    std::cout << "Creating boolean: " << val << std::endl;
+    debugOut << "Creating boolean: " << val << std::endl;
     value = TValue(val);
     return value;
 
 }
 TValue ast::RangeType::run() {
-    std::cout << "Creating subscript range from " << this->low << " to " << this->high << std::endl;
+    debugOut << "Creating subscript range from " << this->low << " to " << this->high << std::endl;
     return value;
 
 }
@@ -302,10 +302,10 @@ TValue ast::Routine::run() {
 }
 
 TValue ast::FunctionDeclaration::run() {
-    std::cout << "declaring function: " << function_name->name << std::endl;
-    std::cout << "with parameters: ";
+    debugOut << "declaring function: " << function_name->name << std::endl;
+    debugOut << "with parameters: ";
     for (auto parameter : *parameter_list) {
-        std::cout << parameter->name << " ";
+        debugOut << parameter->name << " ";
     }
     value = TValue(this);
     nowStack.assignAndNew(function_name->name, value);
@@ -314,19 +314,19 @@ TValue ast::FunctionDeclaration::run() {
 
 
 TValue ast::CallExpression::run() {
-    std::cout << "calling function: " << function_name->name << std::endl;
+    debugOut << "calling function: " << function_name->name << std::endl;
     for (auto arg : *argument_list) {
         arg->run();
     }
-    std::cout << "with arguments: ";
+    debugOut << "with arguments: ";
     for (auto arg : *argument_list) {
         switch (arg->value.type) {
             case TValue::TType::Tstring: {
-                std::cout << arg->value.sValue.str << " ";
+                debugOut << arg->value.sValue.str << " ";
                 break;
             }
             case TValue::TType::Tdouble: {
-                std::cout << arg->value.sValue.dou << " ";
+                debugOut << arg->value.sValue.dou << " ";
                 break;
             }
         }
@@ -458,11 +458,11 @@ TValue ast::ArrayType::run() {
 	value.arr = values;
 	value.type = TValue::TType::Tarray;
 
-	std::cout << "Creating array: " << "values" << std::endl;
+	debugOut << "Creating array: " << "values" << std::endl;
 	for (auto val : value.arr) {
-		std::cout << val.toString() << ", ";
+		debugOut << val.toString() << ", ";
 	}
-	std::cout << std::endl;
+	debugOut << std::endl;
 	return value;
 }
 
@@ -476,12 +476,12 @@ TValue ast::StatementList::run() {
 }
 
 TValue ast::Block::run() {
-	std::cout << "Enter new block!" << std::endl;
+	debugOut << "Enter new block!" << std::endl;
 	nowStack.push_new();
 	this->stmtList->run();
 	nowStack.print();
 	nowStack.pop();
-	std::cout << "Exit from block!" << std::endl;
+	debugOut << "Exit from block!" << std::endl;
 	nowStack.print();
 	return value;
 }

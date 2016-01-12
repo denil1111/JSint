@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 int parseError = 0;
+MyStream debugOut;
 void yyerror(char *s, ...) {
 	PrintError(s);
 	parseError = 1;

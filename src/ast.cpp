@@ -262,6 +262,10 @@ TValue ast::Operator::run() {
 					value = op1->value.logicRShift(op2->value);
 					break;
 				}
+				case OpType::comma :{
+					value = op2->value;
+					break;
+				}
 			}
         }
     }

@@ -21,7 +21,7 @@ struct TValue {
 	static TValue null();
 	struct TSValue{
 		std::string str;
-		int dou;
+		double dou;
 	};
 	enum TType {
 		Tfunction,

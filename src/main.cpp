@@ -41,6 +41,6 @@ int main(int argc, char** argv) {
 	extern int parseError;
 	if (parseError) return 0;
 	// cout<<"!!"<<endl;
-	cout << green("-----success run-----") << endl;
+	debugOut << green("-----success run-----") << endl;
 	return 0;
 }

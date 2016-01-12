@@ -6,80 +6,116 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include "utils.h"
 
 
 #include "Declaration.h"
 
+extern void yyerror(char *s, ...);
 extern std::string green(const std::string& str);
 extern std::string red(const std::string& str);
 struct TValue {
+	static TValue NaN();
+	static TValue undefined();
+	static TValue null();
 	struct TSValue{
 		std::string str;
-		int integer;
-		double dou;
+		int dou;
 	};
 	enum TType {
 		Tfunction,
 		Tstring,
-		Tint,
 		Tdouble,
 		Tarray,
-		TNaN
+		TNaN,
+		Tbool,
+		Tundefined,
+		Tnull
 	};
 	std::vector<TValue> arr;
 	ast::FunctionDeclaration *func;
 	TSValue sValue;
+	bool boolFlag = false;
 	TType type;
-	TValue(){}
+	TValue toDouble() ;
+	TValue toBoolean() ;
+	TValue(){
+		type = TType::Tundefined;
+	}
+	TValue(unsigned int x) {
+		type = TType::Tdouble;
+		sValue.dou = x;
+	}
 	TValue(int x) {
-		type = TType::Tint;
-		sValue.integer = x;
+		type = TType::Tdouble;
+		sValue.dou = x;
 	}
 	TValue(double x) {
 		type = TType::Tdouble;
 		sValue.dou = x;
 	}
+	TValue(bool x) {
+		type = TType::Tdouble;
+		sValue.dou = x;
+		boolFlag = true;
+	}
 	TValue(std::string x) {
-		type = TType::Tint;
+		type = TType::Tstring;
 		sValue.str = x;
 	}
 	TValue(ast::FunctionDeclaration* function) {
 		type = TType::Tfunction;
 		func = function;
 	}
-	void print() const{
+	TType getType()
+	{
+		if (boolFlag) return TType::Tbool;
+		else return type;
+
+	}
+	std::string getTypeString()
+	{
+		switch (getType())
+		{
+			case TType::Tfunction: return "function";
+			case TType::Tstring: return "string";
+			case TType::Tdouble: return "number";
+			case TType::Tarray: return "array";
+			case TType::TNaN: return "NaN";
+			case TType::Tbool: return "bool";
+			case TType::Tundefined: return "undefined";
+			case TType::Tnull: return "nul";
+		}
+
+	}
+
+	void print() {
 		std::cout<<green(this->toString())<<std::endl;
 	}
-    std::string toString() const {
-		std::stringstream  ss;
-		std::string st;
-		if (type == TType::Tint) {
-			ss << sValue.integer;
-		}
-		if (type == TType::Tstring) {
-			ss << "\""<<sValue.str<<"\"";
-		}
-		ss >> st;
-		return st;
-	}
-	TValue operator   +(const TValue &rx);
-	TValue operator   -(const TValue &rx);
-	TValue operator   *(const TValue &rx);
-	TValue operator   /(const TValue &rx);
-	TValue operator   %(const TValue &rx);
-	TValue operator   >(const TValue &rx);
-	TValue operator   <(const TValue &rx);
-	TValue operator   >=(const TValue &rx);
-	TValue operator   <=(const TValue &rx);
-	TValue operator   !=(const TValue &rx);
-	TValue operator   ==(const TValue &rx);
-	TValue operator   ||(const TValue &rx);
-	TValue operator   &&(const TValue &rx);
-	TValue operator   |(const TValue &rx);
-	TValue operator   &(const TValue &rx);
-	TValue operator   ^(const TValue &rx);
+    std::string toString();
+	TValue operator   +( TValue &rx);
+	TValue operator   -( TValue &rx);
+	TValue operator   *( TValue &rx);
+	TValue operator   /( TValue &rx);
+	TValue operator   %( TValue &rx);
+	TValue operator   >( TValue &rx);
+	TValue operator   <( TValue &rx);
+	TValue operator   >=( TValue &rx);
+	TValue operator   <=( TValue &rx);
+	TValue operator   !=( TValue &rx);
+	TValue operator   ==( TValue &rx);
+	TValue operator   ||( TValue &rx);
+	TValue operator   &&( TValue &rx);
+	TValue operator   |( TValue &rx);
+	TValue operator   &( TValue &rx);
+	TValue operator   ^( TValue &rx);
+	TValue operator   <<( TValue &rx);
+	TValue operator   >>( TValue &rx);
+	TValue logicRShift( TValue &rx);
 	TValue operator   !();
 	TValue operator   -();
+	TValue operator   ~();
+
 };
 
 class VarList {
@@ -123,8 +159,7 @@ public:
 		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
 			if (it->hasVar(idname)) return it->getVar(idname);
 		}
-		std::cout << red("Not exist in variable stack!") << std::endl;
-		exit(0);
+		yyerror("Not exist in variable stack!");
 	}
 	void push(VarList varList) {
 		vstack.push_back(varList);

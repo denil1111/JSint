@@ -18,11 +18,11 @@ void ast::Identifier::run() {
 
 void ast::IntegerType::run() {
     std::cout << "Creating integer: " << val << std::endl;
-	value.type = TValue::TType::Tint;
-	value.sValue.integer = val;
 }
 void ast::RealType::run() {
     std::cout << "Creating real: " << val << std::endl;
+    value.type = TValue::TType::Tdouble;
+	value.sValue.dou = val;
 }
 void ast::CharType::run() {
     std::cout << "Creating char: " << val << std::endl;
@@ -34,13 +34,224 @@ void ast::StringType::run() {
 }
 void ast::BooleanType::run() {
     std::cout << "Creating boolean: " << val << std::endl;
+    value = TValue(val);
 }
 void ast::RangeType::run() {
     std::cout << "Creating subscript range from " << this->low << " to " << this->high << std::endl;
 }
-void ast::BinaryOperator::run() {
-	op2->run();
-	if (op == OpType::assign) {
+void ast::Operator::run() {
+	if (op!= OpType::assign)
+	{
+		op1->run();
+	}
+	bool asgFlag = false;
+	switch (op)
+	{
+		case OpType::land :{
+			if (op1->value.toBoolean().sValue.dou)
+			{
+				op2->run();
+				value = op2->value;
+			}
+			else
+			{
+				value = op1->value;
+			}
+			break;
+		}
+		case OpType::lor :{
+			if (!op1->value.toBoolean().sValue.dou)
+			{
+				op2->run();
+				value = op2->value;
+			}
+			else
+			{
+				value = op1->value;
+			}
+			break;
+		}
+		case OpType::lnot :{
+			value = !op1->value;
+			break;
+		}
+		case OpType::bit_not :{
+			value = ~op1->value;
+			break;
+		}
+		case OpType::positive :{
+			value = - -op1->value;
+			break;
+		}
+        case OpType::negtive :{
+        	value = -op1->value;
+        	break;
+        }
+        case OpType::pplus :{
+        	RealType tempE(1);
+        	Operator tempO(op1,OpType::plus_assign,&tempE);
+        	tempO.run();
+        	value = tempO.value;
+        	break;
+        }
+        case OpType::mminus :{
+        	RealType tempE(1);
+        	Operator tempO(op1,OpType::minus_assign,&tempE);
+        	tempO.run();
+        	value = tempO.value;
+        	break;
+        } 
+        case OpType::rpplus :{
+        	value = op1->value;
+        	RealType tempE(1);
+        	Operator tempO(op1,OpType::plus_assign,&tempE);
+        	tempO.run();
+        	break;
+        }
+        case OpType::rmminus :{
+        	value = op1->value;
+        	RealType tempE(1);
+        	Operator tempO(op1,OpType::minus_assign,&tempE);
+        	tempO.run();
+        	break;
+        }         
+        case OpType::type :{
+        	value = TValue(op1->value.getTypeString());
+        	break;
+        }
+        case OpType::voido :{
+        	value = TValue::undefined();
+        	break;
+        }
+        default:
+        {
+        	op2->run();
+		    switch(op)
+		    {
+				case OpType::assign :{
+					asgFlag = true;
+					value = op2->value;
+					break;
+				}
+				case OpType::plus_assign :{
+					asgFlag = true;
+				}
+				case OpType::plus :{
+					value = op1->value + op2->value;
+					break;
+				}
+				case OpType::minus_assign :{
+					asgFlag = true;
+				}
+				case OpType::minus :{
+					value = op1->value - op2->value;
+					break;
+				}
+				case OpType::mul_assign :{
+					asgFlag = true;
+				}
+				case OpType::mul :{
+					value = op1->value * op2->value;
+					break;
+				}
+				case OpType::div_assign :{
+					asgFlag = true;
+				}
+				case OpType::div :{
+					value = op1->value / op2->value;
+					break;
+				}
+				case OpType::mod_assign :{
+					asgFlag = true;
+				}
+				case OpType::mod :{
+					value = op1->value % op2->value;
+					break;
+				}
+				case OpType::bit_and_assign :{
+					asgFlag = true;
+				}
+				case OpType::bit_and :{
+					value = op1->value & op2->value;
+					break;
+				}
+				case OpType::bit_or_assign :{
+					asgFlag = true;
+				}
+				case OpType::bit_or :{
+					value = op1->value | op2->value;
+					break;
+				}
+				case OpType::bit_xor_assign :{
+					asgFlag = true;
+				}
+				case OpType::bit_xor :{
+					value = op1->value ^ op2->value;
+					break;
+				}
+				case OpType::eq :{
+					value = op1->value == op2->value;
+					break;
+				}
+				case OpType::ne :{
+					value = op1->value != op2->value;
+					break;
+				}
+				case OpType::lt :{
+					value = op1->value < op2->value;
+					break;
+				}
+				case OpType::gt :{
+					value = op1->value > op2->value;
+					break;
+				}
+				case OpType::le :{
+					value = op1->value <= op2->value;
+					break;
+				}
+				case OpType::ge :{
+					value = op1->value >= op2->value;
+					break;
+				}
+				case OpType::aeq :{
+					value = op1->value == op2->value;
+					if (op1->value.getType() != op2->value.getType()) {
+						value = TValue(false);
+					}
+					break;
+				}
+				case OpType::ane :{
+					value = op1->value == op2->value;
+					if (op1->value.getType() != op2->value.getType()) {
+						value = TValue(true);
+					}
+					break;
+				}
+				case OpType::lsh_assign :{
+					asgFlag = true;
+				}
+				case OpType::lsh :{
+					value = op1->value << op2->value;
+					break;
+				}
+				case OpType::rsh_assign :{
+					asgFlag = true;
+				}
+				case OpType::rsh :{
+					value = op1->value >> op2->value;
+					break;
+				}
+				case OpType::lrsh_assign :{
+					asgFlag = true;
+				}
+				case OpType::lrsh :{
+					value = op1->value.logicRShift(op2->value);
+					break;
+				}
+			}
+        }
+    }
+    if (asgFlag) {
 		auto id = dynamic_cast<Identifier*>(op1);
 		if (id == nullptr)
 		{
@@ -48,93 +259,7 @@ void ast::BinaryOperator::run() {
 		}
 		else
 		{
-			value = op2->value;
 			nowStack.assignAndNew(id->name,value);
-		}
-	}
-	else
-	{
-		op1->run();
-		switch (op)
-		{
-			case OpType::plus :{
-				value = op1->value + op2->value;
-				break;
-			}
-			case OpType::minus :{
-				value = op1->value - op2->value;
-				break;
-			}
-			case OpType::mul :{
-				value = op1->value * op2->value;
-				break;
-			}
-			case OpType::div :{
-				value = op1->value / op2->value;
-				break;
-			}
-			case OpType::mod :{
-				value = op1->value % op2->value;
-				break;
-			}
-			case OpType::bit_and :{
-				value = op1->value & op2->value;
-				break;
-			}
-			case OpType::bit_or :{
-				value = op1->value | op2->value;
-				break;
-			}
-			case OpType::land :{
-				value = op1->value && op2->value;
-				break;
-			}
-			case OpType::lor :{
-				value = op1->value || op2->value;
-				break;
-			}
-			case OpType::bit_xor :{
-				value = op1->value ^ op2->value;
-				break;
-			}
-			case OpType::eq :{
-				value = op1->value == op2->value;
-				break;
-			}
-			case OpType::ne :{
-				value = op1->value != op2->value;
-				break;
-			}
-			case OpType::lt :{
-				value = op1->value < op2->value;
-				break;
-			}
-			case OpType::gt :{
-				value = op1->value > op2->value;
-				break;
-			}
-			case OpType::le :{
-				value = op1->value <= op2->value;
-				break;
-			}
-			case OpType::ge :{
-				value = op1->value >= op2->value;
-				break;
-			}
-			case OpType::aeq :{
-				value = op1->value == op2->value;
-				if (op1->value.type != op2->value.type) {
-					value.sValue.integer = 0;
-				}
-				break;
-			}
-			case OpType::ane :{
-				value = op1->value == op2->value;
-				if (op1->value.type != op2->value.type) {
-					value.sValue.integer = 1;
-				}
-				break;
-			}
 		}
 	}
 
@@ -180,10 +305,6 @@ void ast::CallExpression::run() {
     std::cout << "with arguments: ";
     for (auto arg : *argument_list) {
         switch (arg->value.type) {
-            case TValue::TType::Tint: {
-                std::cout << arg->value.sValue.integer << " ";
-                break;
-            }
             case TValue::TType::Tstring: {
                 std::cout << arg->value.sValue.str << " ";
                 break;
@@ -224,9 +345,6 @@ void ast::IfStmt::run() {
 void ast::WhileStmt::run() {
 
 }
-void ast::RepeatStmt::run() {
-
-}
 void ast::ForStmt::run() {
 
 }
@@ -236,12 +354,17 @@ void ast::CaseStmt::run() {
 void ast::SwitchStmt::run() {
 
 }
-void ast::GotoStmt::run(){
-
+void ast::ArrayType::run() {
 }
-void ast::LabelStmt::run(){
 
+void ast::ArrayRef::run() {
+    
 }
+
+void ast::ContinueStmt::run() {
+    
+}
+
 
 void ast::ArrayType::run() {
 
@@ -260,10 +383,22 @@ void ast::ArrayType::run() {
 	for (auto val : value.arr) {
 		std::cout << val.toString() << ", ";
 	}
-	std::cout << std::endl; 
+	std::cout << std::endl;
 }
 
-void ast::ArrayRef::run() {
+void ast::BreakStmt::run() {
+}
+
+void ast::TryStmt::run() {
+    
+}
+void ast::ThrowStmt::run() {
+    
+}
+void ast::FinallyStmt::run() {
+    
+}
+void ast::CatchStmt::run() {
     
 }
 

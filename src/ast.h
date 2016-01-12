@@ -33,7 +33,10 @@ class RecordType;
 class TypeConst;
 class CaseStmt;
 class Block;
-
+class CatchStmt;
+class ThrowStmt;
+class FinallyStmt;
+class TryStmt;
 
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
@@ -62,7 +65,7 @@ public:
         auto children_list = this->getChildren();
         auto ch_prefix = tail ? prefix + ch_tailStr : prefix + ch_branchStr;
         for(size_t i = 0; i < children_list.size(); i++) {
-            children_list[i] ? children_list[i]->print_node(ch_prefix, i == children_list.size() - 1, false) : []() {std::cout << "nullptr in tree";}();
+            children_list[i] ? children_list[i]->print_node(ch_prefix, i == children_list.size() - 1, false) : []() {std::cout << "nullptr in tree\n";}();
         }
     }
 
@@ -415,9 +418,9 @@ public:
 
 class BooleanType : public ConstValue {
 public:
-    int val;
+    bool val;
 
-    BooleanType(const char * str) : val(std::string(str) == "true" ? 1 : 0) {}
+    BooleanType(const char * str) : val(std::string(str) == "true" ? true : false) {}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::boolean; }
     virtual int toRange() { return val; }
     virtual std::string toString() { std::stringstream oss; oss << val; return oss.str(); }
@@ -525,9 +528,10 @@ public:
     virtual void run();
 };
 
-class BinaryOperator : public Expression {
+class Operator : public Expression {
 public:
     enum class OpType : int {
+        //binary
         plus,
         minus,
         mul,
@@ -552,27 +556,51 @@ public:
 		iin,
 		lsh,
 		rsh,
-		ursh
+		lrsh,
+		plus_assign,
+		minus_assign,
+		mul_assign,
+		div_assign,
+		mod_assign,
+		bit_and_assign,
+		bit_or_assign,
+		bit_xor_assign,
+		lsh_assign,
+		rsh_assign,
+		lrsh_assign,
+        unary_label,
+        bit_not,
+        lnot,
+        positive,
+        negtive,
+        pplus,
+        mminus,
+        rpplus,
+        rmminus,
+        voido,
+        type,
+        del,
+
     };
 
     Expression *op1, *op2;
     OpType op;
 
-    BinaryOperator(Expression* op1, OpType op, Expression* op2) :
+    Operator(Expression* op1, OpType op, Expression* op2) :
         op1(op1),
         op(op),
         op2(op2)
     {}
 
-
     virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)op1);
-        list.push_back((Node *)op2);
+        if (op<OpType::unary_label)
+            list.push_back((Node *)op2);
         return list;
     }
     virtual std::string toString() {
-        return "Binary op: " + (std::map<OpType, std::string>){
+        return "op: " + (std::map<OpType, std::string>){
             { OpType::plus, "plus" },
             { OpType::minus, "minus" },
             { OpType::mul, "mul" },
@@ -598,7 +626,28 @@ public:
 			{ OpType::iin, "in"},
 			{ OpType::lsh, "left_shift"},
 			{ OpType::rsh, "right_shift"},
-			{ OpType::ursh, "right_u_shift"},
+			{ OpType::lrsh, "lrshift"},
+			{ OpType::plus_assign,"plus_assign"},
+			{ OpType::minus_assign,"minus_assign"},
+			{ OpType::mul_assign,"mul_assign"},
+			{ OpType::div_assign,"div_assign"},
+			{ OpType::mod_assign,"mod_assign"},
+			{ OpType::bit_and_assign,"bit_and_assign"},
+			{ OpType::bit_or_assign,"bit_or_assign"},
+			{ OpType::bit_xor_assign,"bit_xor_assign"},
+			{ OpType::lsh_assign,"lsh_assign"},
+			{ OpType::rsh_assign,"rsh_assign"},
+			{ OpType::lrsh_assign,"lrsh_assign"},
+            { OpType::bit_not, "bit_not" },
+            { OpType::positive, "positive"},
+            { OpType::negtive, "negtive"},
+            { OpType::pplus, "plus_plus_left"},
+            { OpType::mminus, "minus_minus_left"},
+            { OpType::rpplus, "plus_plus_right"},
+            { OpType::rmminus, "minus_minus_right"},
+            { OpType::voido, "void"},
+            { OpType::type, "type"},
+            { OpType::del, "delete"}
         }[op];
     }
     virtual void run();
@@ -608,7 +657,7 @@ class AssignmentStmt : public Statement {
 public:
     Identifier* lhs = nullptr; // left-hand side
     Expression* rhs = nullptr;
-    bool        complex_assign = false;
+    bool  complex_assign = false;
     AssignmentStmt(Identifier* lhs, Expression* rhs) : lhs(lhs), rhs(rhs) {}
     AssignmentStmt(ArrayRef* lhs, Expression* rhs) : lhs((Identifier *)lhs), rhs(rhs), complex_assign(true) {}
     AssignmentStmt(RecordRef* lhs, Expression* rhs) : lhs((Identifier *)lhs), rhs(rhs), complex_assign(true) {}
@@ -642,45 +691,39 @@ class WhileStmt : public Statement {
 public:
     Expression* condition;
     Statement* loopStmt;
-    WhileStmt(Expression* condition,Statement* loopStmt):condition(condition),loopStmt(loopStmt){}
+    bool ifDo;
+    WhileStmt(Expression* condition,Statement* loopStmt,bool ifDo):condition(condition),loopStmt(loopStmt),ifDo(ifDo){}
     virtual void run();
     virtual std::string toString() { return "while"; }
-
-
 };
-class RepeatStmt : public Statement {
-public:
-    Expression* condition;
-    Statement* loopStmt;
-    RepeatStmt(Expression* condition,StatementList* loopStmt):condition(condition),loopStmt(loopStmt){}
-    virtual void run();
-    virtual std::string toString() { return "repeat"; }
-};
+
 // namespace ast end
 class ForStmt : public Statement {
 public:
-    Identifier* loopVar;
+    Expression* loopVar;
     Expression* startExp;
     Expression* endExp;
-    int direction;
+    // int direction;
     Statement* loopStmt;
-    ForStmt(Identifier* loopVar, Expression* startExp, Expression* endExp, int direction,Statement* loopStmt):
+    ForStmt(Expression* loopVar, Expression* startExp, Expression* endExp,Statement* loopStmt):
         loopVar(loopVar),
         startExp(startExp),
         endExp(endExp),
-        loopStmt(loopStmt),
-        direction(direction){}
+        loopStmt(loopStmt){}
     virtual void run();
     virtual std::string toString() { return "for"; }
 };
+
 class CaseStmt : public Statement {
 public:
     Expression* condition;
     Statement* thenStmt;
-    CaseStmt(Expression* condition,Statement* thenStmt):condition(condition),thenStmt(thenStmt){}
+    bool isDefault;
+    CaseStmt(Expression* condition,Statement* thenStmt,bool isDefault):condition(condition),thenStmt(thenStmt),isDefault(isDefault){}
     virtual void run();
-    virtual std::string toString() { return "case statement"; }
+    virtual std::string toString() { return "case/default statement"; }
 };
+
 class SwitchStmt : public Statement {
 public:
     Expression* exp;
@@ -689,22 +732,65 @@ public:
     virtual void run();
     virtual std::string toString() { return "switch statement"; }
 };
-class LabelStmt : public Statement {
-public:
-    int label;
-    Statement* statement;
-    LabelStmt(int label,Statement* statement):label(label),statement(statement){}
-    virtual void run();
-    virtual std::string toString() { return "label statement"; }
 
+class ReturnStmt : public Statement {
+public:
+    Expression* exp;
+    CaseList* list;
+    ReturnStmt(Expression* exp,CaseList* list):exp(exp),list(list){}
+    virtual void run();
+    virtual std::string toString() { return "return statement"; }
 };
-class GotoStmt : public Statement {
-public:
-    int label;
-    GotoStmt(int label):label(label){}
-    virtual void run();
-    virtual std::string toString() { return "label statement"; }
 
+class BreakStmt : public Statement {
+public:
+    Identifier * label;
+    BreakStmt(Identifier * label):label(label){}
+    virtual void run();
+    virtual std::string toString() { return "break statement"; }
+};
+
+class ContinueStmt : public Statement {
+public:
+    Identifier * label;
+    ContinueStmt(Identifier * label):label(label){}
+    virtual void run();
+    virtual std::string toString() { return "continue statement"; }
+};
+
+class TryStmt : public Statement {
+public:
+    Block*blockstmt;
+    CatchStmt*catchstmt;
+    FinallyStmt*finallystmt;
+    TryStmt(CatchStmt*catchstmt,FinallyStmt*finallystmt):catchstmt(catchstmt),finallystmt(finallystmt){}
+    virtual void run();
+    virtual std::string toString() { return "try statement"; }
+};
+
+class ThrowStmt : public Statement {
+public:
+    Expression* exp;
+    ThrowStmt(Expression* exp):exp(exp){}
+    virtual void run();
+    virtual std::string toString() { return "throw statement"; }
+};
+
+class FinallyStmt : public Statement{
+public:   
+    Block * stmt;
+    FinallyStmt(Block * stmt):stmt(stmt){}
+    virtual void run();
+    virtual std::string toString() { return "finally statement"; }
+};
+
+class CatchStmt : public Statement {
+public:
+    Identifier * identifier;    
+    Block * stmt;
+    CatchStmt(Identifier * identifier,Block * stmt):identifier(identifier),stmt(stmt){}
+    virtual void run();
+    virtual std::string toString() { return "catch statement"; }
 };
 
 class Block : public Statement {
@@ -715,5 +801,6 @@ public:
     virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }	
 	virtual void run();
 };
+
 }
 #endif

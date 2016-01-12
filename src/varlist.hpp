@@ -15,34 +15,38 @@ namespace ast {
 extern void yyerror(char *s, ...);
 extern std::string green(const std::string& str);
 extern std::string red(const std::string& str);
-struct TValue {
-	static TValue NaN();
-	static TValue undefined();
-	static TValue null();
-	struct TSValue{
-		std::string str;
-		int dou;
-	};
+
+struct TSValue{
+	std::string str;
+	int dou;
+};
+
+class TValue {
+public:
 	enum TType {
 		Tfunction,
 		Tstring,
 		Tdouble,
-		Tarray,
+		Tobject,
 		TNaN,
 		Tbool,
 		Tundefined,
 		Tnull
 	};
-	std::vector<TValue> arr;
+	//std::vector<TValue> arr;
 	ast::FunctionDeclaration *func;
 	TSValue sValue;
 	bool boolFlag = false;
 	TType type;
-	TValue toDouble() ;
-	bool toBoolean() ;
+
+	static TValue NaN();
+	static TValue undefined();
+	static TValue null();
+	
 	TValue(){
 		type = TType::Tundefined;
 	}
+	TValue(TType type) : type(type) {}
 	TValue(unsigned int x) {
 		type = TType::Tdouble;
 		sValue.dou = x;
@@ -68,6 +72,11 @@ struct TValue {
 		type = TType::Tfunction;
 		func = function;
 	}
+
+	virtual TValue toDouble() ;
+	virtual bool toBoolean() ;
+	virtual std::string toString();
+		
 	TType getType()
 	{
 		if (boolFlag) return TType::Tbool;
@@ -81,7 +90,7 @@ struct TValue {
 			case TType::Tfunction: return "function";
 			case TType::Tstring: return "string";
 			case TType::Tdouble: return "number";
-			case TType::Tarray: return "array";
+			case TType::Tobject: return "object";
 			case TType::TNaN: return "NaN";
 			case TType::Tbool: return "bool";
 			case TType::Tundefined: return "undefined";
@@ -93,7 +102,7 @@ struct TValue {
 	void print() {
 		std::cout<<green(this->toString())<<std::endl;
 	}
-    std::string toString();
+	
 	TValue operator   +( TValue &rx);
 	TValue operator   -( TValue &rx);
 	TValue operator   *( TValue &rx);

@@ -455,22 +455,45 @@ TValue ast::ArrayType::run() {
 	for (int i=0; i<elList.size(); i++) {
 		values[i] = elList[i]->value;
 	}
-	value.arr = values;
-	value.type = TValue::TType::Tarray;
+	arrayValue = Object(values);
 
 	std::cout << "Creating array: " << "values" << std::endl;
-	for (auto val : value.arr) {
-		std::cout << val.toString() << ", ";
-	}
-	std::cout << std::endl;
-	return value;
+	std::cout << arrayValue.toString() << std::endl;
+	return arrayValue;
 }
 
+TValue ast::ObjectType::run() {
+	propList->run();
+	
+	std::map<std::string, TValue> props = std::map<std::string, TValue>();
+	for (auto stmt : propList->list) {
+		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
+		props[property->name] = property->valueExp->value;
+	}
+	
+	objectValue = Object(props);
+
+	std::cout << "Creating object: " << objectValue.toString() << std::endl;
+	
+	return objectValue;
+}
 
 TValue ast::StatementList::run() {
 	for (auto stmt: list){
 		stmt->run();
-	
+	}
+	return value;
+}
+
+TValue ast::PropertyNameAndValue::run() {
+	value = valueExp->run();
+	return value;
+}
+
+TValue ast::PropertyNameAndValueList::run() {
+	for (auto stmt: list) {
+		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);		
+		property->run();
 	}
 	return value;
 }

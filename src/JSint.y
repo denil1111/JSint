@@ -63,6 +63,10 @@ ast::Operator* noOp1Exp;
 	ast::CallExpression*    ast_CallExpression;
 	ast::ElementList*       ast_ElementList;
 	std::vector<ast::CaseStmt*>*		ast_CaseStmtVector;
+	ast::PropertyName*       ast_PropertyName;
+	ast::PropertyNameAndValue* ast_PropertyNameAndValue;
+	ast::PropertyNameAndValueList* ast_PropertyNameAndValueList;
+	ast::ObjectType*         ast_ObjectType;
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -81,9 +85,11 @@ ast::Operator* noOp1Exp;
 %type <ast_Identifier> Identifier
 %type <ast_Expression> PrimaryExpression Literal ArrayLiteral
 %type <ast_ElementList> ElementList ElementListPart
-%type <ast_Node> Elision ObjectLiteral
-%type <ast_Node> PropertyNameAndValueList PropertyNameAndValueListPart
-%type <ast_Node> PropertyNameAndValue PropertyName
+%type <ast_Node> Elision
+%type <ast_ObjectType> ObjectLiteral
+%type <ast_PropertyName> PropertyName
+%type <ast_PropertyNameAndValue> PropertyNameAndValue
+%type <ast_PropertyNameAndValueList> PropertyNameAndValueList
 %type <ast_Expression> MemberExpression MemberExpressionForIn
 %type <ast_Expression> AllocationExpression AllocationExpressionBody
 %type <ast_Expression> MemberExpressionParts MemberExpressionPart
@@ -143,6 +149,9 @@ ast::Operator* noOp1Exp;
 //张宇昊
 PrimaryExpression	:	THIS
 |	ObjectLiteral
+{
+	$$ = $1;
+}
 |	LEFT_PARE Expression RIGHT_PARE
 {
 	$$ = $2;
@@ -204,16 +213,44 @@ ElementListPart :   Elision AssignmentExpression ElementListPart
 Elision	:   COMMA
 |   Elision COMMA
 ObjectLiteral	:	LEFT_BRACE PropertyNameAndValueList RIGHT_BRACE
+{
+	$$ = new ast::ObjectType($2);
+}
 |   LEFT_BRACE  RIGHT_BRACE
-PropertyNameAndValueList	:	PropertyNameAndValue PropertyNameAndValueListPart
-PropertyNameAndValueListPart    :   PropertyNameAndValueListPart COMMA
+{
+	$$ = new ast::ObjectType();
+}
+PropertyNameAndValueList	:	PropertyNameAndValue COMMA PropertyNameAndValueList
+{
+	$$ = new ast::PropertyNameAndValueList($1, $3);
+}
+| PropertyNameAndValue
+{
+	$$ = new ast::PropertyNameAndValueList($1);
+}
+/*PropertyNameAndValueListPart    :   PropertyNameAndValueListPart COMMA
 |   PropertyNameAndValueListPart COMMA PropertyNameAndValue
-|
+{
+	$$ = new ast::PropertyNameAndValueList()
+}
+|*/
 
 PropertyNameAndValue	:	PropertyName COLON AssignmentExpression
+{
+	$$ = new ast::PropertyNameAndValue($1, $3);
+}
 PropertyName	:	Identifier
+{
+	$$ = &($1->name);
+}
 |	STRING_LITERAL
+{
+	$$ = new std::string($1);
+}
 |	DECIMAL_LITERAL
+{
+	$$ = new std::string($1);
+}
 MemberExpression	:  FunctionExpression MemberExpressionParts
 |   PrimaryExpression MemberExpressionParts{
 	if ($2 == nullptr)

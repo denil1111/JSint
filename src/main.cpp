@@ -5,6 +5,7 @@
 #include "parser.hpp"
 #include "ccalc.h"
 #include "varlist.hpp"
+#include "string.h"
 
 using namespace std;
 std::string red(const std::string& str) {
@@ -17,12 +18,23 @@ std::string green(const std::string& str) {
 	std::string red_e = "\033[0m";
 	return red_b + str + red_e;
 }
-int debugFlag = 1;
+int debugFlag = 0;
+int valueFlag = 1;
 extern int yyparse();
 extern ast::StatementList* ast_root;
 VarStack nowStack = VarStack();
 int main(int argc, char** argv) {
-	if (argc>1) {debugFlag = 0;}
+	for (int i=1;i<argc;i++)
+	{
+		if (strcmp(argv[i],"-d")==0)
+		{
+			debugFlag = 1;
+		}
+		if (strcmp(argv[i],"-a")==0)
+		{
+			valueFlag = 0;
+		}
+	}
 	debugOut <<green("start!") << endl;
 	init_buffer();
 	yyparse();

@@ -139,7 +139,7 @@ struct MyStream
     {
         // call the function, but we cannot return it's value
         if (debugFlag)
-        manip(std::cout);
+            manip(std::cout);
 
         return *this;
     }

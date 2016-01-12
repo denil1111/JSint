@@ -971,7 +971,8 @@ SourceElement	:	FunctionDeclaration
 		
 		if (!parseError)
 		{
-			if (debugFlag)
+			extern int valueFlag;
+			if (valueFlag)
 				ast_root->value.print();
 			parseError = 0;
 		}

@@ -307,6 +307,7 @@ TValue ast::FunctionDeclaration::run() {
     for (auto parameter : *parameter_list) {
         debugOut << parameter->name << " ";
     }
+    std::cout << std::endl;
     value = TValue(this);
     nowStack.assignAndNew(function_name->name, value);
     return value;
@@ -314,25 +315,40 @@ TValue ast::FunctionDeclaration::run() {
 
 
 TValue ast::CallExpression::run() {
-    debugOut << "calling function: " << function_name->name << std::endl;
-    for (auto arg : *argument_list) {
-        arg->run();
-    }
-    debugOut << "with arguments: ";
-    for (auto arg : *argument_list) {
-        switch (arg->value.type) {
-            case TValue::TType::Tstring: {
-                debugOut << arg->value.sValue.str << " ";
-                break;
-            }
-            case TValue::TType::Tdouble: {
-                debugOut << arg->value.sValue.dou << " ";
-                break;
-            }
-        }
-    }
+    debugOut<< "calling function: " << function_name->name << std::endl;
     value = nowStack.getVar(function_name->name);
-    // (value.func)->callWithArguments();
+    FunctionDeclaration *function = value.func;
+    ParameterList *pl = function->parameter_list;
+    FunctionBody *fb = function->function_body;
+
+    if (argument_list) {
+        int index = 0;
+
+        if (pl->size() != argument_list->size()) {
+            yyerror("wrong number of arguments");
+        }
+        for (auto arg : *argument_list) {
+            arg->run();
+        }
+
+        std::cout << "with arguments: ";
+        for (auto arg : *argument_list) {
+            switch (arg->value.type) {
+                case TValue::TType::Tstring: {
+                    std::cout << arg->value.sValue.str << " ";
+                    break;
+                }
+                case TValue::TType::Tdouble: {
+                    std::cout << arg->value.sValue.dou << " ";
+                    break;
+                }
+            }
+            nowStack.assignAndNew(pl->at(index)->name, arg->value);
+            index++;
+        }
+        std::cout << std::endl;
+    }
+    fb->run();
     return value;
 }
 
@@ -406,40 +422,40 @@ TValue ast::SwitchStmt::run() {
 // }
 
 TValue ast::ArrayRef::run() {
-    
+
 
 	return value;
 }
 
 TValue ast::ContinueStmt::run() {
-    
+
 
 	return value;
 }
 
 TValue ast::BreakStmt::run() {
-    
+
 
 	return value;
 }
 
 TValue ast::TryStmt::run() {
-    
+
 
 	return value;
 }
 TValue ast::ThrowStmt::run() {
-    
+
 
 	return value;
 }
 TValue ast::FinallyStmt::run() {
-    
+
 
 	return value;
 }
 TValue ast::CatchStmt::run() {
-    
+
 
 	return value;
 }
@@ -470,7 +486,7 @@ TValue ast::ArrayType::run() {
 TValue ast::StatementList::run() {
 	for (auto stmt: list){
 		stmt->run();
-	
+
 	}
 	return value;
 }

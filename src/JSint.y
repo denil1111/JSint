@@ -11,7 +11,7 @@
 #include "parser.hpp"
 #include "ccalc.h"
 #include "helper.h"
-	
+
 using namespace std;
 extern VarStack nowStack;
 extern vector<ast::Expression*> concat(vector<ast::Expression*>, vector<ast::Expression*>);
@@ -91,8 +91,8 @@ ast::Operator* noOp1Exp;
 %type <ast_CallExpression> CallExpression
 %type <ast_ArgumentList> Arguments ArgumentList
 %type <ast_Expression> LeftHandSideExpression LeftHandSideExpressionForIn
-%type <ast_Expression> PostfixExpression 
-%type <ast_Expression> UnaryExpression 
+%type <ast_Expression> PostfixExpression
+%type <ast_Expression> UnaryExpression
 %type <ast_Expression> MultiplicativeExpression MultiplicativeExpressionPart
 %type <ast_Expression> AdditiveExpression AdditiveExpressionPart
 %type <ast_Expression> ShiftExpression ShiftExpressionPart
@@ -118,16 +118,16 @@ ast::Operator* noOp1Exp;
 %type <ast_Statement> EmptyStatement ExpressionStatement
 %type <ast_Node> IfStatement IterationStatement
 %type <ast_Identifier> IdentifierComma
-%type <ast_ContinueStmt> ContinueStatement 
-%type <ast_BreakStmt> BreakStatement 
+%type <ast_ContinueStmt> ContinueStatement
+%type <ast_BreakStmt> BreakStatement
 %type <ast_Node> ReturnStatement
 %type <ast_Node> WithStatement SwitchStatement
-%type <ast_CaseStmtVector> CaseBlock CaseBlockPart CaseClauses 
+%type <ast_CaseStmtVector> CaseBlock CaseBlockPart CaseClauses
 %type <ast_CaseStmt>CaseClause DefaultClause
-%type <ast_Node> LabelledStatement 
+%type <ast_Node> LabelledStatement
 %type <ast_ThrowStmt> ThrowStatement
-%type <ast_TryStmt> TryStatement TryStatementPart 
-%type <ast_CatchStmt> Catch 
+%type <ast_TryStmt> TryStatement TryStatementPart
+%type <ast_CatchStmt> Catch
 %type <ast_FinallyStmt> Finally
 %type <ast_ParameterList> FormalParameterListInPare FormalParameterList
 %type <ast_FunctionDeclaration> FunctionDeclaration FunctionExpression
@@ -160,7 +160,7 @@ PrimaryExpression	:	THIS
 	$$ = $1;
 }
 Literal	:	DECIMAL_LITERAL {
-	$$ = new ast::RealType(atof($1)); 
+	$$ = new ast::RealType(atof($1));
 	//printf("number\n");
 }
 | HEX_INTEGER_LITERAL
@@ -172,7 +172,7 @@ Literal	:	DECIMAL_LITERAL {
 	$$ = new ast::StringType(a);
 }
 | BOOLEAN_LITERAL {
-	$$ = new ast::BooleanType($1); 
+	$$ = new ast::BooleanType($1);
 
 }| NULL_LITERAL
 Identifier	:	IDENTIFIER_NAME {
@@ -261,8 +261,12 @@ Arguments	:	LEFT_PARE ArgumentList RIGHT_PARE {
 }
 
 ArgumentList	:	AssignmentExpression {
-	$$ = new ast::ArgumentList();
-	$$->push_back($1);
+	if ($1) {
+		$$ = new ast::ArgumentList();
+		$$->push_back($1);
+	} else {
+		$$ = nullptr;
+	}
 }
 | ArgumentList COMMA AssignmentExpression {
 	$1->push_back($3);
@@ -775,7 +779,7 @@ IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE{
 }
 |	FOR LEFT_PARE VAR VariableDeclarationList SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
 	//$$=new ast::ForStmt($4,$6,$8,$10);
-}	
+}
 |	FOR LEFT_PARE VAR VariableDeclarationNoIn IN Expression RIGHT_PARE Statement
 |	FOR LEFT_PARE LeftHandSideExpressionForIn IN Expression RIGHT_PARE Statement
 
@@ -948,7 +952,35 @@ SourceElements	:	SourceElement {
 | SourceElements error {
 	$$ = $1;
 }
-SourceElement	:	FunctionDeclaration
+SourceElement	:	FunctionDeclaration {
+	extern int parseError;
+	$$ = $1;
+
+	if (!parseError)
+	{
+		$1 -> print_node("", true, true);
+		ast_root = $1;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;
+		} catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+
+		if (!parseError)
+		{
+			ast_root->value.print();
+			parseError = 0;
+		}
+		else
+		{
+			parseError = 0;
+		}
+	}
+}
 |	Statement {
 	extern int parseError;
 	$$ = $1;
@@ -968,7 +1000,7 @@ SourceElement	:	FunctionDeclaration
 		} catch (...) {
 			cout << "other uncaught error" << endl;
 		}
-		
+
 		if (!parseError)
 		{
 			extern int valueFlag;
@@ -980,7 +1012,7 @@ SourceElement	:	FunctionDeclaration
 		{
 			parseError = 0;
 		}
-			
+
 	}
 }
 InFuncSourceElement	:	FunctionDeclaration

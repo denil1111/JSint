@@ -40,7 +40,7 @@ const char* ch_branchStr = "|   ";
 void ast_print(ast_node* node, char* prefix, int tail) {
 	char* new_prefix = (char *)malloc(sizeof(char) * (strlen(prefix) + 4 + 1));
 	strcpy(new_prefix, prefix);
-	if (tail) 
+	if (tail)
 		strcat(new_prefix, tailStr);
 	else
 		strcat(new_prefix, branchStr);
@@ -100,7 +100,7 @@ ast_node* ast_newNode2(ast_node* c1, ast_node* c2) {
 	ast_node* node = (ast_node *)calloc(1, sizeof(ast_node));
 
     node->ch = (ast_node **)calloc(3, sizeof(ast_node*));
-	node->ch[0] = c1;    
+	node->ch[0] = c1;
 	node->ch[1] = c2;
 	return node;
 }
@@ -179,6 +179,3 @@ ast_node* ast_newNode8(ast_node* c1, ast_node* c2, ast_node* c3, ast_node* c4, a
 	node->ch[7] = c8;
 	return node;
 }
-
-
-

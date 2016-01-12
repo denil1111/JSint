@@ -354,8 +354,6 @@ void ast::CaseStmt::run() {
 void ast::SwitchStmt::run() {
 
 }
-void ast::ArrayType::run() {
-}
 
 void ast::ArrayRef::run() {
     

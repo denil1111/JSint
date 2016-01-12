@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <sstream>
 #include "varlist.hpp"
@@ -37,6 +38,8 @@ class CatchStmt;
 class ThrowStmt;
 class FinallyStmt;
 class TryStmt;
+class BreakException;
+class ContinueException;
 
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
@@ -51,6 +54,23 @@ typedef std::vector<ConstDecl *>    ConstDeclList;
 typedef std::vector<FieldDecl *>    FieldDeclList;
 typedef std::vector<TypeConst *>    TypeDeclList;
 typedef std::vector<CaseStmt *>     CaseList;
+typedef std::map<std::string,Statement*> LabelMap;
+
+class BreakException:public std::exception{
+public:
+    std::string label;
+    // ~BreakException();
+    BreakException(std::string label):label(label){}
+};
+
+class ContinueException:public std::exception{
+public:
+    std::string label;
+    // ~ContinueException();
+    ContinueException(std::string label):label(label){}
+};
+
+
 // pure virtual class for all ast noxdes
 class Node {
 public:

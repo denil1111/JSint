@@ -123,7 +123,7 @@ IdentifierPart {IdentifierStart}|[0-9]
 <INITIAL><<EOF>> { BEGIN(REALLYEND);BeginToken(yytext);YYLVAL_DEBUG return JEOF; }
 <REALLYEND><<EOF>>      { return 0; }                    
 {IdentifierStart}{IdentifierPart}*  { BeginToken(yytext);YYLVAL_DEBUG return IDENTIFIER_NAME; }
-
-[ \n\t]+ { BeginToken(yytext); }
+(\n)	{BeginToken(yytext);YYLVAL_DEBUG return NL;}
+[ \t]+ { BeginToken(yytext); }
 .		{ printf("Invalid character\n"); }
 %%

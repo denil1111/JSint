@@ -1,9 +1,10 @@
 #include "varlist.hpp"
+#include <iomanip>
 #include <cmath>
 using namespace std;
-string TValue::toString() 
+string TValue::toString()
 {
-	std::stringstream  ss;
+	std::ostringstream  ss;
 	std::string st;
 	if (type == TType::Tdouble) {
 		if (boolFlag)
@@ -19,11 +20,11 @@ string TValue::toString()
 		}
 		else
 		{
-			ss << sValue.dou;
+			ss<<setprecision(14)<<sValue.dou;
 		}
 	}
 	if (type == TType::Tstring) {
-		ss << "\""<<sValue.str<<"\"";
+		ss << "\""+sValue.str+"\"";
 	}
 	if (type == TType::TNaN) {
 		ss<<"NaN";
@@ -34,7 +35,10 @@ string TValue::toString()
 	if (type == TType::Tnull) {
 		ss<<"null";
 	}
-	ss >> st;
+	if (type == TType::Tfunction) {
+		ss<<"function";
+	}
+	st = ss.str();
 	return st;
 }
 TValue TValue::NaN()
@@ -67,7 +71,7 @@ TValue TValue::toDouble()
 		}
 		else
 		{
-			return TValue(x);	
+			return TValue(x);
 		}
 	}
 	if (type == TType::Tdouble)
@@ -128,14 +132,8 @@ TValue TValue::operator   +( TValue &rx){
 				ret.sValue.dou = this->sValue.dou + rx.sValue.dou;
 				break;
 			}
-			case TType::Tstring: {
-				ret.type = TType::Tstring;
-				stringstream ss;
-				string s1;
-				ss<<this->sValue.dou;
-				ss>>s1;
-				ret.sValue.str = s1 + rx.sValue.str;
-				break;
+			case TType::Tstring: {	
+				return TValue(toString() + rx.sValue.str);
 			}
 		}
 	}
@@ -145,13 +143,7 @@ TValue TValue::operator   +( TValue &rx){
 		{
 
 			case TType::Tdouble: {
-				ret.type = TType::Tstring;
-				stringstream ss;
-				string s1;
-				ss<<rx.sValue.dou;
-				ss>>s1;
-				ret.sValue.str = this->sValue.str + s1;
-				break;
+				return TValue(this->sValue.str+ rx.toString());
 
 			}
 			case TType::Tstring: {
@@ -353,4 +345,3 @@ TValue TValue::operator  ~(){
 	}
 	return TValue(~(int)x.sValue.dou);
 }
-

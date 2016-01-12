@@ -16,13 +16,15 @@ extern void yyerror(char *s, ...);
 extern std::string green(const std::string& str);
 extern std::string red(const std::string& str);
 
-struct TSValue{
-	std::string str;
-	int dou;
-};
-
 class TValue {
 public:
+	static TValue NaN();
+	static TValue undefined();
+	static TValue null();
+	struct TSValue{
+		std::string str;
+		double dou;
+	};
 	enum TType {
 		Tfunction,
 		Tstring,

@@ -80,8 +80,11 @@ public:
 };
 class Statement : public Node {
 public:
-    Statement() {};
-    virtual TValue run() {}
+    Statement() { value = TValue::undefined(); };
+    virtual TValue run() 
+    {
+        return value;
+    }
     virtual std::vector<Statement*> *getlist(){}
 	virtual std::string toString() { return "Statement"; }
 };
@@ -109,7 +112,7 @@ public:
  	}
 };
 
-class FunctionDeclaration : StatementList {
+class FunctionDeclaration : public StatementList {
 public:
     Identifier* function_name;
     ParameterList* parameter_list;
@@ -765,7 +768,7 @@ public:
 };
 
 class FinallyStmt : public Statement{
-public:   
+public:
     Block * stmt;
     FinallyStmt(Block * stmt):stmt(stmt){}
     virtual TValue run();
@@ -774,7 +777,7 @@ public:
 
 class CatchStmt : public Statement {
 public:
-    Identifier * identifier;    
+    Identifier * identifier;
     Block * stmt;
     CatchStmt(Identifier * identifier,Block * stmt):identifier(identifier),stmt(stmt){}
     virtual TValue run();
@@ -854,7 +857,7 @@ class Block : public Statement {
 public:
     Block(StatementList* stmtList) : stmtList(stmtList) {}
 	virtual std::string toString() { return "block"; }
-    virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }	
+    virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }
 	virtual TValue run();
 };
 

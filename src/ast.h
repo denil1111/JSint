@@ -4,12 +4,14 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <sstream>
 #include "varlist.hpp"
 #include "Object.h"
 
 //used forward-declaration to deal with cross-reference issue
+class TValue;
 // namespace ast start
 namespace ast {
 // forward declaration
@@ -38,6 +40,9 @@ class CatchStmt;
 class ThrowStmt;
 class FinallyStmt;
 class TryStmt;
+class BreakException;
+class ContinueException;
+class LabeledStmt;
 
 typedef std::string PropertyName;
 typedef std::vector<Identifier*> ParameterList;
@@ -53,6 +58,23 @@ typedef std::vector<ConstDecl *>    ConstDeclList;
 typedef std::vector<FieldDecl *>    FieldDeclList;
 typedef std::vector<TypeConst *>    TypeDeclList;
 typedef std::vector<CaseStmt *>     CaseList;
+typedef std::map<std::string,Statement*> LabelMap;
+
+class BreakException:public std::exception{
+public:
+    std::string label;
+    // ~BreakException();
+    BreakException(std::string label):label(label){}
+};
+
+class ContinueException:public std::exception{
+public:
+    std::string label;
+    // ~ContinueException();
+    ContinueException(std::string label):label(label){}
+};
+
+
 // pure virtual class for all ast noxdes
 class Node {
 public:
@@ -81,7 +103,7 @@ public:
 class Statement : public Node {
 public:
     Statement() { value = TValue::undefined(); };
-    virtual TValue run() 
+    virtual TValue run()
     {
         return value;
     }
@@ -749,6 +771,15 @@ public:
     virtual std::string toString() { return "continue statement"; }
 };
 
+class LabeledStmt : public Statement {
+public:
+    Identifier * label;
+    Statement * stmt;
+    LabeledStmt(Identifier * label,Statement* stmt):label(label),stmt(stmt){}
+    virtual TValue run();
+    virtual std::string toString() { return "LabeledStmt statement"; }
+};
+
 class TryStmt : public Statement {
 public:
     Block*blockstmt;
@@ -802,14 +833,14 @@ public:
 	PropertyNameAndValueList(PropertyNameAndValue* property,
 							 PropertyNameAndValueList* propertyList):
 	StatementList(property, propertyList) {}
-	
+
 	virtual std::string toString() { return "PropertyList"; }
 	virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;
-		for(auto el : list) rlist.push_back((Node *)el); 		
+		for(auto el : list) rlist.push_back((Node *)el);
 		return rlist;
 	}
-	virtual TValue run();	
+	virtual TValue run();
 };
 
 class ArrayType: public ConstValue {
@@ -826,13 +857,13 @@ public:
 	}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
 	virtual int toRange() { return 1; }
-	
+
     virtual std::string toString() { return "Array"; }
     virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;
-		for(auto el : elList) rlist.push_back((Node *)el); 		
+		for(auto el : elList) rlist.push_back((Node *)el);
 		return rlist;
-	}	
+	}
     virtual TValue run();
 };
 
@@ -846,7 +877,7 @@ public:
 
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
 	virtual int toRange() { return 1; }
-	
+
 	virtual std::string toString() { return "Object"; }
 	virtual std::vector<Node*> getChildren() { return std::vector<Node*>{propList}; }
 	virtual TValue run();

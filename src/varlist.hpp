@@ -7,6 +7,8 @@
 #include <sstream>
 #include <iostream>
 #include "utils.h"
+class Object;
+class DeclaredFunction;
 
 namespace ast {
 	class FunctionDeclaration;
@@ -21,6 +23,7 @@ public:
 	static TValue NaN();
 	static TValue undefined();
 	static TValue null();
+
 	struct TSValue{
 		std::string str;
 		double dou;
@@ -36,15 +39,12 @@ public:
 		Tnull
 	};
 	//std::vector<TValue> arr;
-	ast::FunctionDeclaration *func;
+	Object* object;
+	DeclaredFunction* function;
 	TSValue sValue;
 	bool boolFlag = false;
 	TType type;
 
-	static TValue NaN();
-	static TValue undefined();
-	static TValue null();
-	
 	TValue(){
 		type = TType::Tundefined;
 	}
@@ -70,15 +70,18 @@ public:
 		type = TType::Tstring;
 		sValue.str = x;
 	}
-	TValue(ast::FunctionDeclaration* function) {
-		type = TType::Tfunction;
-		func = function;
+	TValue(Object *o) {
+		type = TType::Tobject;
+		object = o;
 	}
-
+	TValue(DeclaredFunction *func) {
+		type = TType::Tfunction;
+		function = func;
+	}
 	virtual TValue toDouble() ;
 	virtual bool toBoolean() ;
 	virtual std::string toString();
-		
+
 	TType getType()
 	{
 		if (boolFlag) return TType::Tbool;
@@ -104,7 +107,7 @@ public:
 	void print() {
 		std::cout<<green(this->toString())<<std::endl;
 	}
-	
+
 	TValue operator   +( TValue &rx);
 	TValue operator   -( TValue &rx);
 	TValue operator   *( TValue &rx);

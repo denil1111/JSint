@@ -13,6 +13,21 @@
 using namespace std;
 extern VarStack nowStack;
 extern ast::LabelMap labelMap;
+
+/*
+void debugSet() {
+	debugOut << "Check In!" << std::endl;
+}
+
+void debugUnset() {
+	debugOut << "Check Out!" << std::endl;
+}
+
+void myerror(std::string str) {
+	yyerror(str.c_str());
+}
+*/
+
 TValue ast::Identifier::run() {
     debugOut << "Creating identifier: " << name << std::endl;
 
@@ -521,20 +536,22 @@ TValue ast::CatchStmt::run() {
 
 TValue ast::ArrayType::run() {
 
-	for (auto expPtr : elList) {
-		expPtr->run();
+	elList->run();
+
+	std::vector<Statement*> stmtList = elList->list;
+	
+	std::vector<TValue> values = std::vector<TValue>(stmtList.size());
+	for (int i=0; i<stmtList.size(); i++) {
+		Expression* exp = dynamic_cast<Expression*>(stmtList[i]);
+		values[i] = exp->value;
 	}
+	Object* arrayValue = new Object(values);
 
-	std::vector<TValue> values = std::vector<TValue>(elList.size());
-	for (int i=0; i<elList.size(); i++) {
-		values[i] = elList[i]->value;
-	}
-	arrayValue = Object(values);
+	debugOut << "Creating array: " <<  arrayValue->toString() << std::endl;
 
+	value = TValue(arrayValue); 
+	return value;
 
-	debugOut << "Creating array: " << "values" << std::endl;
-	debugOut << arrayValue.toString() << std::endl;
-	return TValue(&arrayValue);
 }
 
 TValue ast::ObjectType::run() {
@@ -546,15 +563,15 @@ TValue ast::ObjectType::run() {
 		props[property->name] = property->valueExp->value;
 	}
 
-	objectValue = Object(props);
+	Object* objectValue = new Object(props);
 
-	debugOut <<  "Creating object: " << objectValue.toString() << std::endl;
+	debugOut <<  "Creating object: " << objectValue->toString() << std::endl;
 
-	return TValue(&objectValue);
+	value = TValue(objectValue); 	
+	return value;
 }
 
 TValue ast::StatementList::run() {
-	std::cout << "StatementList" << std::endl;
 	for (auto stmt: list){
 		value = stmt->run();
 	}
@@ -573,6 +590,48 @@ TValue ast::PropertyNameAndValueList::run() {
 	}
 	return value;
 }
+
+TValue ast::ElementList::run() {
+	for (auto stmt: list) {
+		Expression* exp = dynamic_cast<Expression*>(stmt);
+		value = exp->run();
+	}
+	return value;
+}
+
+
+TValue ast::MemberPropertyExpression::run() {
+	leftExp->run();
+	value = leftExp->value;
+	
+	if (rightExpList != nullptr) {
+		
+		Object* o;
+		
+		for (ExpressionList::iterator iter=rightExpList->begin();
+			 iter!=rightExpList->end(); iter++) {			 
+			 (*iter)->run();
+		}
+
+		for (ExpressionList::iterator iter=rightExpList->begin();
+			 iter!=rightExpList->end(); iter++) {
+			
+			if (value.object == nullptr) {
+				yyerror("Not an object!");
+			} else {
+				o = value.object;
+			}
+			 
+			value = o->get((*iter)->value.toString());
+		}
+		//debugOut << "check in" << std::endl;			
+		//debugOut << "check out!" << std::endl;				
+	}
+
+	return value;
+	
+}
+
 
 TValue ast::Block::run() {
 	debugOut << "Enter new block!" << std::endl;

@@ -69,6 +69,7 @@ ast::Operator* noOp1Exp;
 	ast::PropertyNameAndValue* ast_PropertyNameAndValue;
 	ast::PropertyNameAndValueList* ast_PropertyNameAndValueList;
 	ast::ObjectType*         ast_ObjectType;
+	ast::MemberPropertyExpression*   ast_MemberPropertyExpression;
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -93,8 +94,10 @@ ast::Operator* noOp1Exp;
 %type <ast_PropertyNameAndValue> PropertyNameAndValue
 %type <ast_PropertyNameAndValueList> PropertyNameAndValueList
 %type <ast_Expression> MemberExpression MemberExpressionForIn
+%type <ast_MemberPropertyExpression> MemberPropertyExpression
 %type <ast_Expression> AllocationExpression AllocationExpressionBody
-%type <ast_Expression> MemberExpressionParts MemberExpressionPart
+%type <ast_ExpressionList> MemberExpressionParts
+%type <ast_Expression> MemberExpressionPart
 %type <ast_Expression> CallExpressionForIn CallExpressionParts CallExpressionPart
 %type <ast_CallExpression> CallExpression
 %type <ast_ArgumentList> Arguments ArgumentList
@@ -204,11 +207,11 @@ ArrayLiteral    :  LEFT_BRACKET Elision RIGHT_BRACKET
 ElementList	:	Elision AssignmentExpression ElementListPart
 |   AssignmentExpression ElementListPart
 {
-	$$ = concat($1, $2);
+	$$ = new ast::ElementList($1, $2);
 }
 ElementListPart :   Elision AssignmentExpression ElementListPart
 {
-	$$ = concat($2, $3);
+	$$ = new ast::ElementList($2, $3);
 }
 |
 {
@@ -255,16 +258,24 @@ PropertyName	:	Identifier
 {
 	$$ = new std::string($1);
 }
-MemberExpression	:  FunctionExpression MemberExpressionParts
-|   PrimaryExpression MemberExpressionParts{
-	if ($2 == nullptr)
-	{
-		$$ = $1;
-/*		//printf("MemberExp\n");*/
-	}
-/*	//printf("MemberExp\n");*/
+
+MemberExpression	:  MemberPropertyExpression
+{
+	$$ =$1;
 }
 |	AllocationExpression
+|   FunctionExpression
+|   PrimaryExpression
+{
+	$$ = $1;
+}
+
+MemberPropertyExpression    :   FunctionExpression MemberExpressionParts
+|   PrimaryExpression MemberExpressionParts
+{
+	$$ = new ast::MemberPropertyExpression($1, $2);
+}
+
 MemberExpressionForIn	:	FunctionExpression MemberExpressionParts
 |   PrimaryExpression MemberExpressionParts {
 /*	//printf("MemberExpForIn\n");*/
@@ -274,11 +285,23 @@ AllocationExpression    :   NEW MemberExpression AllocationExpressionBody
 AllocationExpressionBody    :   AllocationExpressionBody Arguments MemberExpressionParts
 |
 MemberExpressionParts   :   MemberExpressionParts MemberExpressionPart
-| {
-	$$ = nullptr;
+{
+	$1->push_back($2);
+	$$ = $1;
 }
+| MemberExpressionPart
+{
+	$$ = new ast::ExpressionList{$1};
+}
+
 MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
+{
+	$$ = $2;
+}
 |	DOT Identifier
+{
+	$$ = $2;
+}
 
 CallExpression	:	MemberExpression Arguments CallExpressionParts {
 	$$ = new ast::CallExpression(dynamic_cast<ast::Identifier*>($1), $2);

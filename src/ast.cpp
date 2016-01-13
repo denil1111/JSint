@@ -329,7 +329,6 @@ TValue ast::FunctionDeclaration::run() {
     for (auto parameter : *parameter_list) {
         debugOut << parameter->name << " ";
     }
-    std::cout << std::endl;
     value = TValue(new DeclaredFunction(function_name, parameter_list, function_body));
     nowStack.assignAndNew(function_name->name, value);
     return value;
@@ -603,6 +602,7 @@ TValue ast::ElementList::run() {
 TValue ast::MemberPropertyExpression::run() {
 	leftExp->run();
 	value = leftExp->value;
+	debugOut<<"member pro"<<endl;
 	
 	if (rightExpList != nullptr) {
 		

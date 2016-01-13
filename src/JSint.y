@@ -1126,33 +1126,41 @@ LabelledStatement	:	Identifier COLON Statement{
 }
 
 ThrowStatement	:	THROW Expression{
+	printf("throw\n");
 	$$=new ast::ThrowStmt($2);
 }
 | THROW Expression SEMICOLON{
+	printf("throw\n");
 	$$=new ast::ThrowStmt($2);
 }
 
 TryStatement	:	TRY Block TryStatementPart{
+	printf("try\n");
 	$$=$3;
 	$$->blockstmt=$2;
-	delete $3;
+	//delete $3;
 }
 
 TryStatementPart:   Finally{
+	printf("try:Finally\n");
 	$$=new ast::TryStmt(nullptr,$1);
 }
 | Catch{
+	printf("try:catch\n");
 	$$=new ast::TryStmt($1,nullptr);
 }
 | Catch Finally{
+	printf("try:Finally&catch\n");
 	$$=new ast::TryStmt($1,$2);
 }
 
 Catch	:	CATCH LEFT_PARE Identifier RIGHT_PARE Block{
+	printf("catch\n");
 	$$ = new ast::CatchStmt($3,$5);
 }
 
 Finally	:	FINALLY Block{
+	printf("finally\n");
 	$$ = new ast::FinallyStmt($2);
 }
 

@@ -145,6 +145,15 @@ public:
 	void assignAndNew(std::string idname, TValue val){
 		list[idname] = val;
 	};
+	void removeVar(std::string idname){
+		std::map<std::string,TValue>::iterator it;
+		it=list.find(idname);
+		if (it == list.end()){
+			return;
+		}else{
+			list.erase(it);
+		}
+	}
 	bool hasVar(std::string idname) {
 		if (list.find(idname) == list.end())
 			return false;
@@ -175,6 +184,34 @@ public:
 	void assignAndNew(std::string idname, TValue val) {
 		vstack.back().assignAndNew(idname, val);
 	}
+
+	void setVar(std::string idname,TValue val) {
+		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
+			if (it->hasVar(idname)){
+				it->assignAndNew(idname,val);
+				return;
+			}
+		}
+		return;
+	}
+
+	void removeVar(std::string idname) {
+		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
+			if (it->hasVar(idname)){
+				it->removeVar(idname);
+				return;
+			}
+		}
+		return;
+	}
+
+	bool hasVar(std::string idname) {
+		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
+			if (it->hasVar(idname)) return true;
+		}
+		return false;
+	}
+
 	TValue getVar(std::string idname) {
 		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
 			if (it->hasVar(idname)) return it->getVar(idname);

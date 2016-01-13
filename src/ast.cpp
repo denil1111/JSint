@@ -623,15 +623,47 @@ TValue ast::LabeledStmt::run() {
 TValue ast::TryStmt::run() {
 
 	try{
+		debugOut<<"111"<<endl;
 		blockstmt->run();
 	}catch(MyException & ex){
 		//如果抓住什么异常
-		debugOut<<"MyExceptionWithFinally"<<endl;
-		VarStack oldStacks = nowStack;
-		TValue res=ex.myex;
-		nowStack.assignAndNew(catchstmt->identifier->name,res);
+		debugOut<<"MyException"<<endl;
+
+		TValue exval=ex.myex;
+		std::string name=catchstmt->identifier->name;
+
+
+		debugOut<<"myexTvalue:"<<exval.toString()<<endl;
+		debugOut<<"name:"<<name<<endl;
+
+		TValue tmp;
+		bool ifDup=false;
+
+		if(nowStack.hasVar(name)){
+			tmp=nowStack.getVar(name);
+			ifDup=true;
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}else{
+			nowStack.assignAndNew(name,exval);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}
+
 		catchstmt->run();
-		nowStack = oldStacks;
+
+		if(ifDup){
+			debugOut<<"ifDup:true:setVar"<<endl;
+			nowStack.setVar(name,tmp);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}else{
+			debugOut<<"ifDup:false:removeVar"<<endl;
+			nowStack.removeVar(name);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}
+
 	}
 
 	if(finallystmt!=nullptr){
@@ -770,9 +802,9 @@ TValue ast::Block::run() {
 	debugOut << "Enter new block!" << std::endl;
 	// nowStack.push_new();
 	this->stmtList->run();
-	nowStack.print();
+	// nowStack.print();
 	// nowStack.pop();
 	debugOut << "Exit from block!" << std::endl;
-	nowStack.print();
+	// nowStack.print();
 	return value;
 }

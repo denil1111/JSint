@@ -19,7 +19,7 @@ parser.hpp: parser.cpp
 tokenizer.cpp: ${NAME}.l
 	flex -o tokenizer.cpp ${NAME}.l
 
-%.o: %.cpp ast.h utils.h ccalc.h varlist.hpp Object.h DeclaredFunction.h system.h
+%.o: %.cpp ast.h utils.h ccalc.h varlist.hpp Object.h DeclaredFunction.h system.hpp
 	g++ -c $(CXXFLAGS) -g -o $@ $< 
 
 

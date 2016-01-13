@@ -43,8 +43,7 @@ TValue ast::IntegerType::run() {
 
 TValue ast::RealType::run() {
     debugOut << "Creating real: " << val << std::endl;
-    value.type = TValue::TType::Tdouble;
-	value.sValue.dou = val;
+    value = TValue(val);
 	return value;
 }
 
@@ -55,8 +54,7 @@ TValue ast::CharType::run() {
 
 TValue ast::StringType::run() {
     debugOut << "Creating String: " << val << std::endl;
-	value.type = TValue::TType::Tstring;
-	value.sValue.str = val;
+	value = TValue(val);
 	return value;
 }
 
@@ -338,6 +336,7 @@ TValue ast::CallExpression::run() {
     debugOut<< "calling function: "<< std::endl;
     TValue val = funcExp->run();
     DeclaredFunction *function = val.function;
+    debugOut<<val.function<<std::endl;
     if (function) {
         value = function->execute(argument_list);
     }
@@ -621,10 +620,11 @@ TValue ast::MemberPropertyExpression::run() {
 			} else {
 				o = value.object;
 			}
-			 
+			debugOut<<(*iter)->value.toString()<<endl; 
 			value = o->get((*iter)->value.toString());
+			value.print();
 		}
-		//debugOut << "check in" << std::endl;			
+		// debugOut << "check in" << value.function<<std::endl;			
 		//debugOut << "check out!" << std::endl;				
 	}
 

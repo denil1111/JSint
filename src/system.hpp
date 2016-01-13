@@ -8,8 +8,9 @@ public:
 	{
 		parameter_list = new ParameterList;
 		parameter_list->push_back(new ast::Identifier("x"));
+
 	}
-	virtual TValue excute(ArgumentList *args)
+	virtual TValue execute(ArgumentList *args)
 	{
 		(*args)[0]->run().print();
 		return TValue::undefined();

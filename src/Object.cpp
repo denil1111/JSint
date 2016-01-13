@@ -3,7 +3,10 @@
 TValue Object::get(std::string name) {
 	if (prop.find(name) == prop.end()) {
 		return TValue::undefined;
-	} else return prop[name];
+	} else {
+        debugOut<<"finded"<<name<<std::endl;
+        return prop[name];
+    }
 }
 
 TValue Object::get(int index) {

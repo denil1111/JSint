@@ -340,6 +340,7 @@ TValue ast::CallExpression::run() {
     if (function) {
         nowStack.push_new();
         value = function->execute(argument_list);
+        nowStack.pop();
     }
     return value;
 }
@@ -593,7 +594,18 @@ TValue ast::ArrayRef::run() {
 
 	return value;
 }
-
+TValue ast::ReturnStmt::run() {
+	if (exp!=nullptr)
+	{
+		value = exp->run();
+		throw ReturnException(value);
+	} else
+	{
+		throw ReturnException(TValue::undefined());
+	}
+	
+	return value;
+}
 TValue ast::ContinueStmt::run() {
 	if(label!=nullptr){
 		throw ContinueException(label->name);

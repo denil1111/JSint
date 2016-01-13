@@ -167,7 +167,7 @@ public:
 		}
 	}
 	void print() {
-		debugOut<< "VarList(";
+		debugOut << "VarList(";
 		for (auto& kv : list) {
 			debugOut << kv.first << ": " << kv.second.toString() << ", ";
 		}
@@ -217,7 +217,7 @@ public:
 			if (it->hasVar(idname)) return it->getVar(idname);
 		}
 		debugOut<<"get id"<<idname<<std::endl;
-		yyerror("Not exist in variable stack!");
+		runerror("Not exist in variable stack!");
 	}
 	void push(VarList varList) {
 		vstack.push_back(varList);
@@ -233,9 +233,6 @@ public:
 			debugOut << "level " << lv << " : ";
 			vstack[lv].print();
 		}
-	}
-	void assignAndNewGlobal(std::string idname, TValue val) {
-		vstack[0].assignAndNew(idname, val);
 	}
 };
 #endif

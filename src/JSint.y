@@ -906,10 +906,7 @@ ExpressionPart   :    COMMA AssignmentExpression ExpressionPart {
 | {
 	$$ = nullptr;
 }
-| error AssignmentExpression ExpressionPart
-{
-	yyerror("unexpected operator here!");
-}
+
 ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart {
 	if ($2 == nullptr){
 		$$ = $1;
@@ -1003,6 +1000,9 @@ VariableDeclarationListNoIn	:	VariableDeclarationNoIn
 VariableDeclaration	:	Identifier
 | Identifier Initialiser
 VariableDeclarationNoIn	:	Identifier
+{
+	
+}
 | Identifier  InitialiserNoIn
 Initialiser	:	ASSIGN AssignmentExpression
 InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn
@@ -1064,7 +1064,13 @@ BreakStatement	:	BREAK IdentifierComma{
 }
 
 ReturnStatement	:	RETURN ExpressionOrNull
+{
+	$$ = new ast::ReturnStmt($2);
+}
 | RETURN ExpressionOrNull SEMICOLON
+{
+	$$ = new ast::ReturnStmt($2);
+}
 WithStatement	:	WITH LEFT_PARE Expression RIGHT_PARE Statement
 
 SwitchStatement	:	SWITCH LEFT_PARE Expression RIGHT_PARE CaseBlock{
@@ -1216,50 +1222,6 @@ SourceElements	:	SourceElement {
 	$$ = new ast::StatementList;
 	$$ -> list.push_back($1);
 	//printf("To SourceElements\n");
-}
-| SourceElements SourceElement {
-	$1->list.push_back($2);
-	$$ = $1;
-}
-| SourceElements error {
-	$$ = $1;
-	parseError = 0;
-}
-| error {
-	debugOut<<"get an error \n";
-	$$ = new ast::StatementList;
-	parseError = 0;
-}
-SourceElement	:	FunctionDeclaration {
-	$$ = $1;
-
-	if (!parseError)
-	{
-		$1 -> print_node("", true, true);
-		ast_root = $1;
-		try {
-			ast_root->run();
-		} catch (const std::domain_error &de) {
-			cout << de.what() << endl;
-		} catch (const std::logic_error &le) {
-			cout << le.what() << endl;
-		} catch (...) {
-			cout << "other uncaught error" << endl;
-		}
-
-		if (!parseError)
-		{
-			ast_root->value.print();
-			parseError = 0;
-		}
-		else
-		{
-			parseError = 0;
-		}
-	}
-}
-|	Statement {
-	$$ = $1;
 	debugOut<<"a new stmt"<<std::endl;
 	if (!parseError)
 	{	
@@ -1278,7 +1240,6 @@ SourceElement	:	FunctionDeclaration {
 		}catch (...) {
 			cout << "other uncaught error" << endl;
 		}
-
 		if (!parseError)
 		{
 			extern int valueFlag;
@@ -1292,6 +1253,57 @@ SourceElement	:	FunctionDeclaration {
 		}
 
 	}
+}
+| SourceElements SourceElement {
+	$1->list.push_back($2);
+	$$ = $1;
+	debugOut<<"a new stmt"<<std::endl;
+	if (!parseError)
+	{	
+		extern int debugFlag;
+		if (debugFlag)
+			$2 -> print_node("", true, true);
+		ast_root = $2;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;
+		} catch (ast::runerrorException) {
+
+		}catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+		if (!parseError)
+		{
+			extern int valueFlag;
+			if (valueFlag)
+				ast_root->value.print();
+			parseError = 0;
+		}
+		else
+		{
+			parseError = 0;
+		}
+
+	}
+}
+| SourceElements error {
+	debugOut<<"get an error \n";
+	$$ = $1;
+	parseError = 0;
+}
+| error {
+	debugOut<<"get an error \n";
+	$$ = new ast::StatementList;
+	parseError = 0;
+}
+SourceElement	:	FunctionDeclaration {
+	$$ = $1;
+}
+|	Statement {
+	$$ = $1;
 }
 InFuncSourceElement	:	FunctionDeclaration
 |	Statement {

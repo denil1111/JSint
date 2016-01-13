@@ -27,7 +27,6 @@ console.log(a);
 
 a = "214124" +1231231
 console.log(a);
-
 a = 5 + 8;
 console.log(a);
 

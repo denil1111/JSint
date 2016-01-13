@@ -5,7 +5,7 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         int index = 0;
 
         if (parameter_list->size() != args->size()) {
-            yyerror("wrong number of arguments");
+            runerror("wrong number of arguments");
         }
         for (auto arg : *args) {
             arg->run();
@@ -28,5 +28,6 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         debugOut << std::endl;
     }
     TValue val = function_body->run();
+    nowStack.pop();
     return val;
 }

@@ -24,7 +24,7 @@ void debugUnset() {
 }
 
 void myerror(std::string str) {
-	yyerror(str.c_str());
+	runerror(str.c_str());
 }
 */
 
@@ -289,7 +289,7 @@ TValue ast::Operator::run() {
 		auto id = dynamic_cast<Identifier*>(op1);
 		if (id == nullptr)
 		{
-			yyerror("leftside exp error");
+			runerror("leftside exp error");
 		}
 		else
 		{
@@ -338,6 +338,7 @@ TValue ast::CallExpression::run() {
     DeclaredFunction *function = val.function;
     debugOut<<val.function<<std::endl;
     if (function) {
+        nowStack.push_new();
         value = function->execute(argument_list);
     }
     return value;
@@ -421,7 +422,7 @@ TValue ast::WhileStmt::run() {
 					throw cnexception;
 				}
 			}
-			
+
 			return value;
 		}
 	}
@@ -493,10 +494,10 @@ TValue ast::ForStmt::run() {
 					throw cnexception;
 				}
 			}
-			
+
 			return value;
 		}
-		
+
 	}
 
 	return value;
@@ -525,7 +526,7 @@ TValue ast::IfStmt::run() {
 }
 
 TValue ast::SwitchStmt::run() {
-	
+
 	CaseStmt* stmt;
 	bool firstFlag=true;
 	int defaultIndex=-1;
@@ -540,7 +541,7 @@ TValue ast::SwitchStmt::run() {
 				}else{
 					//如果还没有匹配，那么就要先跳过default语句；
 					// 如果最后没有任何匹配，就进入default那句往后执行，所以记下编号；
-					defaultIndex=i;	
+					defaultIndex=i;
 				}
 			}else{
 				if(!firstFlag){
@@ -556,9 +557,9 @@ TValue ast::SwitchStmt::run() {
 
 					stmt->run();
 					firstFlag=false;
-				}	
+				}
 			}
-			
+
 		}catch(BreakException &exception){
 			debugOut<<"switch stmt exception"<<std::endl;
 			return value;
@@ -571,7 +572,7 @@ TValue ast::SwitchStmt::run() {
 			try{
 				debugOut<<"switch default try::i="<<i<<std::endl;
 				stmt=(*list)[i];
-				stmt->run();			
+				stmt->run();
 			}catch(BreakException &exception){
 				debugOut<<"switch stmt exception"<<std::endl;
 				return value;
@@ -580,7 +581,7 @@ TValue ast::SwitchStmt::run() {
 	}else{
 		//如果没有任何匹配，并且也没有default
 		return value;
-	}	
+	}
 }
 // TValue ast::ArrayType::run() {
 
@@ -599,7 +600,7 @@ TValue ast::ContinueStmt::run() {
 	}else{
 		throw ContinueException("");
 	}
-   
+
 	return value;
 }
 
@@ -660,7 +661,7 @@ TValue ast::ArrayType::run() {
 	elList->run();
 
 	std::vector<Statement*> stmtList = elList->list;
-	
+
 	std::vector<TValue> values = std::vector<TValue>(stmtList.size());
 	for (int i=0; i<stmtList.size(); i++) {
 		Expression* exp = dynamic_cast<Expression*>(stmtList[i]);
@@ -670,7 +671,7 @@ TValue ast::ArrayType::run() {
 
 	debugOut << "Creating array: " <<  arrayValue->toString() << std::endl;
 
-	value = TValue(arrayValue); 
+	value = TValue(arrayValue);
 	return value;
 
 }
@@ -682,14 +683,13 @@ TValue ast::ObjectType::run() {
 	for (auto stmt : propList->list) {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
 		debugOut<<property->name<<endl;
-		property->valueExp->value.print();
 		props[property->name] = property->valueExp->value;
 	}
 
 	Object* objectValue = new Object(props);
 	debugOut <<  "Creating object: " << objectValue->toString() << std::endl;
 
-	value = TValue(objectValue); 	
+	value = TValue(objectValue);
 	return value;
 }
 
@@ -727,33 +727,33 @@ TValue ast::MemberPropertyExpression::run() {
 	leftExp->run();
 	value = leftExp->value;
 	debugOut<<"member pro"<<endl;
-	
+
 	if (rightExpList != nullptr) {
-		
+
 		Object* o;
-		
+
 		for (MemberNameList::iterator iter=rightExpList->begin();
-			 iter!=rightExpList->end(); iter++) {			 
+			 iter!=rightExpList->end(); iter++) {
 			 (*iter)->run();
 		}
 
 		for (MemberNameList::iterator iter=rightExpList->begin();
 			 iter!=rightExpList->end(); iter++) {
-			
+
 			if (value.object == nullptr) {
-				yyerror("Not an object!");
+				runerror("Not an object!");
 			} else {
 				o = value.object;
 			}
-			debugOut<<(*iter)->value.toString()<<endl; 
+			debugOut<<(*iter)->value.toString()<<endl;
 			value = o->get((*iter)->value.toString());
 		}
-		// debugOut << "check in" << value.function<<std::endl;			
-		//debugOut << "check out!" << std::endl;				
+		// debugOut << "check in" << value.function<<std::endl;
+		//debugOut << "check out!" << std::endl;
 	}
 
 	return value;
-	
+
 }
 
 TValue ast::MemberName::run() {

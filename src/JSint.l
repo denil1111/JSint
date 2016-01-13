@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include "ast.h"
 #include "utils.h"
@@ -52,7 +53,7 @@ COMPLEX "*"[^/]
  <newstate>{COMPLEX}      {yymore();BEGIN newstate;}
  <newstate>{SPACE}        {yymore();BEGIN newstate;}
  <newstate>{END}  {BEGIN 0;}
-({DecimalIntegerLiteral}\.{DecimalDigits}*{ExponentPart}?)|(\.{DecimalDigits}{ExponentPart}?)|({DecimalIntegerLiteral}{ExponentPart}?) { BeginToken(yytext);YYLVAL_DEBUG return DECIMAL_LITERAL; }
+({DecimalIntegerLiteral}\.{DecimalDigits}*{ExponentPart}?)|(" "\.{DecimalDigits}{ExponentPart}?)|({DecimalIntegerLiteral}{ExponentPart}?) { BeginToken(yytext);YYLVAL_DEBUG return DECIMAL_LITERAL; }
 [0][xX]{HexDigit}+ { BeginToken(yytext);YYLVAL_DEBUG return HEX_INTEGER_LITERAL; }
 (\"{DoubleStringCharacter}*\")|(\'{SingleStringCharacter}*\') { BeginToken(yytext);YYLVAL_DEBUG return STRING_LITERAL; }
 "true"|"false" { BeginToken(yytext);YYLVAL_DEBUG return BOOLEAN_LITERAL; }

@@ -135,7 +135,7 @@ void PrintError(char *errorstring, ...) {
   }
   else {
     fprintf(stdout, "...... !");
-    for (i=1; i<start; i++)
+    for (i=0; i<start; i++)
       fprintf(stdout, ".");
     for (i=start; i<=end; i++)
       fprintf(stdout, "^");

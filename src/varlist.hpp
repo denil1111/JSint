@@ -36,7 +36,7 @@ public:
 		Tundefined,
 		Tnull
 	};
-	//std::vector<TValue> arr;
+	//std::veXctor<TValue> arr;
 	ast::FunctionDeclaration *func;
 	TSValue sValue;
 	bool boolFlag = false;
@@ -45,7 +45,6 @@ public:
 	TValue(){
 		type = TType::Tundefined;
 	}
-	TValue(TType type) : type(type) {}
 	TValue(unsigned int x) {
 		type = TType::Tdouble;
 		sValue.dou = x;

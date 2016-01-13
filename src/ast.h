@@ -42,7 +42,7 @@ class TryStmt;
 typedef std::string PropertyName;
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
-typedef std::vector<Expression*> ElementList;
+//typedef std::vector<Expression*> ElementList;
 typedef StatementList FunctionBody;
 typedef std::vector<VarDecl *>      VarDeclList;
 typedef std::vector<Identifier *>   IdentifierList;
@@ -286,6 +286,8 @@ public:
     virtual std::string toString() { return "RecordType"; }
     virtual TValue run() {}
 };
+
+
 class Identifier : public Expression {
 public:
     std::string         name;
@@ -812,26 +814,29 @@ public:
 	virtual TValue run();	
 };
 
+class ElementList : public StatementList {
+public:
+	ElementList() {}
+ElementList(Expression* el): StatementList(el) {}
+ElementList(Expression* el, ElementList* elList): StatementList(el, elList) {}
+	
+	virtual std::string toString() { return "ElementList"; }
+	virtual std::vector<Node *> getChildren() { return StatementList::getChildren(); }
+	virtual TValue run();
+};
+
 class ArrayType: public ConstValue {
 private:
-	ElementList elList;
-	Object arrayValue;
+	ElementList* elList;
 public:
-    ArrayType() : elList(ElementList()){}
-    ArrayType(ElementList* elListPtr) {
-		elList = ElementList(elListPtr->size());
-		for (int i=0; i<elList.size(); i++) {
-			elList[i] = elListPtr->at(i);
-		}
-	}
+    ArrayType() : elList(new ElementList()){}
+ArrayType(ElementList* elList): elList(elList) {}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
 	virtual int toRange() { return 1; }
 	
     virtual std::string toString() { return "Array"; }
     virtual std::vector<Node *> getChildren() {
-		std::vector<Node *> rlist;
-		for(auto el : elList) rlist.push_back((Node *)el); 		
-		return rlist;
+		return std::vector<Node *>{elList};
 	}	
     virtual TValue run();
 };
@@ -839,7 +844,6 @@ public:
 class ObjectType : public ConstValue {
 private:
 	PropertyNameAndValueList* propList;
-	Object objectValue;
 public:
     ObjectType(): propList(new PropertyNameAndValueList()) {}
     ObjectType(PropertyNameAndValueList* pList): propList(pList) {}
@@ -851,6 +855,43 @@ public:
 	virtual std::vector<Node*> getChildren() { return std::vector<Node*>{propList}; }
 	virtual TValue run();
 };
+
+
+class MemberPropertyExpression : public Expression {
+private:
+	Expression* leftExp;
+	ExpressionList* rightExpList;
+public:
+	MemberPropertyExpression() {}
+    MemberPropertyExpression(Expression* exp): leftExp(exp), rightExpList(nullptr) {}	
+    MemberPropertyExpression(Expression* exp, ExpressionList* expList):
+	leftExp(exp), rightExpList(expList) {}
+
+	virtual std::string toString() { return "MemberPropertyExpression"; }
+	virtual std::vector<Node*> getChildren() {
+		if (rightExpList != nullptr) {
+			std::vector<Node*> rList = std::vector<Node*>{(Node*)leftExp};
+			for (ExpressionList::iterator iter=rightExpList->begin();
+				 iter != rightExpList->end(); iter++) {
+				rList.push_back(*iter);
+			}
+			return rList;
+		} else return std::vector<Node*>{leftExp};
+	}
+	virtual TValue run();
+};
+
+/*class MemberExpressionList : public StatementList {
+private:
+public:
+	MemberExpressionList() {}
+MemberExpressionList(Expression* exp): StatementList(exp) {}
+MemberExpressionList(Expression* exp, ExpressionList* expList):
+	StatementList(exp, expList) {}
+
+	virtual std::string toString() { return "MemberExpressionList"; }
+	virtual std::vector<Node *> getChildren()
+	}*/
 
 class Block : public Statement {
 	StatementList* stmtList;

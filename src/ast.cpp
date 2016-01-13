@@ -467,20 +467,22 @@ TValue ast::CatchStmt::run() {
 
 TValue ast::ArrayType::run() {
 
-	for (auto expPtr : elList) {
-		expPtr->run();
-	}
+	elList->run();
 
-	std::vector<TValue> values = std::vector<TValue>(elList.size());
-	for (int i=0; i<elList.size(); i++) {
-		values[i] = elList[i]->value;
+	std::vector<Statement*> stmtList = elList->list;
+	
+	std::vector<TValue> values = std::vector<TValue>(stmtList.size());
+	for (int i=0; i<stmtList.size(); i++) {
+		Expression* exp = dynamic_cast<Expression*>(stmtList[i]);
+		values[i] = exp->value;
 	}
-	arrayValue = Object(values);
-
+	Object arrayValue = Object(values);
 
 	debugOut << "Creating array: " << "values" << std::endl;
 	debugOut << arrayValue.toString() << std::endl;
-	return arrayValue;
+
+	value = arrayValue;
+	return value;
 }
 
 TValue ast::ObjectType::run() {
@@ -492,11 +494,12 @@ TValue ast::ObjectType::run() {
 		props[property->name] = property->valueExp->value;
 	}
 	
-	objectValue = Object(props);
+	Object objectValue = Object(props);
 
 	debugOut <<  "Creating object: " << objectValue.toString() << std::endl;
-	
-	return objectValue;
+
+	value = objectValue;
+	return value;
 }
 
 TValue ast::StatementList::run() {
@@ -518,6 +521,29 @@ TValue ast::PropertyNameAndValueList::run() {
 	}
 	return value;
 }
+
+TValue ast::ElementList::run() {
+	for (auto stmt: list) {
+		Expression* exp = dynamic_cast<Expression*>(stmt);
+		value = exp->run();
+	}
+	return value;
+}
+
+
+TValue ast::MemberPropertyExpression::run() {
+	leftExp->run();
+	if (rightExpList != nullptr) {
+		for (int i=0; i<rightExpList->size(); i++) {		
+			rightExpList->at(i)->run();
+		}
+	}
+
+	//TValue leftValue = leftExp->value;
+	return value;
+	
+}
+
 
 TValue ast::Block::run() {
 	debugOut << "Enter new block!" << std::endl;

@@ -11,14 +11,26 @@ private:
 	std::map<std::string, TValue> prop;
 	bool isArr;
 public:
-Object(): TValue(TType::Tobject) {}
-Object(std::vector<TValue> arr): TValue(TType::Tobject), isArr(true) {
+	Object() { type = TType::Tobject; }
+Object(std::vector<TValue> arr): isArr(true) {
+		type = TType::Tobject;
 		prop = std::map<std::string, TValue>();
 		for (int i=0; i<arr.size(); i++) {
 			prop[std::to_string(i)] = arr[i];
 		}
 	}
-Object(std::map<std::string, TValue> prop): TValue(TType::Tobject), prop(prop), isArr(false) {
+Object(std::map<std::string, TValue> prop): prop(prop), isArr(false) {
+		type = TType::Tobject;
+	}
+
+	TValue get(std::string name) {
+		if (prop.find(name) == prop.end()) {
+			return TValue::undefined;
+		} else return prop[name];
+	}
+
+	TValue get(int index) {
+		return get(std::to_string(index));
 	}
 	
 	virtual TValue toDouble() {

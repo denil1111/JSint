@@ -8,9 +8,26 @@
 #include <cassert>
 
 #include "utils.h"
+#include "DeclaredFunction.h"
+
 using namespace std;
 extern VarStack nowStack;
 extern ast::LabelMap labelMap;
+
+/*
+void debugSet() {
+	debugOut << "Check In!" << std::endl;
+}
+
+void debugUnset() {
+	debugOut << "Check Out!" << std::endl;
+}
+
+void myerror(std::string str) {
+	yyerror(str.c_str());
+}
+*/
+
 TValue ast::Identifier::run() {
     debugOut << "Creating identifier: " << name << std::endl;
 
@@ -26,8 +43,7 @@ TValue ast::IntegerType::run() {
 
 TValue ast::RealType::run() {
     debugOut << "Creating real: " << val << std::endl;
-    value.type = TValue::TType::Tdouble;
-	value.sValue.dou = val;
+    value = TValue(val);
 	return value;
 }
 
@@ -38,8 +54,7 @@ TValue ast::CharType::run() {
 
 TValue ast::StringType::run() {
     debugOut << "Creating String: " << val << std::endl;
-	value.type = TValue::TType::Tstring;
-	value.sValue.str = val;
+	value = TValue(val);
 	return value;
 }
 
@@ -312,48 +327,19 @@ TValue ast::FunctionDeclaration::run() {
     for (auto parameter : *parameter_list) {
         debugOut << parameter->name << " ";
     }
-    std::cout << std::endl;
-    value = TValue(this);
+    value = TValue(new DeclaredFunction(function_name, parameter_list, function_body));
     nowStack.assignAndNew(function_name->name, value);
     return value;
 }
 
-
 TValue ast::CallExpression::run() {
-    debugOut<< "calling function: " << function_name->name << std::endl;
-    value = nowStack.getVar(function_name->name);
-    FunctionDeclaration *function = value.func;
-    ParameterList *pl = function->parameter_list;
-    FunctionBody *fb = function->function_body;
-
-    if (argument_list) {
-        int index = 0;
-
-        if (pl->size() != argument_list->size()) {
-            yyerror("wrong number of arguments");
-        }
-        for (auto arg : *argument_list) {
-            arg->run();
-        }
-
-        std::cout << "with arguments: ";
-        for (auto arg : *argument_list) {
-            switch (arg->value.type) {
-                case TValue::TType::Tstring: {
-                    std::cout << arg->value.sValue.str << " ";
-                    break;
-                }
-                case TValue::TType::Tdouble: {
-                    std::cout << arg->value.sValue.dou << " ";
-                    break;
-                }
-            }
-            nowStack.assignAndNew(pl->at(index)->name, arg->value);
-            index++;
-        }
-        std::cout << std::endl;
+    debugOut<< "calling function: "<< std::endl;
+    TValue val = funcExp->run();
+    DeclaredFunction *function = val.function;
+    debugOut<<val.function<<std::endl;
+    if (function) {
+        value = function->execute(argument_list);
     }
-    fb->run();
     return value;
 }
 
@@ -618,40 +604,42 @@ TValue ast::CatchStmt::run() {
 
 TValue ast::ArrayType::run() {
 
-	for (auto expPtr : elList) {
-		expPtr->run();
+	elList->run();
+
+	std::vector<Statement*> stmtList = elList->list;
+	
+	std::vector<TValue> values = std::vector<TValue>(stmtList.size());
+	for (int i=0; i<stmtList.size(); i++) {
+		Expression* exp = dynamic_cast<Expression*>(stmtList[i]);
+		values[i] = exp->value;
 	}
+	Object* arrayValue = new Object(values);
 
-	std::vector<TValue> values = std::vector<TValue>(elList.size());
-	for (int i=0; i<elList.size(); i++) {
-		values[i] = elList[i]->value;
-	}
-	arrayValue = Object(values);
+	debugOut << "Creating array: " <<  arrayValue->toString() << std::endl;
 
+	value = TValue(arrayValue); 
+	return value;
 
-	debugOut << "Creating array: " << "values" << std::endl;
-	debugOut << arrayValue.toString() << std::endl;
-	return arrayValue;
 }
 
 TValue ast::ObjectType::run() {
 	propList->run();
-	
+
 	std::map<std::string, TValue> props = std::map<std::string, TValue>();
 	for (auto stmt : propList->list) {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
 		props[property->name] = property->valueExp->value;
 	}
-	
-	objectValue = Object(props);
 
-	debugOut <<  "Creating object: " << objectValue.toString() << std::endl;
-	
-	return objectValue;
+	Object* objectValue = new Object(props);
+
+	debugOut <<  "Creating object: " << objectValue->toString() << std::endl;
+
+	value = TValue(objectValue); 	
+	return value;
 }
 
 TValue ast::StatementList::run() {
-	std::cout << "StatementList" << std::endl;
 	for (auto stmt: list){
 		value = stmt->run();
 	}
@@ -665,8 +653,61 @@ TValue ast::PropertyNameAndValue::run() {
 
 TValue ast::PropertyNameAndValueList::run() {
 	for (auto stmt: list) {
-		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);		
+		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
 		value = property->run();
+	}
+	return value;
+}
+
+TValue ast::ElementList::run() {
+	for (auto stmt: list) {
+		Expression* exp = dynamic_cast<Expression*>(stmt);
+		value = exp->run();
+	}
+	return value;
+}
+
+
+TValue ast::MemberPropertyExpression::run() {
+	leftExp->run();
+	value = leftExp->value;
+	debugOut<<"member pro"<<endl;
+	
+	if (rightExpList != nullptr) {
+		
+		Object* o;
+		
+		for (MemberNameList::iterator iter=rightExpList->begin();
+			 iter!=rightExpList->end(); iter++) {			 
+			 (*iter)->run();
+		}
+
+		for (MemberNameList::iterator iter=rightExpList->begin();
+			 iter!=rightExpList->end(); iter++) {
+			
+			if (value.object == nullptr) {
+				yyerror("Not an object!");
+			} else {
+				o = value.object;
+			}
+			debugOut<<(*iter)->value.toString()<<endl; 
+			value = o->get((*iter)->value.toString());
+			value.print();
+		}
+		// debugOut << "check in" << value.function<<std::endl;			
+		//debugOut << "check out!" << std::endl;				
+	}
+
+	return value;
+	
+}
+
+TValue ast::MemberName::run() {
+	if (isIdentifier) {
+		Identifier* id = dynamic_cast<Identifier*>(exp);
+		value = TValue(id->name);
+	} else {
+		value = exp->run();
 	}
 	return value;
 }

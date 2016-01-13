@@ -11,6 +11,7 @@
 #include "Object.h"
 
 //used forward-declaration to deal with cross-reference issue
+class TValue;
 // namespace ast start
 namespace ast {
 // forward declaration
@@ -42,11 +43,13 @@ class TryStmt;
 class BreakException;
 class ContinueException;
 class LabeledStmt;
+class MemberName;
 
 typedef std::string PropertyName;
+typedef std::vector<MemberName*> MemberNameList;
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
-typedef std::vector<Expression*> ElementList;
+//typedef std::vector<Expression*> ElementList;
 typedef StatementList FunctionBody;
 typedef std::vector<VarDecl *>      VarDeclList;
 typedef std::vector<Identifier *>   IdentifierList;
@@ -102,7 +105,7 @@ public:
 class Statement : public Node {
 public:
     Statement() { value = TValue::undefined(); };
-    virtual TValue run() 
+    virtual TValue run()
     {
         return value;
     }
@@ -124,7 +127,7 @@ public:
 		}
 	}
     virtual TValue run();
-    virtual std::string toString(){ return "stmt_list";}
+    virtual std::string toString(){ return "StatementList";}
     virtual std::vector<Statement*> *getlist(){ return &list;}
 	virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;
@@ -223,9 +226,9 @@ public:
 
 class CallExpression : public Expression {
 public:
-    Identifier* function_name;
+    Expression* funcExp;
     ArgumentList* argument_list;
-    CallExpression(Identifier* id, ArgumentList* args) : function_name(id), argument_list(args) {}
+    CallExpression(Expression* funcExp, ArgumentList* args) : funcExp(funcExp), argument_list(args) {}
     virtual std::string toString(){ return "function_called"; }
     virtual TValue run();
 };
@@ -307,6 +310,8 @@ public:
     virtual std::string toString() { return "RecordType"; }
     virtual TValue run() {}
 };
+
+
 class Identifier : public Expression {
 public:
     std::string         name;
@@ -832,36 +837,39 @@ public:
 	PropertyNameAndValueList(PropertyNameAndValue* property,
 							 PropertyNameAndValueList* propertyList):
 	StatementList(property, propertyList) {}
-	
+
 	virtual std::string toString() { return "PropertyList"; }
 	virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;
-		for(auto el : list) rlist.push_back((Node *)el); 		
+		for(auto el : list) rlist.push_back((Node *)el);
 		return rlist;
 	}
-	virtual TValue run();	
+	virtual TValue run();
+};
+
+class ElementList : public StatementList {
+public:
+	ElementList() {}
+ElementList(Expression* el): StatementList(el) {}
+ElementList(Expression* el, ElementList* elList): StatementList(el, elList) {}
+	
+	virtual std::string toString() { return "ElementList"; }
+	virtual std::vector<Node *> getChildren() { return StatementList::getChildren(); }
+	virtual TValue run();
 };
 
 class ArrayType: public ConstValue {
 private:
-	ElementList elList;
-	Object arrayValue;
+	ElementList* elList;
 public:
-    ArrayType() : elList(ElementList()){}
-    ArrayType(ElementList* elListPtr) {
-		elList = ElementList(elListPtr->size());
-		for (int i=0; i<elList.size(); i++) {
-			elList[i] = elListPtr->at(i);
-		}
-	}
+    ArrayType() : elList(new ElementList()){}
+ArrayType(ElementList* elList): elList(elList) {}
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
 	virtual int toRange() { return 1; }
-	
+
     virtual std::string toString() { return "Array"; }
     virtual std::vector<Node *> getChildren() {
-		std::vector<Node *> rlist;
-		for(auto el : elList) rlist.push_back((Node *)el); 		
-		return rlist;
+		return std::vector<Node *>{elList};
 	}	
     virtual TValue run();
 };
@@ -869,18 +877,69 @@ public:
 class ObjectType : public ConstValue {
 private:
 	PropertyNameAndValueList* propList;
-	Object objectValue;
 public:
     ObjectType(): propList(new PropertyNameAndValueList()) {}
     ObjectType(PropertyNameAndValueList* pList): propList(pList) {}
 
     virtual TypeDecl::TypeName getConstType() { return TypeDecl::TypeName::array; }
 	virtual int toRange() { return 1; }
-	
+
 	virtual std::string toString() { return "Object"; }
 	virtual std::vector<Node*> getChildren() { return std::vector<Node*>{propList}; }
 	virtual TValue run();
 };
+
+
+class MemberPropertyExpression : public Expression {
+private:
+	Expression* leftExp;
+	MemberNameList* rightExpList;
+public:
+	MemberPropertyExpression() {}
+    MemberPropertyExpression(Expression* exp): leftExp(exp), rightExpList(nullptr) {}	
+    MemberPropertyExpression(Expression* exp, MemberNameList* expList):
+	leftExp(exp), rightExpList(expList) {}
+
+	virtual std::string toString() { return "MemberPropertyExpression"; }
+	virtual std::vector<Node*> getChildren() {
+		if (rightExpList != nullptr) {
+			std::vector<Node*> rList = std::vector<Node*>{(Node*)leftExp};
+			for (MemberNameList::iterator iter=rightExpList->begin();
+				 iter != rightExpList->end(); iter++) {
+				rList.push_back((Node*)*iter);
+			}
+			return rList;
+		} else return std::vector<Node*>{leftExp};
+	}
+	virtual TValue run();
+};
+
+class MemberName : public Expression {
+private:
+	bool isIdentifier;
+	Expression* exp;
+public:
+	MemberName() {}
+    MemberName(Expression* exp, bool isIdentifier): exp(exp), isIdentifier(isIdentifier) {}
+
+	virtual std::string toString() { return "MemberName"; }
+	virtual std::vector<Node*> getChildren() {
+		return std::vector<Node*>{exp};
+	}
+	virtual TValue run();
+};
+
+/*class MemberExpressionList : public StatementList {
+private:
+public:
+	MemberExpressionList() {}
+MemberExpressionList(Expression* exp): StatementList(exp) {}
+MemberExpressionList(Expression* exp, ExpressionList* expList):
+	StatementList(exp, expList) {}
+
+	virtual std::string toString() { return "MemberExpressionList"; }
+	virtual std::vector<Node *> getChildren()
+	}*/
 
 class Block : public Statement {
 	StatementList* stmtList;

@@ -197,5 +197,8 @@ public:
 			vstack[lv].print();
 		}
 	}
+	void assignAndNewGlobal(std::string idname, TValue val) {
+		vstack[0].assignAndNew(idname, val);
+	}
 };
 #endif

@@ -28,5 +28,6 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         debugOut << std::endl;
     }
     TValue val = function_body->run();
+    nowStack.pop();
     return val;
 }

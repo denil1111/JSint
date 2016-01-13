@@ -728,6 +728,15 @@ public:
         endExp(endExp),
         loopStmt(loopStmt){}
     virtual TValue run();
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> rList;
+        rList.push_back(loopVar);
+        rList.push_back(startExp);
+        rList.push_back(endExp);
+        rList.push_back(loopStmt);
+        return rList;
+    }
+
     virtual std::string toString() { return "for"; }
 };
 
@@ -781,6 +790,12 @@ public:
     Statement * stmt;
     LabeledStmt(Identifier * label,Statement* stmt):label(label),stmt(stmt){}
     virtual TValue run();
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> rList;
+        rList.push_back(label);
+        rList.push_back(stmt);
+        return rList;
+    }
     virtual std::string toString() { return "LabeledStmt statement"; }
 };
 

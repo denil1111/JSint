@@ -1,4 +1,5 @@
 #include "varlist.hpp"
+#include "Object.h"
 #include <iomanip>
 #include <cmath>
 using namespace std;
@@ -37,6 +38,9 @@ string TValue::toString()
 	}
 	if (type == TType::Tfunction) {
 		ss<<"function";
+	}
+	if (type == TType::Tobject) {
+		ss<<(object->toString());
 	}
 	st = ss.str();
 	return st;
@@ -78,6 +82,12 @@ TValue TValue::toDouble()
 	{
 		return *this;
 	}
+	if (type == TType::Tobject) {
+		return object->toDouble();
+	}
+	if (type == TType::Tfunction) {
+		return  TValue::NaN();
+	}
 	return TType::TNaN;
 }
 bool TValue::toBoolean()
@@ -116,6 +126,10 @@ bool TValue::toBoolean()
 	{
 		return false;
 	}
+	if (type == TType::Tfunction)
+	{
+		return true;
+	}
 }
 TValue TValue::operator   +( TValue &rx){
 	TValue ret;
@@ -132,7 +146,7 @@ TValue TValue::operator   +( TValue &rx){
 				ret.sValue.dou = this->sValue.dou + rx.sValue.dou;
 				break;
 			}
-			case TType::Tstring: {	
+			case TType::Tstring: {
 				return TValue(toString() + rx.sValue.str);
 			}
 		}

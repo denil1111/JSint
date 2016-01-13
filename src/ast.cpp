@@ -336,8 +336,8 @@ TValue ast::FunctionDeclaration::run() {
 }
 
 TValue ast::CallExpression::run() {
-    debugOut<< "calling function: " << function_name->name << std::endl;
-    TValue val = nowStack.getVar(function_name->name);
+    debugOut<< "calling function: "<< std::endl;
+    TValue val = funcExp->run();
     DeclaredFunction *function = val.function;
     if (function) {
         value = function->execute(argument_list);

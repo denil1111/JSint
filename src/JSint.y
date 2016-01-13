@@ -304,7 +304,7 @@ MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
 }
 
 CallExpression	:	MemberExpression Arguments CallExpressionParts {
-	$$ = new ast::CallExpression(dynamic_cast<ast::Identifier*>($1), $2);
+	$$ = new ast::CallExpression($1, $2);
 }
 
 CallExpressionForIn	:	MemberExpressionForIn Arguments CallExpressionParts

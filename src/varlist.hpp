@@ -176,6 +176,7 @@ public:
 		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
 			if (it->hasVar(idname)) return it->getVar(idname);
 		}
+		debugOut<<"get id"<<idname<<std::endl;
 		yyerror("Not exist in variable stack!");
 	}
 	void push(VarList varList) {

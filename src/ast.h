@@ -224,9 +224,9 @@ public:
 
 class CallExpression : public Expression {
 public:
-    Identifier* function_name;
+    Expression* funcExp;
     ArgumentList* argument_list;
-    CallExpression(Identifier* id, ArgumentList* args) : function_name(id), argument_list(args) {}
+    CallExpression(Expression* funcExp, ArgumentList* args) : funcExp(funcExp), argument_list(args) {}
     virtual std::string toString(){ return "function_called"; }
     virtual TValue run();
 };

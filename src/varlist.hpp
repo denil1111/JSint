@@ -158,7 +158,7 @@ public:
 		}
 	}
 	void print() {
-		std::cout << "VarList(";
+		debugOut<< "VarList(";
 		for (auto& kv : list) {
 			debugOut << kv.first << ": " << kv.second.toString() << ", ";
 		}

@@ -310,6 +310,10 @@ MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
 {
 	$$ = new ast::MemberName($2, true);
 }
+|   DOT Literal
+{
+	yyerror("unexpected literal \"%s\" here",yytext);
+}
 
 CallExpression	:	MemberExpression Arguments CallExpressionParts {
 	$$ = new ast::CallExpression($1, $2);
@@ -901,6 +905,10 @@ ExpressionPart   :    COMMA AssignmentExpression ExpressionPart {
 }
 | {
 	$$ = nullptr;
+}
+| error AssignmentExpression ExpressionPart
+{
+	yyerror("unexpected operator here!");
 }
 ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart {
 	if ($2 == nullptr){

@@ -669,7 +669,6 @@ TValue ast::ObjectType::run() {
 	for (auto stmt : propList->list) {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
 		debugOut<<property->name<<endl;
-		property->valueExp->value.print();
 		props[property->name] = property->valueExp->value;
 	}
 

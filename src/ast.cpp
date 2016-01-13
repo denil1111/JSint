@@ -608,12 +608,12 @@ TValue ast::MemberPropertyExpression::run() {
 		
 		Object* o;
 		
-		for (ExpressionList::iterator iter=rightExpList->begin();
+		for (MemberNameList::iterator iter=rightExpList->begin();
 			 iter!=rightExpList->end(); iter++) {			 
 			 (*iter)->run();
 		}
 
-		for (ExpressionList::iterator iter=rightExpList->begin();
+		for (MemberNameList::iterator iter=rightExpList->begin();
 			 iter!=rightExpList->end(); iter++) {
 			
 			if (value.object == nullptr) {
@@ -632,6 +632,15 @@ TValue ast::MemberPropertyExpression::run() {
 	
 }
 
+TValue ast::MemberName::run() {
+	if (isIdentifier) {
+		Identifier* id = dynamic_cast<Identifier*>(exp);
+		value = TValue(id->name);
+	} else {
+		value = exp->run();
+	}
+	return value;
+}
 
 TValue ast::Block::run() {
 	debugOut << "Enter new block!" << std::endl;

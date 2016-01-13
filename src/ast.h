@@ -43,8 +43,10 @@ class TryStmt;
 class BreakException;
 class ContinueException;
 class LabeledStmt;
+class MemberName;
 
 typedef std::string PropertyName;
+typedef std::vector<MemberName*> MemberNameList;
 typedef std::vector<Identifier*> ParameterList;
 typedef std::vector<Expression*> ArgumentList;
 //typedef std::vector<Expression*> ElementList;
@@ -891,23 +893,38 @@ public:
 class MemberPropertyExpression : public Expression {
 private:
 	Expression* leftExp;
-	ExpressionList* rightExpList;
+	MemberNameList* rightExpList;
 public:
 	MemberPropertyExpression() {}
     MemberPropertyExpression(Expression* exp): leftExp(exp), rightExpList(nullptr) {}	
-    MemberPropertyExpression(Expression* exp, ExpressionList* expList):
+    MemberPropertyExpression(Expression* exp, MemberNameList* expList):
 	leftExp(exp), rightExpList(expList) {}
 
 	virtual std::string toString() { return "MemberPropertyExpression"; }
 	virtual std::vector<Node*> getChildren() {
 		if (rightExpList != nullptr) {
 			std::vector<Node*> rList = std::vector<Node*>{(Node*)leftExp};
-			for (ExpressionList::iterator iter=rightExpList->begin();
+			for (MemberNameList::iterator iter=rightExpList->begin();
 				 iter != rightExpList->end(); iter++) {
-				rList.push_back(*iter);
+				rList.push_back((Node*)*iter);
 			}
 			return rList;
 		} else return std::vector<Node*>{leftExp};
+	}
+	virtual TValue run();
+};
+
+class MemberName : public Expression {
+private:
+	bool isIdentifier;
+	Expression* exp;
+public:
+	MemberName() {}
+    MemberName(Expression* exp, bool isIdentifier): exp(exp), isIdentifier(isIdentifier) {}
+
+	virtual std::string toString() { return "MemberName"; }
+	virtual std::vector<Node*> getChildren() {
+		return std::vector<Node*>{exp};
 	}
 	virtual TValue run();
 };

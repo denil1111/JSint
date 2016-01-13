@@ -70,6 +70,8 @@ ast::Operator* noOp1Exp;
 	ast::PropertyNameAndValueList* ast_PropertyNameAndValueList;
 	ast::ObjectType*         ast_ObjectType;
 	ast::MemberPropertyExpression*   ast_MemberPropertyExpression;
+	ast::MemberName*        ast_MemberName;
+	ast::MemberNameList*    ast_MemberNameList;
 }
 
 %token DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
@@ -96,8 +98,8 @@ ast::Operator* noOp1Exp;
 %type <ast_Expression> MemberExpression MemberExpressionForIn
 %type <ast_MemberPropertyExpression> MemberPropertyExpression
 %type <ast_Expression> AllocationExpression AllocationExpressionBody
-%type <ast_ExpressionList> MemberExpressionParts
-%type <ast_Expression> MemberExpressionPart
+%type <ast_MemberNameList> MemberExpressionParts
+%type <ast_MemberName> MemberExpressionPart
 %type <ast_Expression> CallExpressionForIn CallExpressionParts CallExpressionPart
 %type <ast_CallExpression> CallExpression
 %type <ast_ArgumentList> Arguments ArgumentList
@@ -291,16 +293,16 @@ MemberExpressionParts   :   MemberExpressionParts MemberExpressionPart
 }
 | MemberExpressionPart
 {
-	$$ = new ast::ExpressionList{$1};
+	$$ = new ast::MemberNameList{$1};
 }
 
 MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
 {
-	$$ = $2;
+	$$ = new ast::MemberName($2, false);
 }
 |	DOT Identifier
 {
-	$$ = $2;
+	$$ = new ast::MemberName($2, true);
 }
 
 CallExpression	:	MemberExpression Arguments CallExpressionParts {

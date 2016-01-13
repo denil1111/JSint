@@ -17,6 +17,8 @@ extern int yylineno;
 extern char *yytext;
 
 void yyerror(char *s, ...);
+void runerror(char *s, ...);
+
 
 typedef struct ast_struct ast_tree;
 typedef ast_tree ast_node;

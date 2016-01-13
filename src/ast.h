@@ -62,6 +62,10 @@ typedef std::vector<TypeConst *>    TypeDeclList;
 typedef std::vector<CaseStmt *>     CaseList;
 typedef std::map<std::string,Statement*> LabelMap;
 
+class runerrorException:public std::exception{
+public:
+    runerrorException(){};
+};
 class BreakException:public std::exception{
 public:
     std::string label;

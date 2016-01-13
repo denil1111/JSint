@@ -7,6 +7,15 @@
 #include <string.h>
 int parseError = 0;
 MyStream debugOut;
+class runerrorException:public std::exception{
+public:
+    runerrorException(){};
+};
+void runerror(char *s, ...) {
+	PrintError(s);
+	parseError = 1;
+	throw runerrorException();
+}
 void yyerror(char *s, ...) {
 	PrintError(s);
 	parseError = 1;

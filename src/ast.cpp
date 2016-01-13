@@ -24,7 +24,7 @@ void debugUnset() {
 }
 
 void myerror(std::string str) {
-	yyerror(str.c_str());
+	runerror(str.c_str());
 }
 */
 
@@ -289,7 +289,7 @@ TValue ast::Operator::run() {
 		auto id = dynamic_cast<Identifier*>(op1);
 		if (id == nullptr)
 		{
-			yyerror("leftside exp error");
+			runerror("leftside exp error");
 		}
 		else
 		{
@@ -727,7 +727,7 @@ TValue ast::MemberPropertyExpression::run() {
 			 iter!=rightExpList->end(); iter++) {
 			
 			if (value.object == nullptr) {
-				yyerror("Not an object!");
+				runerror("Not an object!");
 			} else {
 				o = value.object;
 			}

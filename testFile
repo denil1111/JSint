@@ -1,0 +1,21 @@
+#!/bin/sh
+echo "\033[1;34m" Now Test all files in text folder "\033[0m"
+FILES=`ls test/*.js`
+i=0
+suc=0
+for d in $FILES; do  
+	i=$[$i+1]
+	filename=`basename $d .js`
+	echo "\033[1m" Test $i "\033[0;35m" $filename.js : "\033[0m""\c"
+	if diff test/$filename.res test/$filename.out >/dev/null ; then
+  		echo "\033[1;32m √ \033[0m"
+  		suc=$[$suc+1]
+	else
+  		echo "\033[1;31m Failed \033[0m"
+	fi
+done;
+if [[ $i -eq $suc ]];then
+	echo "\033[1;32m" All file tested, $suc/$i files is correct "\033[0m"
+else
+	echo "\033[1;31m" All file tested, $suc/$i files is correct "\033[0m"
+fi

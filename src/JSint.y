@@ -19,6 +19,7 @@ extern vector<ast::Expression*> concat(ast::Expression*, vector<ast::Expression*
 int yydebug = 1;
 ast::Node* ast_root;
 ast::Operator* noOp1Exp;
+extern int parseError;
 %}
 
 %union{
@@ -1206,9 +1207,14 @@ SourceElements	:	SourceElement {
 }
 | SourceElements error {
 	$$ = $1;
+	parseError = 0;
+}
+| error {
+	debugOut<<"get an error \n";
+	$$ = new ast::StatementList;
+	parseError = 0;
 }
 SourceElement	:	FunctionDeclaration {
-	extern int parseError;
 	$$ = $1;
 
 	if (!parseError)
@@ -1237,9 +1243,8 @@ SourceElement	:	FunctionDeclaration {
 	}
 }
 |	Statement {
-	extern int parseError;
 	$$ = $1;
-
+	debugOut<<"a new stmt"<<std::endl;
 	if (!parseError)
 	{	
 		extern int debugFlag;
@@ -1252,7 +1257,9 @@ SourceElement	:	FunctionDeclaration {
 			cout << de.what() << endl;
 		} catch (const std::logic_error &le) {
 			cout << le.what() << endl;
-		} catch (...) {
+		} catch (ast::runerrorException) {
+
+		}catch (...) {
 			cout << "other uncaught error" << endl;
 		}
 

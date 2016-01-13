@@ -626,11 +626,12 @@ TValue ast::ObjectType::run() {
 	std::map<std::string, TValue> props = std::map<std::string, TValue>();
 	for (auto stmt : propList->list) {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
+		debugOut<<property->name<<endl;
+		property->valueExp->value.print();
 		props[property->name] = property->valueExp->value;
 	}
 
 	Object* objectValue = new Object(props);
-
 	debugOut <<  "Creating object: " << objectValue->toString() << std::endl;
 
 	value = TValue(objectValue); 	

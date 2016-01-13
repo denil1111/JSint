@@ -1000,6 +1000,9 @@ VariableDeclarationListNoIn	:	VariableDeclarationNoIn
 VariableDeclaration	:	Identifier
 | Identifier Initialiser
 VariableDeclarationNoIn	:	Identifier
+{
+	
+}
 | Identifier  InitialiserNoIn
 Initialiser	:	ASSIGN AssignmentExpression
 InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn

@@ -340,6 +340,7 @@ TValue ast::CallExpression::run() {
     if (function) {
         nowStack.push_new();
         value = function->execute(argument_list);
+        nowStack.pop();
     }
     return value;
 }

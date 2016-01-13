@@ -33,7 +33,5 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
     }catch(ast::ReturnException e){
         val = e.value;
     }
-    
-    nowStack.pop();
     return val;
 }

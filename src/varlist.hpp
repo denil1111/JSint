@@ -175,6 +175,9 @@ public:
 	void assignAndNew(std::string idname, TValue val) {
 		vstack.back().assignAndNew(idname, val);
 	}
+	void newVar(std::string idname, TValue val) {
+		vstack.back().assignAndNew(idname, val);
+	}
 	TValue getVar(std::string idname) {
 		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
 			if (it->hasVar(idname)) return it->getVar(idname);

@@ -81,11 +81,11 @@ ast::Operator* noOp1Exp;
 %token THIS NEW DELETE VOID TYPEOF INSTANCEOF IN VAR IF ELSE DO WHILE FOR CONTINUE BREAK RETURN WITH SWITCH CASE DEFAULT THROW TRY CATCH FINALLY FUNCTION IMPORT
 %token LEFT_BRACKET RIGHT_BRACKET LEFT_PARE RIGHT_PARE LEFT_BRACE RIGHT_BRACE COMMA DOT COLON SEMICOLON
 %token PLUS MINUS MULTI ASSIGN PLUS_PLUS MINUS_MINUS TILDE QUES EXCLAM PERCENT LESS GREATER EQUAL LSHIFT RSHIFT RRSHIFT LESS_EQ GREATER_EQ NOT_EQUAL ALWAYS_EQ ALWAYS_NEQ BIT_AND BIT_OR BIT_XOR AND OR MULTI_ASG MOD_ASG PLUS_ASG MINUS_ASG LRSHIFT_ASG LSHIFT_ASG RSHIFT_ASG
-%token BIT_AND_ASG BIT_XOR_ASG BIT_OR_ASG NL
+%token BIT_AND_ASG BIT_XOR_ASG BIT_OR_ASG
 %start Program
 
 %type <debug> DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
-%type <debug> SLASHASSIGN SLASH JEOF IDENTIFIER_NAME NL
+%type <debug> SLASHASSIGN SLASH JEOF IDENTIFIER_NAME
 
 
 // default type is ast node
@@ -150,7 +150,7 @@ ast::Operator* noOp1Exp;
 %type <ast_FunctionDeclaration> FunctionDeclaration FunctionExpression
 %type <ast_StatementList> FunctionBody
 %type <ast_StatementList> Program
-%type <ast_StatementList> SourceElements InFuncSourceElements SourceElementsNL
+%type <ast_StatementList> SourceElements InFuncSourceElements
 %type <ast_Statement> SourceElement InFuncSourceElement
 %type <ast_Node> ImportStatement Name
 %type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
@@ -1175,13 +1175,65 @@ FunctionBody	:	LEFT_BRACE RIGHT_BRACE {
 }
 
 Program	:	JEOF
-| SourceElementsNL JEOF
+| SourceElements JEOF
 {
 	$$ = $1;
 	//cout << "program End"<<endl;
 }
-SourceElementsNL	:	SourceElements NL
-{
+InFuncSourceElements	:	InFuncSourceElement {
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+	//printf("To InFuncSourceElements\n");
+}
+| InFuncSourceElements InFuncSourceElement {
+	$1->list.push_back($2);
+	$$ = $1;
+}
+| InFuncSourceElements error {
+	$$ = $1;
+}
+SourceElements	:	SourceElement {
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+	//printf("To SourceElements\n");
+}
+| SourceElements SourceElement {
+	$1->list.push_back($2);
+	$$ = $1;
+}
+| SourceElements error {
+	$$ = $1;
+}
+SourceElement	:	FunctionDeclaration {
+	extern int parseError;
+	$$ = $1;
+
+	if (!parseError)
+	{
+		$1 -> print_node("", true, true);
+		ast_root = $1;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;
+		} catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+
+		if (!parseError)
+		{
+			ast_root->value.print();
+			parseError = 0;
+		}
+		else
+		{
+			parseError = 0;
+		}
+	}
+}
+|	Statement {
 	extern int parseError;
 	$$ = $1;
 
@@ -1214,71 +1266,6 @@ SourceElementsNL	:	SourceElements NL
 		}
 
 	}
-}
-| SourceElementsNL  SourceElements NL
-{
-	extern int parseError;
-	$$ = $2;
-
-	if (!parseError)
-	{	
-		extern int debugFlag;
-		if (debugFlag)
-			$2 -> print_node("", true, true);
-		ast_root = $2;
-		try {
-			ast_root->run();
-		} catch (const std::domain_error &de) {
-			cout << de.what() << endl;
-		} catch (const std::logic_error &le) {
-			cout << le.what() << endl;
-		} catch (...) {
-			cout << "other uncaught error" << endl;
-		}
-
-		if (!parseError)
-		{
-			extern int valueFlag;
-			if (valueFlag)
-				ast_root->value.print();
-			parseError = 0;
-		}
-		else
-		{
-			parseError = 0;
-		}
-
-	}
-}
-
-
-InFuncSourceElements	:	InFuncSourceElement {
-	$$ = new ast::StatementList;
-	$$ -> list.push_back($1);
-	//printf("To InFuncSourceElements\n");
-}
-| InFuncSourceElements InFuncSourceElement {
-	$1->list.push_back($2);
-	$$ = $1;
-}
-| InFuncSourceElements error {
-	$$ = $1;
-}
-SourceElements	:	SourceElement {
-	$$ = new ast::StatementList;
-	$$ -> list.push_back($1);
-	//printf("To SourceElements\n");
-}
-| SourceElements SourceElement {
-	$1->list.push_back($2);
-	$$ = $1;
-}
-
-SourceElement	:	FunctionDeclaration {
-	$$ = $1;
-}
-|	Statement {
-	$$ = $1;
 }
 InFuncSourceElement	:	FunctionDeclaration
 |	Statement {

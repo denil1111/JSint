@@ -1,3 +1,4 @@
+//assign exp
 a=1;
 a+=1;
 a-=3;
@@ -74,5 +75,6 @@ console.log(a);
 
 c = "3" << 2;
 console.log(a);
+
 
 

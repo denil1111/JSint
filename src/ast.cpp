@@ -642,6 +642,7 @@ TValue ast::ObjectType::run() {
 TValue ast::StatementList::run() {
 	for (auto stmt: list){
 		value = stmt->run();
+
 	}
 	return value;
 }

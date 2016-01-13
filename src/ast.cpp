@@ -532,15 +532,10 @@ TValue ast::ArrayType::run() {
 	}
 	Object arrayValue = Object(values);
 
-	debugOut << "Creating array: " << "values" << std::endl;
-	debugOut << arrayValue.toString() << std::endl;
-<<<<<<< HEAD
+	debugOut << "Creating array: " <<  arrayValue.toString() << std::endl;
 
-	value = arrayValue;
-	return value;
-=======
 	return TValue(&arrayValue);
->>>>>>> 713333cd981279e41a8b9173001244f1132f7ce9
+
 }
 
 TValue ast::ObjectType::run() {
@@ -551,22 +546,12 @@ TValue ast::ObjectType::run() {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
 		props[property->name] = property->valueExp->value;
 	}
-<<<<<<< HEAD
-	
+
 	Object objectValue = Object(props);
 
 	debugOut <<  "Creating object: " << objectValue.toString() << std::endl;
 
-	value = objectValue;
-	return value;
-=======
-
-	objectValue = Object(props);
-
-	debugOut <<  "Creating object: " << objectValue.toString() << std::endl;
-
 	return TValue(&objectValue);
->>>>>>> 713333cd981279e41a8b9173001244f1132f7ce9
 }
 
 TValue ast::StatementList::run() {

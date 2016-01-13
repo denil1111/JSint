@@ -12,7 +12,7 @@ public:
 	}
 	virtual TValue execute(ArgumentList *args)
 	{
-		(*args)[0]->run().print();
+		(*args)[0]->run().output();
 		return TValue::undefined();
 	}
 };

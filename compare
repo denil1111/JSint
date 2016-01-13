@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if diff $1 $2 >/dev/null ; then
-  echo "\033[1;32m Success \033[0m"
+  echo "\033[1;32m √ \033[0m"
 else
   echo "\033[1;31m Failed \033[0m"
 fi

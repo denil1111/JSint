@@ -110,6 +110,9 @@ public:
 			std::cout<<"\"" << green(this->toString()) << "\"" << std::endl;
 		}
 	}
+	void output() {
+		std::cout<<this->toString()<<std::endl;
+	}
 
 	TValue operator   +( TValue &rx);
 	TValue operator   -( TValue &rx);

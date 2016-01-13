@@ -104,7 +104,11 @@ public:
 	}
 
 	void print() {
-		std::cout<<green(this->toString())<<std::endl;
+		if (type != TType::Tstring) {
+			std::cout<<green(this->toString())<<std::endl;
+		} else {
+			std::cout<<"\"" << green(this->toString()) << "\"" << std::endl;
+		}
 	}
 
 	TValue operator   +( TValue &rx);
@@ -146,16 +150,16 @@ public:
 	TValue getVar(std::string idname) {
 		if (hasVar(idname)) return list[idname];
 		else {
-			std::cout << red("Not exist in variable list!") << std::endl;
+			debugOut << red("Not exist in variable list!") << std::endl;
 			exit(0);
 		}
 	}
 	void print() {
 		std::cout << "VarList(";
 		for (auto& kv : list) {
-			std::cout << kv.first << ": " << kv.second.toString() << ", ";
+			debugOut << kv.first << ": " << kv.second.toString() << ", ";
 		}
-		std::cout << ")" << std::endl;
+		debugOut << ")" << std::endl;
 	}
 };
 
@@ -185,7 +189,7 @@ public:
 	}
 	void print() {
 		for (int lv = vstack.size()-1; lv>=0; lv--) {
-			std::cout << "level " << lv << " : ";
+			debugOut << "level " << lv << " : ";
 			vstack[lv].print();
 		}
 	}

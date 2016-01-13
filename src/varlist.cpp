@@ -25,7 +25,7 @@ string TValue::toString()
 		}
 	}
 	if (type == TType::Tstring) {
-		ss << "\""+sValue.str+"\"";
+		ss << sValue.str;
 	}
 	if (type == TType::TNaN) {
 		ss<<"NaN";

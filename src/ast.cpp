@@ -13,6 +13,21 @@
 using namespace std;
 extern VarStack nowStack;
 extern ast::LabelMap labelMap;
+
+/*
+void debugSet() {
+	debugOut << "Check In!" << std::endl;
+}
+
+void debugUnset() {
+	debugOut << "Check Out!" << std::endl;
+}
+
+void myerror(std::string str) {
+	yyerror(str.c_str());
+}
+*/
+
 TValue ast::Identifier::run() {
     debugOut << "Creating identifier: " << name << std::endl;
 
@@ -530,11 +545,12 @@ TValue ast::ArrayType::run() {
 		Expression* exp = dynamic_cast<Expression*>(stmtList[i]);
 		values[i] = exp->value;
 	}
-	Object arrayValue = Object(values);
+	Object* arrayValue = new Object(values);
 
-	debugOut << "Creating array: " <<  arrayValue.toString() << std::endl;
+	debugOut << "Creating array: " <<  arrayValue->toString() << std::endl;
 
-	return TValue(&arrayValue);
+	value = TValue(arrayValue); 
+	return value;
 
 }
 
@@ -547,15 +563,15 @@ TValue ast::ObjectType::run() {
 		props[property->name] = property->valueExp->value;
 	}
 
-	Object objectValue = Object(props);
+	Object* objectValue = new Object(props);
 
-	debugOut <<  "Creating object: " << objectValue.toString() << std::endl;
+	debugOut <<  "Creating object: " << objectValue->toString() << std::endl;
 
-	return TValue(&objectValue);
+	value = TValue(objectValue); 	
+	return value;
 }
 
 TValue ast::StatementList::run() {
-	std::cout << "StatementList" << std::endl;
 	for (auto stmt: list){
 		value = stmt->run();
 	}
@@ -586,13 +602,32 @@ TValue ast::ElementList::run() {
 
 TValue ast::MemberPropertyExpression::run() {
 	leftExp->run();
+	value = leftExp->value;
+	
 	if (rightExpList != nullptr) {
-		for (int i=0; i<rightExpList->size(); i++) {		
-			rightExpList->at(i)->run();
+		
+		Object* o;
+		
+		for (ExpressionList::iterator iter=rightExpList->begin();
+			 iter!=rightExpList->end(); iter++) {			 
+			 (*iter)->run();
 		}
+
+		for (ExpressionList::iterator iter=rightExpList->begin();
+			 iter!=rightExpList->end(); iter++) {
+			
+			if (value.object == nullptr) {
+				yyerror("Not an object!");
+			} else {
+				o = value.object;
+			}
+			 
+			value = o->get((*iter)->value.toString());
+		}
+		//debugOut << "check in" << std::endl;			
+		//debugOut << "check out!" << std::endl;				
 	}
 
-	//TValue leftValue = leftExp->value;
 	return value;
 	
 }

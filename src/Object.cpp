@@ -1,17 +1,5 @@
 #include "Object.h"
 
-Object::Object() {}
-
-Object::Object(std::vector<TValue> arr): isArr(true) {
-    prop = std::map<std::string, TValue>();
-    for (int i=0; i<arr.size(); i++) {
-        prop[std::to_string(i)] = arr[i];
-    }
-}
-
-Object(std::map<std::string, TValue> prop): prop(prop), isArr(false) {
-}
-
 TValue Object::get(std::string name) {
 	if (prop.find(name) == prop.end()) {
 		return TValue::undefined;

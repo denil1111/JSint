@@ -125,7 +125,7 @@ public:
 		}
 	}
     virtual TValue run();
-    virtual std::string toString(){ return "stmt_list";}
+    virtual std::string toString(){ return "StatementList";}
     virtual std::vector<Statement*> *getlist(){ return &list;}
 	virtual std::vector<Node *> getChildren() {
 		std::vector<Node *> rlist;

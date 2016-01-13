@@ -6,17 +6,21 @@
 #include <stdio.h>
 #include <string.h>
 int parseError = 0;
+int runFlag;
 MyStream debugOut;
-class runerrorException:public std::exception{
-public:
-    runerrorException(){};
-};
+
 void runerror(char *s, ...) {
-	PrintError(s);
+	char errmsg[1000];
+	va_list args;
+	va_start(args, s);
+  	vsprintf(errmsg, s, args);
+  	va_end(args);
+  	fprintf(stdout, "\033[1;31m Error \033[0m\033[1m: %s\033[0m\n", errmsg);
 	parseError = 1;
-	throw runerrorException();
+	throw ast::runerrorException();
 }
 void yyerror(char *s, ...) {
+	runFlag = 0;
 	PrintError(s);
 	parseError = 1;
 	// va_list ap;

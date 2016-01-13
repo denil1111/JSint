@@ -1,6 +1,7 @@
 #include "DeclaredFunction.h"
 
 TValue DeclaredFunction::execute(ArgumentList *args) {
+    TValue val;
     if (args) {
         int index = 0;
 
@@ -27,7 +28,12 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         }
         debugOut << std::endl;
     }
-    TValue val = function_body->run();
+    try{
+        val = function_body->run();
+    }catch(ast::ReturnException e){
+        val = e.value;
+    }
+    
     nowStack.pop();
     return val;
 }

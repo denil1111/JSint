@@ -62,6 +62,11 @@ typedef std::vector<TypeConst *>    TypeDeclList;
 typedef std::vector<CaseStmt *>     CaseList;
 typedef std::map<std::string,Statement*> LabelMap;
 
+class ReturnException:public std::exception{
+public:
+    TValue value;
+    ReturnException(TValue v):value(v){};
+};
 class runerrorException:public std::exception{
 public:
     runerrorException(){};
@@ -766,8 +771,7 @@ public:
 class ReturnStmt : public Statement {
 public:
     Expression* exp;
-    CaseList* list;
-    ReturnStmt(Expression* exp,CaseList* list):exp(exp),list(list){}
+    ReturnStmt(Expression* exp):exp(exp){}
     virtual TValue run();
     virtual std::string toString() { return "return statement"; }
 };

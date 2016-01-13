@@ -49,9 +49,11 @@ ast::Operator* noOp1Exp;
     ast::FieldDeclList*     ast_FieldDeclList;
     ast::TypeDeclList*      ast_TypeDeclList;
     ast::IfStmt*          	ast_IfStmt;
+    ast::ForStmt*          	ast_ForStmt;
+    ast::WhileStmt*         ast_WhileStmt;
     ast::CaseList*          ast_CaseList;
     ast::CaseStmt*          ast_CaseStmt;
-    ast::SwitchStmt*          ast_SwitchStmt;
+    ast::SwitchStmt*        ast_SwitchStmt;
 	ast::ContinueStmt*      ast_ContinueStmt;
 	ast::BreakStmt*         ast_BreakStmt;
 	ast::Block*         	ast_Block;
@@ -116,7 +118,7 @@ ast::Operator* noOp1Exp;
 %type <ast_OpType> PostfixOperator UnaryOperator AssignmentOperator LogicalOROperator LogicalANDOperator BitwiseOROperator  EqualityOperator BitwiseXOROperator BitwiseANDOperator
 %type <ast_OpType> RelationalNoInOperator RelationalOperator ShiftOperator AdditiveOperator MultiplicativeOperator
 %type <ast_Expression> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
-%type <ast_Node> ExpressionOrNull
+%type <ast_Expression> ExpressionOrNull
 %type <ast_Statement> Statement
 %type <ast_Block> Block
 %type <ast_StatementList> StatementList
@@ -989,10 +991,11 @@ IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE{
 	$$=new ast::WhileStmt($3,$5,false);
 }
 |	FOR LEFT_PARE SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
-	//$$=new ast::ForStmt(nullptr,$4,$6,$8);
+	$$=new ast::ForStmt(nullptr,$4,$6,$8);
+	printf("after for stmt\n");
 }
 |	FOR LEFT_PARE ExpressionNoIn SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
-	//$$=new ast::ForStmt($3,$5,$7,$9);
+	$$=new ast::ForStmt($3,$5,$7,$9);
 }
 |	FOR LEFT_PARE VAR VariableDeclarationList SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
 	//$$=new ast::ForStmt($4,$6,$8,$10);

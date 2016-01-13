@@ -395,15 +395,85 @@ TValue ast::WhileStmt::run() {
 	}
 
 	condition->run();
-	while(condition->value.toBoolean()){
-		loopStmt->run();
-		condition->run();
+	bool conditionBool=condition->value.toBoolean();
+	while(conditionBool){
+		// std::cout<<"in whilestmt::while:"<<condition->value.toString()<<std::endl;
+		try{
+			loopStmt->run();
+			condition->run();
+			conditionBool=condition->value.toBoolean();
+		}catch(BreakException &brexception){
+			std::cout<<"for stmt brexception"<<std::endl;
+			if(brexception.label==""){
+				return;
+			}else{
+				//如果有标签
+			}
+			return value;
+		}catch(ContinueException &cnexception){
+			std::cout<<"for stmt cnexception"<<std::endl;
+			if(cnexception.label==""){
+				continue;
+			}else{
+				//如果有标签
+			}
+			
+			return value;
+		}
 	}
 
 	return value;
 }
 TValue ast::ForStmt::run() {
 
+	bool condition=false;
+	TValue res;
+
+	if(loopVar!=nullptr){
+		std::cout<<"111"<<std::endl;
+		loopVar->run();
+	}
+	if(startExp!=nullptr){
+		std::cout<<"222"<<std::endl;
+		startExp->run();
+	}else{
+		std::cout<<"333"<<std::endl;
+		condition=true;
+	}
+
+	res=(startExp->value == TValue(1));
+
+	while(condition||res.toBoolean()){
+		try{
+			std::cout<<"444"<<std::endl;
+			loopStmt->run();
+
+			if(endExp!=nullptr){
+				endExp->run();
+			}
+			if(startExp!=nullptr){
+				startExp->run();
+			}
+		}catch(BreakException &brexception){
+			std::cout<<"for stmt brexception"<<std::endl;
+			if(brexception.label==""){
+				return;
+			}else{
+				//如果有标签
+			}
+			return value;
+		}catch(ContinueException &cnexception){
+			std::cout<<"for stmt cnexception"<<std::endl;
+			if(cnexception.label==""){
+				continue;
+			}else{
+				//如果有标签
+			}
+			
+			return value;
+		}
+		
+	}
 
 	return value;
 }

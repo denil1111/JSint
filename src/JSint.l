@@ -134,7 +134,6 @@ COMPLEX "*"[^/]
 <INITIAL><<EOF>> { BEGIN(REALLYEND);BeginToken(yytext);YYLVAL_DEBUG return JEOF; }
 <REALLYEND><<EOF>>      { return 0; }                    
 {IdentifierStart}{IdentifierPart}*  { BeginToken(yytext);YYLVAL_DEBUG return IDENTIFIER_NAME; }
-(\n)	{BeginToken(yytext);YYLVAL_DEBUG return NL;}
-[ \t]+ { BeginToken(yytext); }
+[ \n\t]+ { BeginToken(yytext); }
 .		{ printf("Invalid character\n"); }
 %%

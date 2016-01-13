@@ -621,22 +621,36 @@ TValue ast::LabeledStmt::run() {
 
 TValue ast::TryStmt::run() {
 
+	try{
+		blockstmt->run();
+	}catch(MyException & ex){
+		//如果抓住什么异常
+		debugOut<<"MyExceptionWithFinally"<<endl;
+		VarStack oldStacks = nowStack;
+		TValue res=ex.myex;
+		nowStack.assignAndNew(catchstmt->identifier->name,res);
+		catchstmt->run();
+		nowStack = oldStacks;
+	}
 
+	if(finallystmt!=nullptr){
+		finallystmt->run();
+	}
+	
 	return value;
 }
 TValue ast::ThrowStmt::run() {
-
-
+	exp->run();
+	throw MyException(exp->value);
 	return value;
 }
 TValue ast::FinallyStmt::run() {
 
-
+	stmt->run();
 	return value;
 }
 TValue ast::CatchStmt::run() {
-
-
+	stmt->run();
 	return value;
 }
 

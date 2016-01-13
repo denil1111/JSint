@@ -1,12 +1,14 @@
 SRC_DIR = src
 FILES=`ls test/*.js`
-define test_all_file
+define make_all_file
 @for file in $(FILES); do \
 ( make ll $$file ) \
 done;
 endef
+
 all: compiler
-	 @$(test_all_file)
+	 @$(make_all_file)
+	 @./testFile
 
 compiler:
 	$(MAKE) -C $(SRC_DIR) -j
@@ -15,8 +17,7 @@ compiler:
 ll:
 	@./Jsint -a < $(filter-out ll asm,$(MAKECMDGOALS)) > $(basename $(filter-out ll asm,$(MAKECMDGOALS))).res
 	@node < $(filter-out ll asm,$(MAKECMDGOALS)) > $(basename $(filter-out ll asm,$(MAKECMDGOALS))).out
-	@echo "\033[1m" Test "\033[0m" $(filter-out ll asm,$(MAKECMDGOALS)) : "\c"
-	@./compare $(basename $(filter-out ll asm,$(MAKECMDGOALS))).res $(basename $(filter-out ll asm,$(MAKECMDGOALS))).out
+
 %:
 	@:
 

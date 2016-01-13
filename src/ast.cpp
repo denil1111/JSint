@@ -389,19 +389,37 @@ TValue ast::WhileStmt::run() {
 			condition->run();
 			conditionBool=condition->value.toBoolean();
 		}catch(BreakException &brexception){
-			debugOut<<"for stmt brexception"<<std::endl;
+			debugOut<<"while stmt brexception"<<std::endl;
 			if(brexception.label==""){
 				return;
 			}else{
 				//如果有标签
+				Statement* stmt=labelMap[brexception.label];
+				if(stmt==this){
+					//如果就是这个结点
+					return value;
+				}else{
+					//如果不是就再throw给外部
+					throw brexception;
+				}
 			}
 			return value;
 		}catch(ContinueException &cnexception){
-			debugOut<<"for stmt cnexception"<<std::endl;
+			debugOut<<"while stmt cnexception"<<std::endl;
+			condition->run();
+			conditionBool=condition->value.toBoolean();
 			if(cnexception.label==""){
 				continue;
 			}else{
 				//如果有标签
+				Statement* stmt=labelMap[cnexception.label];
+				if(stmt==this){
+					//如果就是这个结点
+					continue;
+				}else{
+					//如果不是就再throw给外部
+					throw cnexception;
+				}
 			}
 			
 			return value;
@@ -415,43 +433,65 @@ TValue ast::ForStmt::run() {
 	bool condition=false;
 
 	if(loopVar!=nullptr){
-		debugOut<<"111"<<std::endl;
 		loopVar->run();
 	}
 	if(startExp!=nullptr){
-		debugOut<<"222"<<std::endl;
 		startExp->run();
 	}else{
-		debugOut<<"333"<<std::endl;
 		condition=true;
 	}
 
 
 	while(condition||startExp->value.toBoolean()){
 		try{
-			debugOut<<"444"<<std::endl;
 			loopStmt->run();
 
 			if(endExp!=nullptr){
 				endExp->run();
 			}
+
 			if(startExp!=nullptr){
 				startExp->run();
 			}
 		}catch(BreakException &brexception){
 			debugOut<<"for stmt brexception"<<std::endl;
 			if(brexception.label==""){
-				return;
+				return value;
 			}else{
 				//如果有标签
+				Statement* stmt=labelMap[brexception.label];
+				if(stmt==this){
+					//如果就是这个结点
+					return value;
+				}else{
+					//如果不是就再throw给外部
+					throw brexception;
+				}
 			}
 			return value;
 		}catch(ContinueException &cnexception){
 			debugOut<<"for stmt cnexception"<<std::endl;
+			if(endExp!=nullptr){
+				endExp->run();
+			}
+			if(startExp!=nullptr){
+				startExp->run();
+			}
 			if(cnexception.label==""){
 				continue;
 			}else{
 				//如果有标签
+				debugOut<<"label justice"<<std::endl;
+				Statement* stmt=labelMap[cnexception.label];
+				if(stmt==this){
+					//如果就是这个结点
+					debugOut<<"label finded"<<std::endl;
+					continue;
+				}else{
+					//如果不是就再throw给外部
+					debugOut<<"label throw again"<<std::endl;
+					throw cnexception;
+				}
 			}
 			
 			return value;
@@ -575,6 +615,7 @@ TValue ast::BreakStmt::run() {
 
 TValue ast::LabeledStmt::run() {
     labelMap[label->name]=stmt;
+    stmt->run();
 	return value;
 }
 
@@ -711,10 +752,10 @@ TValue ast::MemberName::run() {
 
 TValue ast::Block::run() {
 	debugOut << "Enter new block!" << std::endl;
-	nowStack.push_new();
+	// nowStack.push_new();
 	this->stmtList->run();
 	nowStack.print();
-	nowStack.pop();
+	// nowStack.pop();
 	debugOut << "Exit from block!" << std::endl;
 	nowStack.print();
 	return value;

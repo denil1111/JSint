@@ -920,8 +920,12 @@ ExpressionNoInPart   :   COMMA ExpressionNoInPart AssignmentExpressionNoIn {
 	$$ = nullptr;
 }
 //陈睿
-ExpressionOrNull:
-| Expression
+ExpressionOrNull:{
+	$$=nullptr;
+}
+| Expression{
+	$$=$1;
+}
 Statement	:	Block
 {
 	$$ = $1;
@@ -1017,7 +1021,6 @@ IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE{
 }
 |	FOR LEFT_PARE SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
 	$$=new ast::ForStmt(nullptr,$4,$6,$8);
-	printf("after for stmt\n");
 }
 |	FOR LEFT_PARE ExpressionNoIn SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
 	$$=new ast::ForStmt($3,$5,$7,$9);

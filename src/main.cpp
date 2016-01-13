@@ -6,6 +6,7 @@
 #include "ccalc.h"
 #include "varlist.hpp"
 #include "string.h"
+#include "system.hpp"
 
 using namespace std;
 std::string red(const std::string& str) {
@@ -25,6 +26,7 @@ extern int yyparse();
 extern ast::StatementList* ast_root;
 VarStack nowStack = VarStack();
 int main(int argc, char** argv) {
+	initSystem();
 	for (int i=1;i<argc;i++)
 	{
 		if (strcmp(argv[i],"-d")==0)

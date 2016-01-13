@@ -39,8 +39,19 @@ DoubleStringCharacter ([^\"\\\n\r]+)|(\\{EscapeSequence})
 SingleStringCharacter ([^\'\\\n\r]+)|(\\{EscapeSequence})
 IdentifierStart [$_a-zA-Z]
 IdentifierPart {IdentifierStart}|[0-9]
-
+START "/*"
+END "*/"
+SIMPLE [^*]
+SPACE [ \t\n]
+COMPLEX "*"[^/]
+%s newstate
 %%
+"//"(.*[ \t]*.*)*[\n]+    {}
+{START}                    {yymore();BEGIN newstate;}
+ <newstate>{SIMPLE}        {yymore();BEGIN newstate;}
+ <newstate>{COMPLEX}      {yymore();BEGIN newstate;}
+ <newstate>{SPACE}        {yymore();BEGIN newstate;}
+ <newstate>{END}  {BEGIN 0;}
 ({DecimalIntegerLiteral}\.{DecimalDigits}*{ExponentPart}?)|(\.{DecimalDigits}{ExponentPart}?)|({DecimalIntegerLiteral}{ExponentPart}?) { BeginToken(yytext);YYLVAL_DEBUG return DECIMAL_LITERAL; }
 [0][xX]{HexDigit}+ { BeginToken(yytext);YYLVAL_DEBUG return HEX_INTEGER_LITERAL; }
 (\"{DoubleStringCharacter}*\")|(\'{SingleStringCharacter}*\') { BeginToken(yytext);YYLVAL_DEBUG return STRING_LITERAL; }

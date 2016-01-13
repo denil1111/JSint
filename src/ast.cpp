@@ -313,11 +313,11 @@ TValue ast::VarDecl::run() {
 	if (initial!=nullptr)
 	{
 		TValue val = initial->run();
-		nowStack.NewVar(name->name,val);
+		nowStack.newVar(name->name,val);
 	}
 	else
 	{
-		nowStack.NewVar(name->name,TValue::undefined());
+		nowStack.newVar(name->name,TValue::undefined());
 	}
 	return value;
 }
@@ -643,22 +643,68 @@ TValue ast::LabeledStmt::run() {
 
 TValue ast::TryStmt::run() {
 
+	try{
+		debugOut<<"111"<<endl;
+		blockstmt->run();
+	}catch(MyException & ex){
+		//如果抓住什么异常
+		debugOut<<"MyException"<<endl;
 
+		TValue exval=ex.myex;
+		std::string name=catchstmt->identifier->name;
+
+
+		debugOut<<"myexTvalue:"<<exval.toString()<<endl;
+		debugOut<<"name:"<<name<<endl;
+
+		TValue tmp;
+		bool ifDup=false;
+
+		if(nowStack.hasVar(name)){
+			tmp=nowStack.getVar(name);
+			ifDup=true;
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}else{
+			nowStack.assignAndNew(name,exval);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}
+
+		catchstmt->run();
+
+		if(ifDup){
+			debugOut<<"ifDup:true:setVar"<<endl;
+			nowStack.setVar(name,tmp);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}else{
+			debugOut<<"ifDup:false:removeVar"<<endl;
+			nowStack.removeVar(name);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}
+
+	}
+
+	if(finallystmt!=nullptr){
+		finallystmt->run();
+	}
+	
 	return value;
 }
 TValue ast::ThrowStmt::run() {
-
-
+	exp->run();
+	throw MyException(exp->value);
 	return value;
 }
 TValue ast::FinallyStmt::run() {
 
-
+	stmt->run();
 	return value;
 }
 TValue ast::CatchStmt::run() {
-
-
+	stmt->run();
 	return value;
 }
 
@@ -777,9 +823,9 @@ TValue ast::Block::run() {
 	debugOut << "Enter new block!" << std::endl;
 	// nowStack.push_new();
 	this->stmtList->run();
-	nowStack.print();
+	// nowStack.print();
 	// nowStack.pop();
 	debugOut << "Exit from block!" << std::endl;
-	nowStack.print();
+	// nowStack.print();
 	return value;
 }

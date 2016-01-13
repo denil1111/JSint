@@ -44,6 +44,7 @@ class BreakException;
 class ContinueException;
 class LabeledStmt;
 class MemberName;
+class myException;
 
 typedef std::string PropertyName;
 typedef std::vector<MemberName*> MemberNameList;
@@ -74,15 +75,19 @@ public:
 class BreakException:public std::exception{
 public:
     std::string label;
-    // ~BreakException();
     BreakException(std::string label):label(label){}
 };
 
 class ContinueException:public std::exception{
 public:
     std::string label;
-    // ~ContinueException();
     ContinueException(std::string label):label(label){}
+};
+
+class MyException:public std::exception{
+public:
+    TValue myex;
+    MyException(TValue myex):myex(myex){}
 };
 
 

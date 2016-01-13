@@ -145,6 +145,15 @@ public:
 	void assignAndNew(std::string idname, TValue val){
 		list[idname] = val;
 	};
+	void removeVar(std::string idname){
+		std::map<std::string,TValue>::iterator it;
+		it=list.find(idname);
+		if (it == list.end()){
+			return;
+		}else{
+			list.erase(it);
+		}
+	}
 	bool hasVar(std::string idname) {
 		if (list.find(idname) == list.end())
 			return false;
@@ -172,12 +181,34 @@ public:
 	VarStack() : vstack(std::vector<VarList>()){
 		this->push_new();
 	}
-	void assignAndNew(std::string idname, TValue val) {
-		vstack.back().assignAndNew(idname, val);
+
+	void setVar(std::string idname,TValue val) {
+		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
+			if (it->hasVar(idname)){
+				it->assignAndNew(idname,val);
+				return;
+			}
+		}
+		return;
 	}
-	void newVar(std::string idname, TValue val) {
-		vstack.back().assignAndNew(idname, val);
+
+	void removeVar(std::string idname) {
+		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
+			if (it->hasVar(idname)){
+				it->removeVar(idname);
+				return;
+			}
+		}
+		return;
 	}
+
+	bool hasVar(std::string idname) {
+		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
+			if (it->hasVar(idname)) return true;
+		}
+		return false;
+	}
+
 	TValue getVar(std::string idname) {
 		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
 			if (it->hasVar(idname)) return it->getVar(idname);
@@ -185,6 +216,27 @@ public:
 		debugOut<<"get id"<<idname<<std::endl;
 		runerror("Not exist in variable stack!");
 	}
+	void assignAndNew(std::string idname, TValue val) {
+		if (hasVar(idname))
+		{
+			setVar(idname,val);
+		}
+		else
+		{
+			vstack.front().assignAndNew(idname, val);
+		}
+	}
+	void newVar(std::string idname, TValue val) {
+		if (vstack.back().hasVar(idname))
+		{
+			runerror("redefined variable %s",idname.c_str());
+		}
+		else
+		{
+			vstack.back().assignAndNew(idname, val);
+		}
+	}
+
 	void push(VarList varList) {
 		vstack.push_back(varList);
 	}

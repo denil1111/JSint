@@ -61,7 +61,8 @@ console.log(a);console.log(i);
 num=0;outermost:for(i=0;i<10;i++){for(j=0;j<10;j++){if(i==5&&j==5){break outermost;}num++;}}console.log(num);
 num=0;outermost:for(i=0;i<10;i++){for(j=0;j<10;j++){if(i==5&&j==5){continue outermost;}num++;}}console.log(num);
 
-num=0;for(i=0;i<10;i++){
-	for(j=0;j<10;j++){num++;}
-}
-console.log(num)
+//try-catch
+
+
+
+

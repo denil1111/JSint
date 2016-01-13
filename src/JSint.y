@@ -128,16 +128,17 @@ extern int parseError;
 %type <ast_Statement> Statement
 %type <ast_Block> Block
 %type <ast_StatementList> StatementList
-%type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
-%type <ast_Node> VariableDeclaration VariableDeclarationNoIn
-%type <ast_Node> Initialiser InitialiserNoIn
+%type <ast_Statement> VariableStatement
+%type <ast_StatementList>  VariableDeclarationList  VariableDeclarationListNoIn
+%type <ast_VarDecl> VariableDeclaration VariableDeclarationNoIn
+%type <ast_Expression> Initialiser InitialiserNoIn
 %type <ast_Statement> EmptyStatement ExpressionStatement
 %type <ast_IfStmt> IfStatement 
 %type <ast_Statement> IterationStatement
 %type <ast_Identifier> IdentifierComma
 %type <ast_ContinueStmt> ContinueStatement
 %type <ast_BreakStmt> BreakStatement
-%type <ast_Node> ReturnStatement
+%type <ast_Statement> ReturnStatement
 %type <ast_Node> WithStatement 
 %type <ast_SwitchStmt> SwitchStatement
 %type <ast_CaseList> CaseBlock CaseBlockPart CaseClauses 
@@ -992,20 +993,49 @@ StatementList	:	Statement
 	$$ = new ast::StatementList($1, $2);
 }
 VariableStatement	:	VAR VariableDeclarationList
+{
+	$$ = $2;
+}
 |   VAR VariableDeclarationList SEMICOLON
-VariableDeclarationList	:	VariableDeclaration
+{
+	$$ = $2;
+}
+VariableDeclarationList	:	VariableDeclaration 
+{
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+}
 | VariableDeclarationList  COMMA VariableDeclaration
+{
+	$$ = $1;
+	$$->list.push_back($3);
+}
 VariableDeclarationListNoIn	:	VariableDeclarationNoIn
 | VariableDeclarationListNoIn COMMA VariableDeclarationNoIn
-VariableDeclaration	:	Identifier
-| Identifier Initialiser
+VariableDeclaration	:	Identifier 
+{
+	$$ = new ast::VarDecl($1);
+}
+| Identifier  Initialiser
+{
+	$$ = new ast::VarDecl($1,$2);
+}
 VariableDeclarationNoIn	:	Identifier
 {
-	
+	$$ = new ast::VarDecl($1);
 }
 | Identifier  InitialiserNoIn
+{
+	$$ = new ast::VarDecl($1,$2);
+}
 Initialiser	:	ASSIGN AssignmentExpression
+{
+	$$ = $2;
+}
 InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn
+{
+	$$ = $2;
+}
 EmptyStatement	:	SEMICOLON
 |
 ExpressionStatement	:	Expression {
@@ -1132,33 +1162,41 @@ LabelledStatement	:	Identifier COLON Statement{
 }
 
 ThrowStatement	:	THROW Expression{
+	printf("throw\n");
 	$$=new ast::ThrowStmt($2);
 }
 | THROW Expression SEMICOLON{
+	printf("throw\n");
 	$$=new ast::ThrowStmt($2);
 }
 
 TryStatement	:	TRY Block TryStatementPart{
+	printf("try\n");
 	$$=$3;
 	$$->blockstmt=$2;
-	delete $3;
+	//delete $3;
 }
 
 TryStatementPart:   Finally{
+	printf("try:Finally\n");
 	$$=new ast::TryStmt(nullptr,$1);
 }
 | Catch{
+	printf("try:catch\n");
 	$$=new ast::TryStmt($1,nullptr);
 }
 | Catch Finally{
+	printf("try:Finally&catch\n");
 	$$=new ast::TryStmt($1,$2);
 }
 
 Catch	:	CATCH LEFT_PARE Identifier RIGHT_PARE Block{
+	printf("catch\n");
 	$$ = new ast::CatchStmt($3,$5);
 }
 
 Finally	:	FINALLY Block{
+	printf("finally\n");
 	$$ = new ast::FinallyStmt($2);
 }
 

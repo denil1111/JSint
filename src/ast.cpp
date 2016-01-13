@@ -383,13 +383,13 @@ TValue ast::WhileStmt::run() {
 	condition->run();
 	bool conditionBool=condition->value.toBoolean();
 	while(conditionBool){
-		// std::cout<<"in whilestmt::while:"<<condition->value.toString()<<std::endl;
+		// debugOut<<"in whilestmt::while:"<<condition->value.toString()<<std::endl;
 		try{
 			loopStmt->run();
 			condition->run();
 			conditionBool=condition->value.toBoolean();
 		}catch(BreakException &brexception){
-			std::cout<<"for stmt brexception"<<std::endl;
+			debugOut<<"for stmt brexception"<<std::endl;
 			if(brexception.label==""){
 				return;
 			}else{
@@ -397,7 +397,7 @@ TValue ast::WhileStmt::run() {
 			}
 			return value;
 		}catch(ContinueException &cnexception){
-			std::cout<<"for stmt cnexception"<<std::endl;
+			debugOut<<"for stmt cnexception"<<std::endl;
 			if(cnexception.label==""){
 				continue;
 			}else{
@@ -413,25 +413,23 @@ TValue ast::WhileStmt::run() {
 TValue ast::ForStmt::run() {
 
 	bool condition=false;
-	TValue res;
 
 	if(loopVar!=nullptr){
-		std::cout<<"111"<<std::endl;
+		debugOut<<"111"<<std::endl;
 		loopVar->run();
 	}
 	if(startExp!=nullptr){
-		std::cout<<"222"<<std::endl;
+		debugOut<<"222"<<std::endl;
 		startExp->run();
 	}else{
-		std::cout<<"333"<<std::endl;
+		debugOut<<"333"<<std::endl;
 		condition=true;
 	}
 
-	res=(startExp->value == TValue(1));
 
-	while(condition||res.toBoolean()){
+	while(condition||startExp->value.toBoolean()){
 		try{
-			std::cout<<"444"<<std::endl;
+			debugOut<<"444"<<std::endl;
 			loopStmt->run();
 
 			if(endExp!=nullptr){
@@ -441,7 +439,7 @@ TValue ast::ForStmt::run() {
 				startExp->run();
 			}
 		}catch(BreakException &brexception){
-			std::cout<<"for stmt brexception"<<std::endl;
+			debugOut<<"for stmt brexception"<<std::endl;
 			if(brexception.label==""){
 				return;
 			}else{
@@ -449,7 +447,7 @@ TValue ast::ForStmt::run() {
 			}
 			return value;
 		}catch(ContinueException &cnexception){
-			std::cout<<"for stmt cnexception"<<std::endl;
+			debugOut<<"for stmt cnexception"<<std::endl;
 			if(cnexception.label==""){
 				continue;
 			}else{
@@ -464,19 +462,19 @@ TValue ast::ForStmt::run() {
 	return value;
 }
 TValue ast::CaseStmt::run() {
-	std::cout<<"CaseStmt::run"<<std::endl;
+	debugOut<<"CaseStmt::run"<<std::endl;
 	// try{
 		thenStmt->run();
 	// }catch(BreakException &exception){
-	// 	std::cout<<"case stmt exception"<<std::endl;
+	// 	debugOut<<"case stmt exception"<<std::endl;
 	// }
 	return value;
 }
 
 TValue ast::IfStmt::run() {
 	condition->run();
-	std::cout <<"IfStmt::run::"<<condition->value.toBoolean()<<std::endl;
-	if(condition->value.toBoolean() == TValue(1).toBoolean()){
+	debugOut <<"IfStmt::run::"<<condition->value.toBoolean()<<std::endl;
+	if(condition->value.toBoolean()){
 		thenStmt->run();
 	}else{
 		if(elseStmt!=nullptr){
@@ -493,7 +491,7 @@ TValue ast::SwitchStmt::run() {
 	int defaultIndex=-1;
 	for(int i=0;i<list->size();i++){
 		try{
-			std::cout<<"for try::i="<<i<<std::endl;
+			debugOut<<"for try::i="<<i<<std::endl;
 			stmt=(*list)[i];
 			if(stmt->isDefault){
 				//如果已经匹配过了case，那么就要执行default语句
@@ -514,7 +512,7 @@ TValue ast::SwitchStmt::run() {
 				exp->run();
 				auto res=exp->value;
 
-				if((stmt->condition->value==res).toBoolean()){
+				if(stmt->condition->value.toBoolean()){
 
 					stmt->run();
 					firstFlag=false;
@@ -522,7 +520,7 @@ TValue ast::SwitchStmt::run() {
 			}
 			
 		}catch(BreakException &exception){
-			std::cout<<"switch stmt exception"<<std::endl;
+			debugOut<<"switch stmt exception"<<std::endl;
 			return value;
 		}
 	}
@@ -531,11 +529,11 @@ TValue ast::SwitchStmt::run() {
 	if(firstFlag && defaultIndex!=-1){
 		for(int i=defaultIndex;i<list->size();i++){
 			try{
-				std::cout<<"switch default try::i="<<i<<std::endl;
+				debugOut<<"switch default try::i="<<i<<std::endl;
 				stmt=(*list)[i];
 				stmt->run();			
 			}catch(BreakException &exception){
-				std::cout<<"switch stmt exception"<<std::endl;
+				debugOut<<"switch stmt exception"<<std::endl;
 				return value;
 			}
 		}
@@ -692,7 +690,6 @@ TValue ast::MemberPropertyExpression::run() {
 			}
 			debugOut<<(*iter)->value.toString()<<endl; 
 			value = o->get((*iter)->value.toString());
-			value.print();
 		}
 		// debugOut << "check in" << value.function<<std::endl;			
 		//debugOut << "check out!" << std::endl;				

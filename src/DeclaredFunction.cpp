@@ -1,5 +1,5 @@
 #include "DeclaredFunction.h"
-
+std::vector<DeclaredFunction*> DeclaredFunction::newDeclared;
 TValue DeclaredFunction::execute(ArgumentList *args) {
     TValue val;
     if (args) {

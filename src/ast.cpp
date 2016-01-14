@@ -333,10 +333,17 @@ TValue ast::Routine::run() {
 TValue ast::FunctionDeclaration::run() {
     debugOut << "declaring function: " << function_name->name << std::endl;
     debugOut << "with parameters: ";
+
     for (auto parameter : *parameter_list) {
         debugOut << parameter->name << " ";
     }
     value = TValue(new DeclaredFunction(function_name, parameter_list, function_body));
+    for (int i=0;i<DeclaredFunction::newDeclared.size();i++)
+    {
+    	DeclaredFunction::newDeclared[i]->parent = value.function;
+    }
+    DeclaredFunction::newDeclared.clear();
+    DeclaredFunction::newDeclared.push_back(value.function);
     nowStack.assignAndNew(function_name->name, value);
     return value;
 }

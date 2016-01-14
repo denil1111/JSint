@@ -2,6 +2,7 @@
 #define DECLARED_FUNCTION_H_
 
 #include <string>
+#include <vector>
 #include "Object.h"
 #include "ast.h"
 #include "varlist.hpp"
@@ -23,9 +24,11 @@ extern VarStack nowStack;
 
 class DeclaredFunction {
 public:
+	static std::vector<DeclaredFunction*> newDeclared;
     ast::Identifier *function_name;
     ParameterList *parameter_list;
     FunctionBody *function_body;
+    DeclaredFunction *parent = nullptr;
     DeclaredFunction(){}
     DeclaredFunction(ast::Identifier* id, ParameterList* parameters, FunctionBody* body) : function_name(id), parameter_list(parameters), function_body(body) { }
 

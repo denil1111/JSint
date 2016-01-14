@@ -16,7 +16,6 @@ compiler:
 
 ll:
 	@./Jsint -a < $(filter-out ll asm,$(MAKECMDGOALS)) > $(basename $(filter-out ll asm,$(MAKECMDGOALS))).res
-	@node < $(filter-out ll asm,$(MAKECMDGOALS)) > $(basename $(filter-out ll asm,$(MAKECMDGOALS))).out
 
 %:
 	@:

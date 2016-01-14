@@ -26,7 +26,6 @@ extern int yyparse();
 extern ast::StatementList* ast_root;
 VarStack nowStack = VarStack();
 int main(int argc, char** argv) {
-	initSystem();
 	for (int i=1;i<argc;i++)
 	{
 		if (strcmp(argv[i],"-d")==0)
@@ -38,6 +37,7 @@ int main(int argc, char** argv) {
 			valueFlag = 0;
 		}
 	}
+	initSystem();
 	debugOut <<green("start!") << endl;
 	init_buffer();
 	yyparse();

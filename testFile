@@ -6,6 +6,8 @@ suc=0
 for d in $FILES; do  
 	i=$[$i+1]
 	filename=`basename $d .js`
+	node < test/$filename.js > test/$filename.out
+	resfile="test/$filename.out"
 	echo "\033[1m" Test $i "\033[0;35m" $filename.js : "\033[0m""\c"
 	if diff test/$filename.res test/$filename.out >/dev/null ; then
   		echo "\033[1;32m √ \033[0m"

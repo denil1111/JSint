@@ -359,3 +359,143 @@ TValue TValue::operator  ~(){
 	}
 	return TValue(~(int)x.sValue.dou);
 }
+
+
+
+
+
+//varStack
+VarStack::VarStack(){
+	vstack.push_back(new VarList);
+}
+
+void VarStack::setVar(std::string idname,TValue val) {
+	VarList *nowList = (vstack.back());
+	do
+	{
+		debugOut<<"now Finding";
+		nowList->print();
+
+		if (nowList->hasVar(idname))
+		{
+			nowList->assignAndNew(idname,val);
+			return;
+		}
+		else
+		{
+			if (nowList->parent != nullptr)
+				nowList = nowList->parent;
+			else
+				break;
+		} 
+	}while(1);
+}
+
+void VarStack::removeVar(std::string idname) {
+	VarList *nowList = (vstack.back());
+	do
+	{
+		if (nowList->hasVar(idname))
+		{
+			nowList->removeVar(idname);
+			return;
+		}
+		else
+		{
+			if (nowList->parent != nullptr)
+				nowList = nowList->parent;
+			else
+				break;
+		} 
+	}while(1);
+}
+
+bool VarStack::hasVar(std::string idname) {
+	VarList *nowList = (vstack.back());
+	do
+	{
+		if (nowList->hasVar(idname))
+		{
+			return true;
+		}
+		else
+		{
+			if (nowList->parent != nullptr)
+				nowList = nowList->parent;
+			else
+				break;
+		} 
+	}while(1);
+	return false;
+}
+
+TValue VarStack::getVar(std::string idname) {
+	VarList *nowList = (vstack.back());
+	debugOut<<nowList->parent<<std::endl;
+	if (nowList->parent)
+	nowList->parent->print();
+	do
+	{
+		debugOut<<"now Finding";
+		nowList->print();
+		if (nowList->hasVar(idname))
+		{
+			return nowList->getVar(idname);
+		}
+		else
+		{
+			if (nowList->parent != nullptr)
+			{
+				nowList->parent->print();
+				nowList = nowList->parent;
+			}
+				
+			else
+				break;
+		} 
+	}while(1);
+	runerror("Not exist in variable stack!");
+}
+void VarStack::assignAndNew(std::string idname, TValue val) {
+	if (hasVar(idname))
+	{
+		setVar(idname,val);
+	}
+	else
+	{
+		vstack.front()->assignAndNew(idname, val);
+	}
+}
+void VarStack::newVar(std::string idname, TValue val) {
+	if (vstack.back()->hasVar(idname))
+	{
+		runerror("redefined variable %s",idname.c_str());
+	}
+	else
+	{
+		vstack.back()->assignAndNew(idname, val);
+	}
+}
+
+void VarStack::push(VarList *varList) {
+	vstack.push_back(varList);
+}
+void VarStack::push_new(VarList* parent) {
+	debugOut<<"pushing new list"<<std::endl;
+	VarList *newList = new VarList;
+	newList->parent =parent;
+	this->push(newList);
+}
+void VarStack::pop() {
+	vstack.pop_back();
+}
+VarList* VarStack::front() {
+
+	return vstack.front();
+}
+void VarStack::print() {
+	for (int lv = vstack.size()-1; lv>=0; lv--) {
+		debugOut << "level " << lv << " : ";
+		vstack[lv]->print();
+	}
+}

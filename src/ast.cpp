@@ -338,12 +338,6 @@ TValue ast::FunctionDeclaration::run() {
         debugOut << parameter->name << " ";
     }
     value = TValue(new DeclaredFunction(function_name, parameter_list, function_body));
-    for (int i=0;i<DeclaredFunction::newDeclared.size();i++)
-    {
-    	DeclaredFunction::newDeclared[i]->parent = value.function;
-    }
-    DeclaredFunction::newDeclared.clear();
-    DeclaredFunction::newDeclared.push_back(value.function);
     nowStack.assignAndNew(function_name->name, value);
     return value;
 }
@@ -354,9 +348,25 @@ TValue ast::CallExpression::run() {
     DeclaredFunction *function = val.function;
     debugOut<<val.function<<std::endl;
     if (function) {
-        nowStack.push_new();
-        value = function->execute(argument_list);
-        nowStack.pop();
+    	std::vector<TValue> valueList;
+    	if (argument_list)
+    	{
+    		for (auto arg : *argument_list) {
+	            valueList.push_back(arg->run());
+	        }
+	    	val.function->parent->print();
+	    	debugOut<<"run func"<<endl;
+	        nowStack.push_new(val.function->parent);
+	        value = function->execute(&valueList);
+	        nowStack.pop();
+    	}
+    	else
+    	{
+    		nowStack.push_new(val.function->parent);
+	        value = function->execute(nullptr);
+	        nowStack.pop();
+    	}
+	    	
     }
     return value;
 }

@@ -1,5 +1,4 @@
 #include "DeclaredFunction.h"
-std::vector<DeclaredFunction*> DeclaredFunction::newDeclared;
 TValue DeclaredFunction::execute(ArgumentList *args) {
     TValue val;
     if (args) {
@@ -8,22 +7,19 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         if (parameter_list->size() != args->size()) {
             runerror("wrong number of arguments");
         }
-        for (auto arg : *args) {
-            arg->run();
-        }
         debugOut << "with arguments: ";
         for (auto arg : *args) {
-            switch (arg->value.type) {
+            switch (arg.type) {
                 case TValue::TType::Tstring: {
-                    debugOut << arg->value.sValue.str << " ";
+                    debugOut << arg.sValue.str << " ";
                     break;
                 }
                 case TValue::TType::Tdouble: {
-                    debugOut << arg->value.sValue.dou << " ";
+                    debugOut << arg.sValue.dou << " ";
                     break;
                 }
             }
-            nowStack.assignAndNew(parameter_list->at(index)->name, arg->value);
+            nowStack.assignAndNew(parameter_list->at(index)->name, arg);
             index++;
         }
         debugOut << std::endl;

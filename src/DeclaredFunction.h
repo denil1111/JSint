@@ -10,6 +10,8 @@
 
 class TValue;
 class VarStack;
+class VarList;
+
 
 namespace ast {
     class Identifier;
@@ -17,20 +19,20 @@ namespace ast {
     class StatementList;
 }
 typedef std::vector<ast::Identifier*> ParameterList;
-typedef std::vector<ast::Expression*> ArgumentList;
+typedef std::vector<TValue> ArgumentList;
+
 typedef ast::StatementList FunctionBody;
 
 extern VarStack nowStack;
 
 class DeclaredFunction {
 public:
-	static std::vector<DeclaredFunction*> newDeclared;
     ast::Identifier *function_name;
     ParameterList *parameter_list;
     FunctionBody *function_body;
-    DeclaredFunction *parent = nullptr;
+    VarList *parent;
     DeclaredFunction(){}
-    DeclaredFunction(ast::Identifier* id, ParameterList* parameters, FunctionBody* body) : function_name(id), parameter_list(parameters), function_body(body) { }
+    DeclaredFunction(ast::Identifier* id, ParameterList* parameters, FunctionBody* body) : function_name(id), parameter_list(parameters), function_body(body),parent(nowStack.front()) { }
 
     virtual TValue execute(ArgumentList *args);
 };

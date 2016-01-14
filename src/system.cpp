@@ -1,7 +1,7 @@
 #include "system.hpp"
 void initSystem()
 {
-	extern VarStack nowStack;
+	debugOut<<"intit!"<<std::endl;
 	Console* console = new Console;
 	nowStack.assignAndNew("console",TValue(console));
 

@@ -1,6 +1,7 @@
 #ifndef _SYSTEM_HPP_
 #define _SYSTEM_HPP_
 #include "DeclaredFunction.h"
+extern VarStack nowStack;
 class LogFunction : public DeclaredFunction
 {
 public:
@@ -8,11 +9,14 @@ public:
 	{
 		parameter_list = new ParameterList;
 		parameter_list->push_back(new ast::Identifier("x"));
-
+		parent = nowStack.front();
+		debugOut<<"PARENT!"<<std::endl;
+		parent->print();
 	}
 	virtual TValue execute(ArgumentList *args)
 	{
-		(*args)[0]->run().output();
+		extern VarStack nowStack;
+		(*args)[0].output();
 		return TValue::undefined();
 	}
 };

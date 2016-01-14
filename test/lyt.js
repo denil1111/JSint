@@ -62,7 +62,14 @@ num=0;outermost:for(i=0;i<10;i++){for(j=0;j<10;j++){if(i==5&&j==5){break outermo
 num=0;outermost:for(i=0;i<10;i++){for(j=0;j<10;j++){if(i==5&&j==5){continue outermost;}num++;}}console.log(num);
 
 //try-catch
-
+// a=0;try{throw 1;}catch(e){console.log(e);a++;};//√
+// a=0;try{a=10;}catch(e){console.log(e);a++;};//√
+// a=0;try{throw 1;}catch(e){a=10;}finally{a=20;};//√
+// a=0;try{a=1;}catch(e){a=10;}finally{a=20;};//√
+// a=0;try{return 1;}catch(e){a=10;}finally{a=20;}//√a=20
+// a=0;try{throw 1;return 1;}catch(e){return 2;}finally{a=20;}//√a=20
+// a=0;try{return 1;throw 1;}catch(e){return 2;}finally{return 3;}//√return 3
+// a=0;try{throw 1;return 1;}catch(e){return 2;}finally{return 3;}//√return 3;
 
 
 

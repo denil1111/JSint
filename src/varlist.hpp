@@ -181,9 +181,6 @@ public:
 	VarStack() : vstack(std::vector<VarList>()){
 		this->push_new();
 	}
-	void assignAndNew(std::string idname, TValue val) {
-		vstack.back().assignAndNew(idname, val);
-	}
 
 	void setVar(std::string idname,TValue val) {
 		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
@@ -219,6 +216,27 @@ public:
 		debugOut<<"get id"<<idname<<std::endl;
 		runerror("Not exist in variable stack!");
 	}
+	void assignAndNew(std::string idname, TValue val) {
+		if (hasVar(idname))
+		{
+			setVar(idname,val);
+		}
+		else
+		{
+			vstack.front().assignAndNew(idname, val);
+		}
+	}
+	void newVar(std::string idname, TValue val) {
+		if (vstack.back().hasVar(idname))
+		{
+			runerror("redefined variable %s",idname.c_str());
+		}
+		else
+		{
+			vstack.back().assignAndNew(idname, val);
+		}
+	}
+
 	void push(VarList varList) {
 		vstack.push_back(varList);
 	}

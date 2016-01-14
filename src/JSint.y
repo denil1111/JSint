@@ -128,16 +128,17 @@ extern int parseError;
 %type <ast_Statement> Statement
 %type <ast_Block> Block
 %type <ast_StatementList> StatementList
-%type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
-%type <ast_Node> VariableDeclaration VariableDeclarationNoIn
-%type <ast_Node> Initialiser InitialiserNoIn
+%type <ast_Statement> VariableStatement
+%type <ast_StatementList>  VariableDeclarationList  VariableDeclarationListNoIn
+%type <ast_VarDecl> VariableDeclaration VariableDeclarationNoIn
+%type <ast_Expression> Initialiser InitialiserNoIn
 %type <ast_Statement> EmptyStatement ExpressionStatement
 %type <ast_IfStmt> IfStatement 
 %type <ast_Statement> IterationStatement
 %type <ast_Identifier> IdentifierComma
 %type <ast_ContinueStmt> ContinueStatement
 %type <ast_BreakStmt> BreakStatement
-%type <ast_Node> ReturnStatement
+%type <ast_Statement> ReturnStatement
 %type <ast_Node> WithStatement 
 %type <ast_SwitchStmt> SwitchStatement
 %type <ast_CaseList> CaseBlock CaseBlockPart CaseClauses 
@@ -992,20 +993,49 @@ StatementList	:	Statement
 	$$ = new ast::StatementList($1, $2);
 }
 VariableStatement	:	VAR VariableDeclarationList
+{
+	$$ = $2;
+}
 |   VAR VariableDeclarationList SEMICOLON
-VariableDeclarationList	:	VariableDeclaration
+{
+	$$ = $2;
+}
+VariableDeclarationList	:	VariableDeclaration 
+{
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+}
 | VariableDeclarationList  COMMA VariableDeclaration
+{
+	$$ = $1;
+	$$->list.push_back($3);
+}
 VariableDeclarationListNoIn	:	VariableDeclarationNoIn
 | VariableDeclarationListNoIn COMMA VariableDeclarationNoIn
-VariableDeclaration	:	Identifier
-| Identifier Initialiser
+VariableDeclaration	:	Identifier 
+{
+	$$ = new ast::VarDecl($1);
+}
+| Identifier  Initialiser
+{
+	$$ = new ast::VarDecl($1,$2);
+}
 VariableDeclarationNoIn	:	Identifier
 {
-	
+	$$ = new ast::VarDecl($1);
 }
 | Identifier  InitialiserNoIn
+{
+	$$ = new ast::VarDecl($1,$2);
+}
 Initialiser	:	ASSIGN AssignmentExpression
+{
+	$$ = $2;
+}
 InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn
+{
+	$$ = $2;
+}
 EmptyStatement	:	SEMICOLON
 |
 ExpressionStatement	:	Expression {

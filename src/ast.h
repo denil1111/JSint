@@ -411,14 +411,14 @@ public:
 class VarDecl : public Statement {
 public:
     Identifier*     name;
-    TypeDecl*       type;
-    bool isGolbal;
+    Expression*     initial;
 
-    VarDecl(Identifier* name, TypeDecl* type) : name(name), type(type) {}
+    VarDecl(Identifier* name, Expression* initial) : name(name), initial(initial) {}
+    VarDecl(Identifier* name) : name(name), initial(nullptr) {}
     virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)name);
-        list.push_back((Node *)type);
+        list.push_back((Node *)initial);
         return list;
     }
     std::string toString() { return "VarDecl"; }

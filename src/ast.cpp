@@ -310,6 +310,15 @@ TValue ast::ConstDecl::run() {
 
 
 TValue ast::VarDecl::run() {
+	if (initial!=nullptr)
+	{
+		TValue val = initial->run();
+		nowStack.newVar(name->name,val);
+	}
+	else
+	{
+		nowStack.newVar(name->name,TValue::undefined());
+	}
 	return value;
 }
 

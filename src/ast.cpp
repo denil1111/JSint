@@ -636,7 +636,16 @@ TValue ast::TryStmt::run() {
 
 	try{
 		debugOut<<"111"<<endl;
-		blockstmt->run();
+		try{
+			blockstmt->run();
+		}catch(ReturnException & rtex){
+			if(finallystmt!=nullptr){
+				debugOut<<"need to run finally"<<endl;
+			}else{
+				debugOut<<"no finally"<<endl;
+				throw rtex;
+			}
+		}
 	}catch(MyException & ex){
 		//如果抓住什么异常
 		debugOut<<"MyException"<<endl;
@@ -662,7 +671,16 @@ TValue ast::TryStmt::run() {
 			nowStack.print();
 		}
 
-		catchstmt->run();
+		try{
+			catchstmt->run();
+		}catch(ReturnException & rtex){
+			if(finallystmt!=nullptr){
+				debugOut<<"catch:need to run finally"<<endl;
+			}else{
+				debugOut<<"catch:no finally"<<endl;
+				throw rtex;
+			}
+		}
 
 		if(ifDup){
 			debugOut<<"ifDup:true:setVar"<<endl;

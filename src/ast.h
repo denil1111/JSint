@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <map>
+#include <utility>
 #include <iostream>
 #include <sstream>
 #include "varlist.hpp"
@@ -115,6 +116,7 @@ public:
         return "node";
     };
     virtual TValue run() = 0;
+	virtual void assign(TValue value) { runerror("Assignment not supported!"); }
 };
 class Statement : public Node {
 public:
@@ -961,7 +963,9 @@ public:
 			return rList;
 		} else return std::vector<Node*>{leftExp};
 	}
+	std::pair<Object*, ast::MemberName*>* simplify();
 	virtual TValue run();
+	virtual void assign(TValue value);
 };
 
 class MemberName : public Expression {

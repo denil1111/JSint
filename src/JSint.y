@@ -1259,12 +1259,13 @@ SourceElements	:	SourceElement {
 	debugOut<<"a new stmt"<<std::endl;
 	if (!parseError)
 	{
+		TValue res;
 		extern int debugFlag;
 		if (debugFlag)
 			$1 -> print_node("", true, true);
 		ast_root = $1;
 		try {
-			ast_root->run();
+			res = ast_root->run();
 		} catch (const std::domain_error &de) {
 			cout << de.what() << endl;
 		} catch (const std::logic_error &le) {
@@ -1278,7 +1279,7 @@ SourceElements	:	SourceElement {
 		{
 			extern int valueFlag;
 			if (valueFlag)
-				ast_root->value.print();
+				res.print();
 			parseError = 0;
 		}
 		else
@@ -1293,12 +1294,13 @@ SourceElements	:	SourceElement {
 	debugOut<<"a new stmt"<<std::endl;
 	if (!parseError)
 	{
+        TValue res;
 		extern int debugFlag;
 		if (debugFlag)
 			$2 -> print_node("", true, true);
 		ast_root = $2;
 		try {
-			ast_root->run();
+			res = ast_root->run();
 		} catch (const std::domain_error &de) {
 			cout << de.what() << endl;
 		} catch (const std::logic_error &le) {
@@ -1312,7 +1314,7 @@ SourceElements	:	SourceElement {
 		{
 			extern int valueFlag;
 			if (valueFlag)
-				ast_root->value.print();
+				res.print();
 			parseError = 0;
 		}
 		else

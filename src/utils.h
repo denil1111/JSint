@@ -10,6 +10,7 @@ typedef struct YYLTYPE {
 } YYLTYPE;
 
 #define YYLTYPE_is_declared
+#include <string>
 
 extern int yylex();
 // extern int yyparse();
@@ -17,7 +18,7 @@ extern int yylineno;
 extern char *yytext;
 
 void yyerror(char *s, ...);
-void runerror(char *s, ...);
+void runerror(std::string s, ...);
 
 
 typedef struct ast_struct ast_tree;

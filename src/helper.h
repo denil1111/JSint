@@ -22,12 +22,4 @@ std::vector<T>* concat(T t, std::vector<T>* v2) {
 	return v;
 }
 
-void debugSet() {
-	debugOut << "Check In!" << std::endl;
-}
-
-void debugUnset() {
-	debugOut << "Check Out!" << std::endl;
-}
-
 #endif

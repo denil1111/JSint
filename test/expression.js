@@ -75,5 +75,11 @@ console.log(a);
 c = "3" << 2;
 console.log(a);
 
+a = 100;
+b = 70;
+c = (a>b*2)?1:a=3;
+console.log(c);
+console.log(a);
+
 
 

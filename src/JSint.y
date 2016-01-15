@@ -274,6 +274,9 @@ MemberExpression	:  MemberPropertyExpression
 }
 |	AllocationExpression
 |   FunctionExpression
+{
+	$$ = $1;
+}
 |   PrimaryExpression
 {
 	$$ = $1;
@@ -825,11 +828,13 @@ ConditionalExpression	:	LogicalORExpression{
 	$$ = $1;
 }
 |LogicalORExpression QUES AssignmentExpression COLON AssignmentExpression {
+	$$ = new ast::Operator($1,$3,$5);
 }
 ConditionalExpressionNoIn	:	LogicalORExpressionNoIn {
 	$$ = $1;
 }
 |LogicalORExpressionNoIn QUES AssignmentExpression COLON AssignmentExpressionNoIn {
+	$$ = new ast::Operator($1,$3,$5);
 }
 AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression
 {
@@ -942,6 +947,9 @@ Statement	:	Block
 }
 |	JScriptVarStatement
 |	VariableStatement
+{
+	$$ = $1;
+}
 |	EmptyStatement
 {
 	$$ = new ast::Statement();
@@ -967,6 +975,9 @@ Statement	:	Block
 }
 |	ImportStatement
 |	ReturnStatement
+{
+	$$ = $1;
+}
 |	WithStatement
 |	SwitchStatement{
 	$$=$1;
@@ -978,7 +989,7 @@ Statement	:	Block
 	$$=$1;
 }
 Block	:	LEFT_BRACE RIGHT_BRACE{
-
+	$$ = new ast::Block();
 }
 |   LEFT_BRACE StatementList RIGHT_BRACE
 {

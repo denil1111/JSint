@@ -72,6 +72,17 @@ TValue ast::RangeType::run() {
 }
 TValue ast::Operator::run() {
 	TValue value,value1,value2;
+	if (op == OpType::condition)
+	{
+		if (op1->run().toBoolean())
+		{
+			return op2->run(); 
+		}
+		else
+		{
+			return op3->run();
+		}
+	}
 	if (op!= OpType::assign)
 	{
 		value1 =  op1->run();

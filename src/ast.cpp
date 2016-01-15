@@ -607,7 +607,7 @@ TValue ast::MemberPropertyExpression::run() {
 	if (rightExpList != nullptr) {
 		
 		Object* o;
-		
+
 		for (MemberNameList::iterator iter=rightExpList->begin();
 			 iter!=rightExpList->end(); iter++) {			 
 			 (*iter)->run();

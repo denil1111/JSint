@@ -75,83 +75,84 @@ TValue ast::RangeType::run() {
 
 }
 TValue ast::Operator::run() {
+	TValue value,value1,value2;
 	if (op!= OpType::assign)
 	{
-		op1->run();
+		value1 =  op1->run();
 	}
 	bool asgFlag = false;
 	switch (op)
 	{
 		case OpType::land :{
-			if (op1->value.toBoolean())
+			if (value1.toBoolean())
 			{
-				op2->run();
-				value = op2->value;
+				value2 = op2->run();
+				value = value2;
 			}
 			else
 			{
-				value = op1->value;
+				value = value1;
 			}
 			break;
 		}
 		case OpType::lor :{
-			if (!op1->value.toBoolean())
+			if (!value1.toBoolean())
 			{
-				op2->run();
-				value = op2->value;
+				value2 = op2->run();
+				value = value2;
 			}
 			else
 			{
-				value = op1->value;
+				value = value1;
 			}
 			break;
 		}
 		case OpType::lnot :{
-			value = !op1->value;
+			value = !value1;
 			break;
 		}
 		case OpType::bit_not :{
-			value = ~op1->value;
+			value = ~value1;
 			break;
 		}
 		case OpType::positive :{
-			value = - -op1->value;
+			value = - -value1;
 			break;
 		}
         case OpType::negtive :{
-        	value = -op1->value;
+        	value = -value1;
         	break;
         }
         case OpType::pplus :{
         	RealType tempE(1);
         	Operator tempO(op1,OpType::plus_assign,&tempE);
-        	tempO.run();
-        	value = tempO.value;
+        	TValue tv = tempO.run();
+        	value = tv;
         	break;
         }
         case OpType::mminus :{
         	RealType tempE(1);
         	Operator tempO(op1,OpType::minus_assign,&tempE);
-        	tempO.run();
-        	value = tempO.value;
+        	TValue tv = tempO.run();
+        	value = tv;
         	break;
         }
         case OpType::rpplus :{
-        	value = op1->value;
+        	value = value1;
         	RealType tempE(1);
         	Operator tempO(op1,OpType::plus_assign,&tempE);
         	tempO.run();
         	break;
         }
         case OpType::rmminus :{
-        	value = op1->value;
+        	value = value1;
         	RealType tempE(1);
         	Operator tempO(op1,OpType::minus_assign,&tempE);
         	tempO.run();
         	break;
         }
         case OpType::type :{
-        	value = TValue(op1->value.getTypeString());
+        	value = TValue(value1.getTypeString());
         	break;
         }
         case OpType::voido :{
@@ -160,104 +161,104 @@ TValue ast::Operator::run() {
         }
         default:
         {
-        	op2->run();
+        	value2 = op2->run();
 		    switch(op)
 		    {
 				case OpType::assign :{
 					asgFlag = true;
-					value = op2->value;
+					value = value2;
 					break;
 				}
 				case OpType::plus_assign :{
 					asgFlag = true;
 				}
 				case OpType::plus :{
-					value = op1->value + op2->value;
+					value = value1 + value2;
 					break;
 				}
 				case OpType::minus_assign :{
 					asgFlag = true;
 				}
 				case OpType::minus :{
-					value = op1->value - op2->value;
+					value = value1 - value2;
 					break;
 				}
 				case OpType::mul_assign :{
 					asgFlag = true;
 				}
 				case OpType::mul :{
-					value = op1->value * op2->value;
+					value = value1 * value2;
 					break;
 				}
 				case OpType::div_assign :{
 					asgFlag = true;
 				}
 				case OpType::div :{
-					value = op1->value / op2->value;
+					value = value1 / value2;
 					break;
 				}
 				case OpType::mod_assign :{
 					asgFlag = true;
 				}
 				case OpType::mod :{
-					value = op1->value % op2->value;
+					value = value1 % value2;
 					break;
 				}
 				case OpType::bit_and_assign :{
 					asgFlag = true;
 				}
 				case OpType::bit_and :{
-					value = op1->value & op2->value;
+					value = value1 & value2;
 					break;
 				}
 				case OpType::bit_or_assign :{
 					asgFlag = true;
 				}
 				case OpType::bit_or :{
-					value = op1->value | op2->value;
+					value = value1 | value2;
 					break;
 				}
 				case OpType::bit_xor_assign :{
 					asgFlag = true;
 				}
 				case OpType::bit_xor :{
-					value = op1->value ^ op2->value;
+					value = value1 ^ value2;
 					break;
 				}
 				case OpType::eq :{
-					value = op1->value == op2->value;
+					value = value1 == value2;
 					break;
 				}
 				case OpType::ne :{
-					value = op1->value != op2->value;
+					value = value1 != value2;
 					break;
 				}
 				case OpType::lt :{
-					value = op1->value < op2->value;
+					value = value1 < value2;
 					break;
 				}
 				case OpType::gt :{
-					value = op1->value > op2->value;
+					value = value1 > value2;
 					break;
 				}
 				case OpType::le :{
-					value = op1->value <= op2->value;
+					value = value1 <= value2;
 					break;
 				}
 				case OpType::ge :{
-					value = op1->value >= op2->value;
+					value = value1 >= value2;
 					break;
 				}
 				case OpType::aeq :{
-					value = op1->value == op2->value;
-					if (op1->value.getType() != op2->value.getType()) {
+					value = value1 == value2;
+					if (value1.getType() != value2.getType()) {
 						value = TValue(false);
 					}
 					break;
 				}
 				case OpType::ane :{
-					value = op1->value == op2->value;
-					if (op1->value.getType() != op2->value.getType()) {
+					value = value1 == value2;
+					if (value1.getType() != value2.getType()) {
 						value = TValue(true);
 					}
 					break;
@@ -266,25 +267,25 @@ TValue ast::Operator::run() {
 					asgFlag = true;
 				}
 				case OpType::lsh :{
-					value = op1->value << op2->value;
+					value = value1 << value2;
 					break;
 				}
 				case OpType::rsh_assign :{
 					asgFlag = true;
 				}
 				case OpType::rsh :{
-					value = op1->value >> op2->value;
+					value = value1 >> value2;
 					break;
 				}
 				case OpType::lrsh_assign :{
 					asgFlag = true;
 				}
 				case OpType::lrsh :{
-					value = op1->value.logicRShift(op2->value);
+					value = value1.logicRShift(value2);
 					break;
 				}
 				case OpType::comma :{
-					value = op2->value;
+					value = value2;
 					break;
 				}
 			}
@@ -378,6 +379,7 @@ TValue ast::CallExpression::run() {
 		    }
 	        nowStack.pop();
     	}
+	    	
     }
     return value;
 }
@@ -641,7 +643,7 @@ TValue ast::ReturnStmt::run() {
 	{
 		throw ReturnException(TValue::undefined());
 	}
-
+	
 	return value;
 }
 TValue ast::ContinueStmt::run() {
@@ -737,7 +739,7 @@ TValue ast::TryStmt::run() {
 	if(finallystmt!=nullptr){
 		finallystmt->run();
 	}
-
+	
 	return value;
 }
 TValue ast::ThrowStmt::run() {

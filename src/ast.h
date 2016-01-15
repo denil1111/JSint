@@ -235,6 +235,14 @@ public:
     CallExpression(Expression* funcExp, ArgumentList* args) : funcExp(funcExp), argument_list(args) {}
     virtual std::string toString(){ return "function_called"; }
     virtual TValue run();
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> list;
+        list.push_back(funcExp);
+        for (auto i : *argument_list) {
+            list.push_back(i);
+        }
+        return list;
+    }
 };
 
 class LabelDecl : public Statement {
@@ -335,6 +343,17 @@ public:
     FunctionDeclaration(Identifier* id, ParameterList* args, FunctionBody* body) : function_name(id), parameter_list(args), function_body(body) {}
     virtual std::string toString(){ return "function_declaration"; }
     virtual TValue run();
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> list;
+        list.push_back(function_name);
+        for (auto i : *parameter_list) {
+            list.push_back(i);
+        }
+        for (auto i : function_body->getChildren()) {
+            list.push_back(i);
+        }
+        return list;
+    }
 };
 
 class ArrayRef : public Expression {

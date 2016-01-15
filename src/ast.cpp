@@ -331,14 +331,21 @@ TValue ast::Routine::run() {
 }
 
 TValue ast::FunctionDeclaration::run() {
-    debugOut << "declaring function: " << function_name->name << std::endl;
-    debugOut << "with parameters: ";
+    if (function_name) {
+        debugOut << "declaring function: " << function_name->name << std::endl;
+        debugOut << "with parameters: ";
+    }
+    else {
+        debugOut << "declaring anonymous function with parameters: ";
+    }
 
     for (auto parameter : *parameter_list) {
         debugOut << parameter->name << " ";
     }
     value = TValue(new DeclaredFunction(function_name, parameter_list, function_body));
-    nowStack.assignAndNew(function_name->name, value);
+    if (function_name) {
+        nowStack.assignAndNew(function_name->name, value);
+    }
     return value;
 }
 
@@ -366,7 +373,6 @@ TValue ast::CallExpression::run() {
 	        value = function->execute(nullptr);
 	        nowStack.pop();
     	}
-	    	
     }
     return value;
 }
@@ -629,7 +635,7 @@ TValue ast::ReturnStmt::run() {
 	{
 		throw ReturnException(TValue::undefined());
 	}
-	
+
 	return value;
 }
 TValue ast::ContinueStmt::run() {
@@ -725,7 +731,7 @@ TValue ast::TryStmt::run() {
 	if(finallystmt!=nullptr){
 		finallystmt->run();
 	}
-	
+
 	return value;
 }
 TValue ast::ThrowStmt::run() {

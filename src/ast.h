@@ -150,16 +150,6 @@ public:
  	}
 };
 
-class FunctionDeclaration : public StatementList {
-public:
-    Identifier* function_name;
-    ParameterList* parameter_list;
-    FunctionBody* function_body;
-    FunctionDeclaration(Identifier* id, ParameterList* args, FunctionBody* body) : function_name(id), parameter_list(args), function_body(body) {}
-    virtual std::string toString(){ return "function_declaration"; }
-    virtual TValue run();
-};
-
 class Program : public Node {
 public:
     LabelDecl*      lable_part;
@@ -333,6 +323,17 @@ public:
     Identifier(const std::string& name) : name(name) {}
     Identifier(const char * ptr_s) : name(*(new std::string(ptr_s))) {}
     virtual std::string toString() { return "Identifier: " + name; }
+    virtual TValue run();
+};
+
+
+class FunctionDeclaration : public Expression {
+public:
+    Identifier* function_name;
+    ParameterList* parameter_list;
+    FunctionBody* function_body;
+    FunctionDeclaration(Identifier* id, ParameterList* args, FunctionBody* body) : function_name(id), parameter_list(args), function_body(body) {}
+    virtual std::string toString(){ return "function_declaration"; }
     virtual TValue run();
 };
 
@@ -880,7 +881,7 @@ public:
 	ElementList() {}
 ElementList(Expression* el): StatementList(el) {}
 ElementList(Expression* el, ElementList* elList): StatementList(el, elList) {}
-	
+
 	virtual std::string toString() { return "ElementList"; }
 	virtual std::vector<Node *> getChildren() { return StatementList::getChildren(); }
 	virtual TValue run();
@@ -898,7 +899,7 @@ ArrayType(ElementList* elList): elList(elList) {}
     virtual std::string toString() { return "Array"; }
     virtual std::vector<Node *> getChildren() {
 		return std::vector<Node *>{elList};
-	}	
+	}
     virtual TValue run();
 };
 
@@ -924,7 +925,7 @@ private:
 	MemberNameList* rightExpList;
 public:
 	MemberPropertyExpression() {}
-    MemberPropertyExpression(Expression* exp): leftExp(exp), rightExpList(nullptr) {}	
+    MemberPropertyExpression(Expression* exp): leftExp(exp), rightExpList(nullptr) {}
     MemberPropertyExpression(Expression* exp, MemberNameList* expList):
 	leftExp(exp), rightExpList(expList) {}
 

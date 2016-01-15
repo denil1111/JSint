@@ -13,6 +13,10 @@ TValue Object::get(int index) {
 	return get(std::to_string(index));
 }
 
+void Object::set(std::string name, TValue val) {
+	prop[name] = val;
+}
+
 TValue Object::toDouble() {
     if (isArr && prop.size() == 1 && prop["0"].toDouble().type != TValue::TType::TNaN) {
         return prop["0"].toDouble();

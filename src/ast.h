@@ -336,6 +336,7 @@ public:
     Identifier(const char * ptr_s) : name(*(new std::string(ptr_s))) {}
     virtual std::string toString() { return "Identifier: " + name; }
     virtual TValue run();
+	virtual void assign();
 };
 
 

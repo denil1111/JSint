@@ -29,6 +29,7 @@ public:
 
 	TValue get(std::string name);
 	TValue get(int index);
+	void set(std::string name, TValue value);
 	
 };
 

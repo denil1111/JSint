@@ -37,6 +37,10 @@ TValue ast::Identifier::run() {
 	return value;
 }
 
+void ast::Identifier::assign(TValue val) {
+	nowStack.assignAndNew(name, val);
+}
+
 TValue ast::IntegerType::run() {
     debugOut << "Creating integer: " << val << std::endl;
     return value;
@@ -287,15 +291,7 @@ TValue ast::Operator::run() {
         }
     }
     if (asgFlag) {
-		auto id = dynamic_cast<Identifier*>(op1);
-		if (id == nullptr)
-		{
-			runerror("leftside exp error");
-		}
-		else
-		{
-			nowStack.assignAndNew(id->name,value);
-		}
+		op1->assign(value2);
 	}
 
 	return value;
@@ -857,8 +853,12 @@ TValue ast::MemberPropertyExpression::run() {
 	return simPair->first->get(memberValue.toString());
 }
 
-void ast::MemberPropertyExpression::assign(TValue value) {
-	
+void ast::MemberPropertyExpression::assign(TValue assignValue) {
+	std::pair<Object*, ast::MemberName*>* simPair = this->simplify();
+	TValue memberValue = simPair->second->run();
+	Object* o = simPair->first;
+	o->set(memberValue.toString(), assignValue);
+	return TValue(o);
 }
 
 TValue ast::MemberName::run() {

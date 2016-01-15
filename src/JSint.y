@@ -327,6 +327,9 @@ CallExpression	:	MemberExpression Arguments CallExpressionParts {
 CallExpressionForIn	:	MemberExpressionForIn Arguments CallExpressionParts
 
 CallExpressionParts :   CallExpressionParts CallExpressionPart
+{
+	
+}
 | {
 	$$ = nullptr;
 }

@@ -1,32 +1,33 @@
 #include "DeclaredFunction.h"
-
 TValue DeclaredFunction::execute(ArgumentList *args) {
+    TValue val;
     if (args) {
         int index = 0;
 
         if (parameter_list->size() != args->size()) {
-            yyerror("wrong number of arguments");
-        }
-        for (auto arg : *args) {
-            arg->run();
+            runerror("wrong number of arguments");
         }
         debugOut << "with arguments: ";
         for (auto arg : *args) {
-            switch (arg->value.type) {
+            switch (arg.type) {
                 case TValue::TType::Tstring: {
-                    debugOut << arg->value.sValue.str << " ";
+                    debugOut << arg.sValue.str << " ";
                     break;
                 }
                 case TValue::TType::Tdouble: {
-                    debugOut << arg->value.sValue.dou << " ";
+                    debugOut << arg.sValue.dou << " ";
                     break;
                 }
             }
-            nowStack.assignAndNew(parameter_list->at(index)->name, arg->value);
+            nowStack.assignAndNew(parameter_list->at(index)->name, arg);
             index++;
         }
         debugOut << std::endl;
     }
-    TValue val = function_body->run();
+    try{
+        val = function_body->run();
+    }catch(ast::ReturnException e){
+        val = e.value;
+    }
     return val;
 }

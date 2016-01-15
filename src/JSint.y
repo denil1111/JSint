@@ -19,6 +19,7 @@ extern vector<ast::Expression*> concat(ast::Expression*, vector<ast::Expression*
 int yydebug = 1;
 ast::Node* ast_root;
 ast::Operator* noOp1Exp;
+extern int parseError;
 %}
 
 %union{
@@ -49,9 +50,11 @@ ast::Operator* noOp1Exp;
     ast::FieldDeclList*     ast_FieldDeclList;
     ast::TypeDeclList*      ast_TypeDeclList;
     ast::IfStmt*          	ast_IfStmt;
+    ast::ForStmt*          	ast_ForStmt;
+    ast::WhileStmt*         ast_WhileStmt;
     ast::CaseList*          ast_CaseList;
     ast::CaseStmt*          ast_CaseStmt;
-    ast::SwitchStmt*          ast_SwitchStmt;
+    ast::SwitchStmt*        ast_SwitchStmt;
 	ast::ContinueStmt*      ast_ContinueStmt;
 	ast::BreakStmt*         ast_BreakStmt;
 	ast::Block*         	ast_Block;
@@ -79,11 +82,11 @@ ast::Operator* noOp1Exp;
 %token THIS NEW DELETE VOID TYPEOF INSTANCEOF IN VAR IF ELSE DO WHILE FOR CONTINUE BREAK RETURN WITH SWITCH CASE DEFAULT THROW TRY CATCH FINALLY FUNCTION IMPORT
 %token LEFT_BRACKET RIGHT_BRACKET LEFT_PARE RIGHT_PARE LEFT_BRACE RIGHT_BRACE COMMA DOT COLON SEMICOLON
 %token PLUS MINUS MULTI ASSIGN PLUS_PLUS MINUS_MINUS TILDE QUES EXCLAM PERCENT LESS GREATER EQUAL LSHIFT RSHIFT RRSHIFT LESS_EQ GREATER_EQ NOT_EQUAL ALWAYS_EQ ALWAYS_NEQ BIT_AND BIT_OR BIT_XOR AND OR MULTI_ASG MOD_ASG PLUS_ASG MINUS_ASG LRSHIFT_ASG LSHIFT_ASG RSHIFT_ASG
-%token BIT_AND_ASG BIT_XOR_ASG BIT_OR_ASG NL
+%token BIT_AND_ASG BIT_XOR_ASG BIT_OR_ASG
 %start Program
 
 %type <debug> DECIMAL_LITERAL HEX_INTEGER_LITERAL STRING_LITERAL BOOLEAN_LITERAL NULL_LITERAL
-%type <debug> SLASHASSIGN SLASH JEOF IDENTIFIER_NAME NL
+%type <debug> SLASHASSIGN SLASH JEOF IDENTIFIER_NAME
 
 
 // default type is ast node
@@ -121,20 +124,21 @@ ast::Operator* noOp1Exp;
 %type <ast_OpType> PostfixOperator UnaryOperator AssignmentOperator LogicalOROperator LogicalANDOperator BitwiseOROperator  EqualityOperator BitwiseXOROperator BitwiseANDOperator
 %type <ast_OpType> RelationalNoInOperator RelationalOperator ShiftOperator AdditiveOperator MultiplicativeOperator
 %type <ast_Expression> Expression ExpressionPart ExpressionNoIn ExpressionNoInPart
-%type <ast_Node> ExpressionOrNull
+%type <ast_Expression> ExpressionOrNull
 %type <ast_Statement> Statement
 %type <ast_Block> Block
 %type <ast_StatementList> StatementList
-%type <ast_Node> VariableStatement VariableDeclarationList  VariableDeclarationListNoIn
-%type <ast_Node> VariableDeclaration VariableDeclarationNoIn
-%type <ast_Node> Initialiser InitialiserNoIn
+%type <ast_Statement> VariableStatement
+%type <ast_StatementList>  VariableDeclarationList  VariableDeclarationListNoIn
+%type <ast_VarDecl> VariableDeclaration VariableDeclarationNoIn
+%type <ast_Expression> Initialiser InitialiserNoIn
 %type <ast_Statement> EmptyStatement ExpressionStatement
 %type <ast_IfStmt> IfStatement 
 %type <ast_Statement> IterationStatement
 %type <ast_Identifier> IdentifierComma
 %type <ast_ContinueStmt> ContinueStatement
 %type <ast_BreakStmt> BreakStatement
-%type <ast_Node> ReturnStatement
+%type <ast_Statement> ReturnStatement
 %type <ast_Node> WithStatement 
 %type <ast_SwitchStmt> SwitchStatement
 %type <ast_CaseList> CaseBlock CaseBlockPart CaseClauses 
@@ -148,7 +152,7 @@ ast::Operator* noOp1Exp;
 %type <ast_FunctionDeclaration> FunctionDeclaration FunctionExpression
 %type <ast_StatementList> FunctionBody
 %type <ast_StatementList> Program
-%type <ast_StatementList> SourceElements InFuncSourceElements SourceElementsNL
+%type <ast_StatementList> SourceElements InFuncSourceElements
 %type <ast_Statement> SourceElement InFuncSourceElement
 %type <ast_Node> ImportStatement Name
 %type <ast_Node> JScriptVarStatement JScriptVarDeclarationList JScriptVarDeclaration
@@ -254,6 +258,9 @@ PropertyName	:	Identifier
 }
 |	STRING_LITERAL
 {
+	char a[200];
+	strcpy(a,$1+1);
+	a[strlen(a)-1] = 0;
 	$$ = new std::string($1);
 }
 |	DECIMAL_LITERAL
@@ -304,9 +311,13 @@ MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
 {
 	$$ = new ast::MemberName($2, true);
 }
+|   DOT Literal
+{
+	yyerror("unexpected literal \"%s\" here",yytext);
+}
 
 CallExpression	:	MemberExpression Arguments CallExpressionParts {
-	$$ = new ast::CallExpression(dynamic_cast<ast::Identifier*>($1), $2);
+	$$ = new ast::CallExpression($1, $2);
 }
 
 CallExpressionForIn	:	MemberExpressionForIn Arguments CallExpressionParts
@@ -896,6 +907,7 @@ ExpressionPart   :    COMMA AssignmentExpression ExpressionPart {
 | {
 	$$ = nullptr;
 }
+
 ExpressionNoIn	:	AssignmentExpressionNoIn ExpressionNoInPart {
 	if ($2 == nullptr){
 		$$ = $1;
@@ -918,8 +930,12 @@ ExpressionNoInPart   :   COMMA ExpressionNoInPart AssignmentExpressionNoIn {
 	$$ = nullptr;
 }
 //陈睿
-ExpressionOrNull:
-| Expression
+ExpressionOrNull:{
+	$$=nullptr;
+}
+| Expression{
+	$$=$1;
+}
 Statement	:	Block
 {
 	$$ = $1;
@@ -977,17 +993,49 @@ StatementList	:	Statement
 	$$ = new ast::StatementList($1, $2);
 }
 VariableStatement	:	VAR VariableDeclarationList
+{
+	$$ = $2;
+}
 |   VAR VariableDeclarationList SEMICOLON
-VariableDeclarationList	:	VariableDeclaration
+{
+	$$ = $2;
+}
+VariableDeclarationList	:	VariableDeclaration 
+{
+	$$ = new ast::StatementList;
+	$$ -> list.push_back($1);
+}
 | VariableDeclarationList  COMMA VariableDeclaration
+{
+	$$ = $1;
+	$$->list.push_back($3);
+}
 VariableDeclarationListNoIn	:	VariableDeclarationNoIn
 | VariableDeclarationListNoIn COMMA VariableDeclarationNoIn
-VariableDeclaration	:	Identifier
-| Identifier Initialiser
+VariableDeclaration	:	Identifier 
+{
+	$$ = new ast::VarDecl($1);
+}
+| Identifier  Initialiser
+{
+	$$ = new ast::VarDecl($1,$2);
+}
 VariableDeclarationNoIn	:	Identifier
+{
+	$$ = new ast::VarDecl($1);
+}
 | Identifier  InitialiserNoIn
+{
+	$$ = new ast::VarDecl($1,$2);
+}
 Initialiser	:	ASSIGN AssignmentExpression
+{
+	$$ = $2;
+}
 InitialiserNoIn	:	ASSIGN AssignmentExpressionNoIn
+{
+	$$ = $2;
+}
 EmptyStatement	:	SEMICOLON
 |
 ExpressionStatement	:	Expression {
@@ -1014,10 +1062,10 @@ IterationStatement	:	DO Statement WHILE LEFT_PARE Expression RIGHT_PARE{
 	$$=new ast::WhileStmt($3,$5,false);
 }
 |	FOR LEFT_PARE SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
-	//$$=new ast::ForStmt(nullptr,$4,$6,$8);
+	$$=new ast::ForStmt(nullptr,$4,$6,$8);
 }
 |	FOR LEFT_PARE ExpressionNoIn SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
-	//$$=new ast::ForStmt($3,$5,$7,$9);
+	$$=new ast::ForStmt($3,$5,$7,$9);
 }
 |	FOR LEFT_PARE VAR VariableDeclarationList SEMICOLON ExpressionOrNull SEMICOLON ExpressionOrNull RIGHT_PARE Statement{
 	//$$=new ast::ForStmt($4,$6,$8,$10);
@@ -1046,7 +1094,13 @@ BreakStatement	:	BREAK IdentifierComma{
 }
 
 ReturnStatement	:	RETURN ExpressionOrNull
+{
+	$$ = new ast::ReturnStmt($2);
+}
 | RETURN ExpressionOrNull SEMICOLON
+{
+	$$ = new ast::ReturnStmt($2);
+}
 WithStatement	:	WITH LEFT_PARE Expression RIGHT_PARE Statement
 
 SwitchStatement	:	SWITCH LEFT_PARE Expression RIGHT_PARE CaseBlock{
@@ -1108,33 +1162,41 @@ LabelledStatement	:	Identifier COLON Statement{
 }
 
 ThrowStatement	:	THROW Expression{
+	//printf("throw\n");
 	$$=new ast::ThrowStmt($2);
 }
 | THROW Expression SEMICOLON{
+	//printf("throw\n");
 	$$=new ast::ThrowStmt($2);
 }
 
 TryStatement	:	TRY Block TryStatementPart{
+	//printf("try\n");
 	$$=$3;
 	$$->blockstmt=$2;
-	delete $3;
+	//delete $3;
 }
 
 TryStatementPart:   Finally{
+	//printf("try:Finally\n");
 	$$=new ast::TryStmt(nullptr,$1);
 }
 | Catch{
+	//printf("try:catch\n");
 	$$=new ast::TryStmt($1,nullptr);
 }
 | Catch Finally{
+	//printf("try:Finally&catch\n");
 	$$=new ast::TryStmt($1,$2);
 }
 
 Catch	:	CATCH LEFT_PARE Identifier RIGHT_PARE Block{
+	//printf("catch\n");
 	$$ = new ast::CatchStmt($3,$5);
 }
 
 Finally	:	FINALLY Block{
+	//printf("finally\n");
 	$$ = new ast::FinallyStmt($2);
 }
 
@@ -1169,83 +1231,11 @@ FunctionBody	:	LEFT_BRACE RIGHT_BRACE {
 }
 
 Program	:	JEOF
-| SourceElementsNL JEOF
+| SourceElements JEOF
 {
 	$$ = $1;
 	//cout << "program End"<<endl;
 }
-SourceElementsNL	:	SourceElements NL
-{
-	extern int parseError;
-	$$ = $1;
-
-	if (!parseError)
-	{	
-		extern int debugFlag;
-		if (debugFlag)
-			$1 -> print_node("", true, true);
-		ast_root = $1;
-		try {
-			ast_root->run();
-		} catch (const std::domain_error &de) {
-			cout << de.what() << endl;
-		} catch (const std::logic_error &le) {
-			cout << le.what() << endl;
-		} catch (...) {
-			cout << "other uncaught error" << endl;
-		}
-
-		if (!parseError)
-		{
-			extern int valueFlag;
-			if (valueFlag)
-				ast_root->value.print();
-			parseError = 0;
-		}
-		else
-		{
-			parseError = 0;
-		}
-
-	}
-}
-| SourceElementsNL  SourceElements NL
-{
-	extern int parseError;
-	$$ = $2;
-
-	if (!parseError)
-	{	
-		extern int debugFlag;
-		if (debugFlag)
-			$2 -> print_node("", true, true);
-		ast_root = $2;
-		try {
-			ast_root->run();
-		} catch (const std::domain_error &de) {
-			cout << de.what() << endl;
-		} catch (const std::logic_error &le) {
-			cout << le.what() << endl;
-		} catch (...) {
-			cout << "other uncaught error" << endl;
-		}
-
-		if (!parseError)
-		{
-			extern int valueFlag;
-			if (valueFlag)
-				ast_root->value.print();
-			parseError = 0;
-		}
-		else
-		{
-			parseError = 0;
-		}
-
-	}
-}
-
-
 InFuncSourceElements	:	InFuncSourceElement {
 	$$ = new ast::StatementList;
 	$$ -> list.push_back($1);
@@ -1262,12 +1252,83 @@ SourceElements	:	SourceElement {
 	$$ = new ast::StatementList;
 	$$ -> list.push_back($1);
 	//printf("To SourceElements\n");
+	debugOut<<"a new stmt"<<std::endl;
+	if (!parseError)
+	{	
+		extern int debugFlag;
+		if (debugFlag)
+			$1 -> print_node("", true, true);
+		ast_root = $1;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;
+		} catch (ast::runerrorException) {
+
+		}catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+		if (!parseError)
+		{
+			extern int valueFlag;
+			if (valueFlag)
+				ast_root->value.print();
+			parseError = 0;
+		}
+		else
+		{
+			parseError = 0;
+		}
+
+	}
 }
 | SourceElements SourceElement {
 	$1->list.push_back($2);
 	$$ = $1;
-}
+	debugOut<<"a new stmt"<<std::endl;
+	if (!parseError)
+	{	
+		extern int debugFlag;
+		if (debugFlag)
+			$2 -> print_node("", true, true);
+		ast_root = $2;
+		try {
+			ast_root->run();
+		} catch (const std::domain_error &de) {
+			cout << de.what() << endl;
+		} catch (const std::logic_error &le) {
+			cout << le.what() << endl;
+		} catch (ast::runerrorException) {
 
+		}catch (...) {
+			cout << "other uncaught error" << endl;
+		}
+		if (!parseError)
+		{
+			extern int valueFlag;
+			if (valueFlag)
+				ast_root->value.print();
+			parseError = 0;
+		}
+		else
+		{
+			parseError = 0;
+		}
+
+	}
+}
+| SourceElements error {
+	debugOut<<"get an error \n";
+	$$ = $1;
+	parseError = 0;
+}
+| error {
+	debugOut<<"get an error \n";
+	$$ = new ast::StatementList;
+	parseError = 0;
+}
 SourceElement	:	FunctionDeclaration {
 	$$ = $1;
 }

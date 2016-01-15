@@ -44,6 +44,7 @@ class BreakException;
 class ContinueException;
 class LabeledStmt;
 class MemberName;
+class myException;
 
 typedef std::string PropertyName;
 typedef std::vector<MemberName*> MemberNameList;
@@ -62,18 +63,31 @@ typedef std::vector<TypeConst *>    TypeDeclList;
 typedef std::vector<CaseStmt *>     CaseList;
 typedef std::map<std::string,Statement*> LabelMap;
 
+class ReturnException:public std::exception{
+public:
+    TValue value;
+    ReturnException(TValue v):value(v){};
+};
+class runerrorException:public std::exception{
+public:
+    runerrorException(){};
+};
 class BreakException:public std::exception{
 public:
     std::string label;
-    // ~BreakException();
     BreakException(std::string label):label(label){}
 };
 
 class ContinueException:public std::exception{
 public:
     std::string label;
-    // ~ContinueException();
     ContinueException(std::string label):label(label){}
+};
+
+class MyException:public std::exception{
+public:
+    TValue myex;
+    MyException(TValue myex):myex(myex){}
 };
 
 
@@ -226,9 +240,9 @@ public:
 
 class CallExpression : public Expression {
 public:
-    Identifier* function_name;
+    Expression* funcExp;
     ArgumentList* argument_list;
-    CallExpression(Identifier* id, ArgumentList* args) : function_name(id), argument_list(args) {}
+    CallExpression(Expression* funcExp, ArgumentList* args) : funcExp(funcExp), argument_list(args) {}
     virtual std::string toString(){ return "function_called"; }
     virtual TValue run();
 };
@@ -397,14 +411,14 @@ public:
 class VarDecl : public Statement {
 public:
     Identifier*     name;
-    TypeDecl*       type;
-    bool isGolbal;
+    Expression*     initial;
 
-    VarDecl(Identifier* name, TypeDecl* type) : name(name), type(type) {}
+    VarDecl(Identifier* name, Expression* initial) : name(name), initial(initial) {}
+    VarDecl(Identifier* name) : name(name), initial(nullptr) {}
     virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)name);
-        list.push_back((Node *)type);
+        list.push_back((Node *)initial);
         return list;
     }
     std::string toString() { return "VarDecl"; }
@@ -728,6 +742,15 @@ public:
         endExp(endExp),
         loopStmt(loopStmt){}
     virtual TValue run();
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> rList;
+        rList.push_back(loopVar);
+        rList.push_back(startExp);
+        rList.push_back(endExp);
+        rList.push_back(loopStmt);
+        return rList;
+    }
+
     virtual std::string toString() { return "for"; }
 };
 
@@ -753,8 +776,7 @@ public:
 class ReturnStmt : public Statement {
 public:
     Expression* exp;
-    CaseList* list;
-    ReturnStmt(Expression* exp,CaseList* list):exp(exp),list(list){}
+    ReturnStmt(Expression* exp):exp(exp){}
     virtual TValue run();
     virtual std::string toString() { return "return statement"; }
 };
@@ -781,6 +803,12 @@ public:
     Statement * stmt;
     LabeledStmt(Identifier * label,Statement* stmt):label(label),stmt(stmt){}
     virtual TValue run();
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> rList;
+        rList.push_back(label);
+        rList.push_back(stmt);
+        return rList;
+    }
     virtual std::string toString() { return "LabeledStmt statement"; }
 };
 

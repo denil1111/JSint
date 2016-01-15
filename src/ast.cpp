@@ -24,7 +24,7 @@ void debugUnset() {
 }
 
 void myerror(std::string str) {
-	yyerror(str.c_str());
+	runerror(str.c_str());
 }
 */
 
@@ -43,8 +43,7 @@ TValue ast::IntegerType::run() {
 
 TValue ast::RealType::run() {
     debugOut << "Creating real: " << val << std::endl;
-    value.type = TValue::TType::Tdouble;
-	value.sValue.dou = val;
+    value = TValue(val);
 	return value;
 }
 
@@ -55,8 +54,7 @@ TValue ast::CharType::run() {
 
 TValue ast::StringType::run() {
     debugOut << "Creating String: " << val << std::endl;
-	value.type = TValue::TType::Tstring;
-	value.sValue.str = val;
+	value = TValue(val);
 	return value;
 }
 
@@ -291,7 +289,7 @@ TValue ast::Operator::run() {
 		auto id = dynamic_cast<Identifier*>(op1);
 		if (id == nullptr)
 		{
-			yyerror("leftside exp error");
+			runerror("leftside exp error");
 		}
 		else
 		{
@@ -312,6 +310,15 @@ TValue ast::ConstDecl::run() {
 
 
 TValue ast::VarDecl::run() {
+	if (initial!=nullptr)
+	{
+		TValue val = initial->run();
+		nowStack.newVar(name->name,val);
+	}
+	else
+	{
+		nowStack.newVar(name->name,TValue::undefined());
+	}
 	return value;
 }
 
@@ -326,21 +333,40 @@ TValue ast::Routine::run() {
 TValue ast::FunctionDeclaration::run() {
     debugOut << "declaring function: " << function_name->name << std::endl;
     debugOut << "with parameters: ";
+
     for (auto parameter : *parameter_list) {
         debugOut << parameter->name << " ";
     }
-    std::cout << std::endl;
     value = TValue(new DeclaredFunction(function_name, parameter_list, function_body));
     nowStack.assignAndNew(function_name->name, value);
     return value;
 }
 
 TValue ast::CallExpression::run() {
-    debugOut<< "calling function: " << function_name->name << std::endl;
-    TValue val = nowStack.getVar(function_name->name);
+    debugOut<< "calling function: "<< std::endl;
+    TValue val = funcExp->run();
     DeclaredFunction *function = val.function;
+    debugOut<<val.function<<std::endl;
     if (function) {
-        value = function->execute(argument_list);
+    	std::vector<TValue> valueList;
+    	if (argument_list)
+    	{
+    		for (auto arg : *argument_list) {
+	            valueList.push_back(arg->run());
+	        }
+	    	val.function->parent->print();
+	    	debugOut<<"run func"<<endl;
+	        nowStack.push_new(val.function->parent);
+	        value = function->execute(&valueList);
+	        nowStack.pop();
+    	}
+    	else
+    	{
+    		nowStack.push_new(val.function->parent);
+	        value = function->execute(nullptr);
+	        nowStack.pop();
+    	}
+	    	
     }
     return value;
 }
@@ -383,32 +409,140 @@ TValue ast::WhileStmt::run() {
 	}
 
 	condition->run();
-	while(condition->value.toBoolean()){
-		loopStmt->run();
-		condition->run();
+	bool conditionBool=condition->value.toBoolean();
+	while(conditionBool){
+		// debugOut<<"in whilestmt::while:"<<condition->value.toString()<<std::endl;
+		try{
+			loopStmt->run();
+			condition->run();
+			conditionBool=condition->value.toBoolean();
+		}catch(BreakException &brexception){
+			debugOut<<"while stmt brexception"<<std::endl;
+			if(brexception.label==""){
+				return;
+			}else{
+				//如果有标签
+				Statement* stmt=labelMap[brexception.label];
+				if(stmt==this){
+					//如果就是这个结点
+					return value;
+				}else{
+					//如果不是就再throw给外部
+					throw brexception;
+				}
+			}
+			return value;
+		}catch(ContinueException &cnexception){
+			debugOut<<"while stmt cnexception"<<std::endl;
+			condition->run();
+			conditionBool=condition->value.toBoolean();
+			if(cnexception.label==""){
+				continue;
+			}else{
+				//如果有标签
+				Statement* stmt=labelMap[cnexception.label];
+				if(stmt==this){
+					//如果就是这个结点
+					continue;
+				}else{
+					//如果不是就再throw给外部
+					throw cnexception;
+				}
+			}
+
+			return value;
+		}
 	}
 
 	return value;
 }
 TValue ast::ForStmt::run() {
 
+	bool condition=false;
+
+	if(loopVar!=nullptr){
+		loopVar->run();
+	}
+	if(startExp!=nullptr){
+		startExp->run();
+	}else{
+		condition=true;
+	}
+
+
+	while(condition||startExp->value.toBoolean()){
+		try{
+			loopStmt->run();
+
+			if(endExp!=nullptr){
+				endExp->run();
+			}
+
+			if(startExp!=nullptr){
+				startExp->run();
+			}
+		}catch(BreakException &brexception){
+			debugOut<<"for stmt brexception"<<std::endl;
+			if(brexception.label==""){
+				return value;
+			}else{
+				//如果有标签
+				Statement* stmt=labelMap[brexception.label];
+				if(stmt==this){
+					//如果就是这个结点
+					return value;
+				}else{
+					//如果不是就再throw给外部
+					throw brexception;
+				}
+			}
+			return value;
+		}catch(ContinueException &cnexception){
+			debugOut<<"for stmt cnexception"<<std::endl;
+			if(endExp!=nullptr){
+				endExp->run();
+			}
+			if(startExp!=nullptr){
+				startExp->run();
+			}
+			if(cnexception.label==""){
+				continue;
+			}else{
+				//如果有标签
+				debugOut<<"label justice"<<std::endl;
+				Statement* stmt=labelMap[cnexception.label];
+				if(stmt==this){
+					//如果就是这个结点
+					debugOut<<"label finded"<<std::endl;
+					continue;
+				}else{
+					//如果不是就再throw给外部
+					debugOut<<"label throw again"<<std::endl;
+					throw cnexception;
+				}
+			}
+
+			return value;
+		}
+
+	}
 
 	return value;
 }
 TValue ast::CaseStmt::run() {
-	std::cout<<"CaseStmt::run"<<std::endl;
+	debugOut<<"CaseStmt::run"<<std::endl;
 	// try{
 		thenStmt->run();
 	// }catch(BreakException &exception){
-	// 	std::cout<<"case stmt exception"<<std::endl;
+	// 	debugOut<<"case stmt exception"<<std::endl;
 	// }
 	return value;
 }
 
 TValue ast::IfStmt::run() {
 	condition->run();
-	std::cout <<"IfStmt::run::"<<condition->value.toBoolean()<<std::endl;
-	if(condition->value.toBoolean() == TValue(1).toBoolean()){
+	debugOut <<"IfStmt::run::"<<condition->value.toBoolean()<<std::endl;
+	if(condition->value.toBoolean()){
 		thenStmt->run();
 	}else{
 		if(elseStmt!=nullptr){
@@ -419,13 +553,13 @@ TValue ast::IfStmt::run() {
 }
 
 TValue ast::SwitchStmt::run() {
-	
+
 	CaseStmt* stmt;
 	bool firstFlag=true;
 	int defaultIndex=-1;
 	for(int i=0;i<list->size();i++){
 		try{
-			std::cout<<"for try::i="<<i<<std::endl;
+			debugOut<<"for try::i="<<i<<std::endl;
 			stmt=(*list)[i];
 			if(stmt->isDefault){
 				//如果已经匹配过了case，那么就要执行default语句
@@ -434,7 +568,7 @@ TValue ast::SwitchStmt::run() {
 				}else{
 					//如果还没有匹配，那么就要先跳过default语句；
 					// 如果最后没有任何匹配，就进入default那句往后执行，所以记下编号；
-					defaultIndex=i;	
+					defaultIndex=i;
 				}
 			}else{
 				if(!firstFlag){
@@ -446,15 +580,15 @@ TValue ast::SwitchStmt::run() {
 				exp->run();
 				auto res=exp->value;
 
-				if((stmt->condition->value==res).toBoolean()){
+				if(stmt->condition->value.toBoolean()){
 
 					stmt->run();
 					firstFlag=false;
-				}	
+				}
 			}
-			
+
 		}catch(BreakException &exception){
-			std::cout<<"switch stmt exception"<<std::endl;
+			debugOut<<"switch stmt exception"<<std::endl;
 			return value;
 		}
 	}
@@ -463,18 +597,18 @@ TValue ast::SwitchStmt::run() {
 	if(firstFlag && defaultIndex!=-1){
 		for(int i=defaultIndex;i<list->size();i++){
 			try{
-				std::cout<<"switch default try::i="<<i<<std::endl;
+				debugOut<<"switch default try::i="<<i<<std::endl;
 				stmt=(*list)[i];
-				stmt->run();			
+				stmt->run();
 			}catch(BreakException &exception){
-				std::cout<<"switch stmt exception"<<std::endl;
+				debugOut<<"switch stmt exception"<<std::endl;
 				return value;
 			}
 		}
 	}else{
 		//如果没有任何匹配，并且也没有default
 		return value;
-	}	
+	}
 }
 // TValue ast::ArrayType::run() {
 
@@ -486,14 +620,25 @@ TValue ast::ArrayRef::run() {
 
 	return value;
 }
-
+TValue ast::ReturnStmt::run() {
+	if (exp!=nullptr)
+	{
+		value = exp->run();
+		throw ReturnException(value);
+	} else
+	{
+		throw ReturnException(TValue::undefined());
+	}
+	
+	return value;
+}
 TValue ast::ContinueStmt::run() {
 	if(label!=nullptr){
 		throw ContinueException(label->name);
 	}else{
 		throw ContinueException("");
 	}
-   
+
 	return value;
 }
 
@@ -509,27 +654,92 @@ TValue ast::BreakStmt::run() {
 
 TValue ast::LabeledStmt::run() {
     labelMap[label->name]=stmt;
+    stmt->run();
 	return value;
 }
 
 TValue ast::TryStmt::run() {
 
+	try{
+		debugOut<<"111"<<endl;
+		try{
+			blockstmt->run();
+		}catch(ReturnException & rtex){
+			if(finallystmt!=nullptr){
+				debugOut<<"need to run finally"<<endl;
+			}else{
+				debugOut<<"no finally"<<endl;
+				throw rtex;
+			}
+		}
+	}catch(MyException & ex){
+		//如果抓住什么异常
+		debugOut<<"MyException"<<endl;
 
+		TValue exval=ex.myex;
+		std::string name=catchstmt->identifier->name;
+
+
+		debugOut<<"myexTvalue:"<<exval.toString()<<endl;
+		debugOut<<"name:"<<name<<endl;
+
+		TValue tmp;
+		bool ifDup=false;
+
+		if(nowStack.hasVar(name)){
+			tmp=nowStack.getVar(name);
+			ifDup=true;
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}else{
+			nowStack.assignAndNew(name,exval);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}
+
+		try{
+			catchstmt->run();
+		}catch(ReturnException & rtex){
+			if(finallystmt!=nullptr){
+				debugOut<<"catch:need to run finally"<<endl;
+			}else{
+				debugOut<<"catch:no finally"<<endl;
+				throw rtex;
+			}
+		}
+
+		if(ifDup){
+			debugOut<<"ifDup:true:setVar"<<endl;
+			nowStack.setVar(name,tmp);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}else{
+			debugOut<<"ifDup:false:removeVar"<<endl;
+			nowStack.removeVar(name);
+			debugOut<<"nowStack:";
+			nowStack.print();
+		}
+
+	}
+
+	if(finallystmt!=nullptr){
+		finallystmt->run();
+	}
+	
 	return value;
 }
 TValue ast::ThrowStmt::run() {
-
-
+	exp->run();
+	throw MyException(exp->value);
 	return value;
 }
 TValue ast::FinallyStmt::run() {
 
-
+	stmt->run();
 	return value;
 }
 TValue ast::CatchStmt::run() {
-
-
+	stmt->run();
 	return value;
 }
 
@@ -539,7 +749,7 @@ TValue ast::ArrayType::run() {
 	elList->run();
 
 	std::vector<Statement*> stmtList = elList->list;
-	
+
 	std::vector<TValue> values = std::vector<TValue>(stmtList.size());
 	for (int i=0; i<stmtList.size(); i++) {
 		Expression* exp = dynamic_cast<Expression*>(stmtList[i]);
@@ -549,7 +759,7 @@ TValue ast::ArrayType::run() {
 
 	debugOut << "Creating array: " <<  arrayValue->toString() << std::endl;
 
-	value = TValue(arrayValue); 
+	value = TValue(arrayValue);
 	return value;
 
 }
@@ -560,20 +770,21 @@ TValue ast::ObjectType::run() {
 	std::map<std::string, TValue> props = std::map<std::string, TValue>();
 	for (auto stmt : propList->list) {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
+		debugOut<<property->name<<endl;
 		props[property->name] = property->valueExp->value;
 	}
 
 	Object* objectValue = new Object(props);
-
 	debugOut <<  "Creating object: " << objectValue->toString() << std::endl;
 
-	value = TValue(objectValue); 	
+	value = TValue(objectValue);
 	return value;
 }
 
 TValue ast::StatementList::run() {
 	for (auto stmt: list){
 		value = stmt->run();
+
 	}
 	return value;
 }
@@ -603,33 +814,34 @@ TValue ast::ElementList::run() {
 TValue ast::MemberPropertyExpression::run() {
 	leftExp->run();
 	value = leftExp->value;
-	
+	debugOut<<"member pro"<<endl;
+
 	if (rightExpList != nullptr) {
-		
+
 		Object* o;
 
 		for (MemberNameList::iterator iter=rightExpList->begin();
-			 iter!=rightExpList->end(); iter++) {			 
+			 iter!=rightExpList->end(); iter++) {
 			 (*iter)->run();
 		}
 
 		for (MemberNameList::iterator iter=rightExpList->begin();
 			 iter!=rightExpList->end(); iter++) {
-			
+
 			if (value.object == nullptr) {
-				yyerror("Not an object!");
+				runerror("Not an object!");
 			} else {
 				o = value.object;
 			}
-			 
+			debugOut<<(*iter)->value.toString()<<endl;
 			value = o->get((*iter)->value.toString());
 		}
-		//debugOut << "check in" << std::endl;			
-		//debugOut << "check out!" << std::endl;				
+		// debugOut << "check in" << value.function<<std::endl;
+		//debugOut << "check out!" << std::endl;
 	}
 
 	return value;
-	
+
 }
 
 TValue ast::MemberName::run() {
@@ -644,11 +856,11 @@ TValue ast::MemberName::run() {
 
 TValue ast::Block::run() {
 	debugOut << "Enter new block!" << std::endl;
-	nowStack.push_new();
+	// nowStack.push_new();
 	this->stmtList->run();
-	nowStack.print();
-	nowStack.pop();
+	// nowStack.print();
+	// nowStack.pop();
 	debugOut << "Exit from block!" << std::endl;
-	nowStack.print();
+	// nowStack.print();
 	return value;
 }

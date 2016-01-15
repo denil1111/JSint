@@ -6,6 +6,7 @@
 #include "ccalc.h"
 #include "varlist.hpp"
 #include "string.h"
+#include "system.hpp"
 
 using namespace std;
 std::string red(const std::string& str) {
@@ -36,6 +37,7 @@ int main(int argc, char** argv) {
 			valueFlag = 0;
 		}
 	}
+	initSystem();
 	debugOut <<green("start!") << endl;
 	init_buffer();
 	yyparse();

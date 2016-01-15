@@ -110,6 +110,9 @@ public:
 			std::cout<<"\"" << green(this->toString()) << "\"" << std::endl;
 		}
 	}
+	void output() {
+		std::cout<<this->toString()<<std::endl;
+	}
 
 	TValue operator   +( TValue &rx);
 	TValue operator   -( TValue &rx);
@@ -138,10 +141,20 @@ public:
 class VarList {
 	std::map<std::string,TValue> list;
 public:
+	VarList* parent = nullptr;
 	VarList() : list(std::map<std::string, TValue>()) {}
 	void assignAndNew(std::string idname, TValue val){
 		list[idname] = val;
 	};
+	void removeVar(std::string idname){
+		std::map<std::string,TValue>::iterator it;
+		it=list.find(idname);
+		if (it == list.end()){
+			return;
+		}else{
+			list.erase(it);
+		}
+	}
 	bool hasVar(std::string idname) {
 		if (list.find(idname) == list.end())
 			return false;
@@ -150,12 +163,11 @@ public:
 	TValue getVar(std::string idname) {
 		if (hasVar(idname)) return list[idname];
 		else {
-			debugOut << red("Not exist in variable list!") << std::endl;
-			exit(0);
+			runerror("Not exist in variable list!");
 		}
 	}
 	void print() {
-		std::cout << "VarList(";
+		debugOut << "VarList(";
 		for (auto& kv : list) {
 			debugOut << kv.first << ": " << kv.second.toString() << ", ";
 		}
@@ -164,34 +176,24 @@ public:
 };
 
 class VarStack {
-	std::vector<VarList> vstack;
+	std::vector<VarList*> vstack;
 public:
-	VarStack() : vstack(std::vector<VarList>()){
-		this->push_new();
-	}
-	void assignAndNew(std::string idname, TValue val) {
-		vstack.back().assignAndNew(idname, val);
-	}
-	TValue getVar(std::string idname) {
-		for (auto it = vstack.rbegin(); it != vstack.rend(); ++it) {
-			if (it->hasVar(idname)) return it->getVar(idname);
-		}
-		yyerror("Not exist in variable stack!");
-	}
-	void push(VarList varList) {
-		vstack.push_back(varList);
-	}
-	void push_new() {
-		this->push(VarList());
-	}
-	void pop() {
-		vstack.pop_back();
-	}
-	void print() {
-		for (int lv = vstack.size()-1; lv>=0; lv--) {
-			debugOut << "level " << lv << " : ";
-			vstack[lv].print();
-		}
-	}
+	VarStack();
+
+	void setVar(std::string idname,TValue val);
+
+	void removeVar(std::string idname);
+
+	bool hasVar(std::string idname);
+
+	TValue getVar(std::string idname);
+	void assignAndNew(std::string idname, TValue val);
+	void newVar(std::string idname, TValue val);
+
+	void push(VarList *varList);
+	void push_new(VarList* parent);
+	void pop();
+	VarList* front();
+	void print();
 };
 #endif

@@ -19,7 +19,7 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
                     break;
                 }
             }
-            nowStack.assignAndNew(parameter_list->at(index)->name, arg);
+            nowStack.newVar(parameter_list->at(index)->name, arg);
             index++;
         }
         debugOut << std::endl;

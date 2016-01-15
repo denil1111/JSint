@@ -133,17 +133,17 @@ extern int parseError;
 %type <ast_VarDecl> VariableDeclaration VariableDeclarationNoIn
 %type <ast_Expression> Initialiser InitialiserNoIn
 %type <ast_Statement> EmptyStatement ExpressionStatement
-%type <ast_IfStmt> IfStatement 
+%type <ast_IfStmt> IfStatement
 %type <ast_Statement> IterationStatement
 %type <ast_Identifier> IdentifierComma
 %type <ast_ContinueStmt> ContinueStatement
 %type <ast_BreakStmt> BreakStatement
 %type <ast_Statement> ReturnStatement
-%type <ast_Node> WithStatement 
+%type <ast_Node> WithStatement
 %type <ast_SwitchStmt> SwitchStatement
-%type <ast_CaseList> CaseBlock CaseBlockPart CaseClauses 
+%type <ast_CaseList> CaseBlock CaseBlockPart CaseClauses
 %type <ast_CaseStmt> CaseClause DefaultClause
-%type <ast_LabeledStmt> LabelledStatement 
+%type <ast_LabeledStmt> LabelledStatement
 %type <ast_ThrowStmt> ThrowStatement
 %type <ast_TryStmt> TryStatement TryStatementPart
 %type <ast_CatchStmt> Catch
@@ -1000,7 +1000,7 @@ VariableStatement	:	VAR VariableDeclarationList
 {
 	$$ = $2;
 }
-VariableDeclarationList	:	VariableDeclaration 
+VariableDeclarationList	:	VariableDeclaration
 {
 	$$ = new ast::StatementList;
 	$$ -> list.push_back($1);
@@ -1012,7 +1012,7 @@ VariableDeclarationList	:	VariableDeclaration
 }
 VariableDeclarationListNoIn	:	VariableDeclarationNoIn
 | VariableDeclarationListNoIn COMMA VariableDeclarationNoIn
-VariableDeclaration	:	Identifier 
+VariableDeclaration	:	Identifier
 {
 	$$ = new ast::VarDecl($1);
 }
@@ -1111,7 +1111,7 @@ CaseBlock	    :	LEFT_BRACE CaseBlockPart{
 	$$=$2;
 }
 | LEFT_BRACE CaseClauses CaseBlockPart{
-	
+
 	$$=$2;
 	for(int i=0;i<$3->size();i++){
 		$$->push_back((*$3)[i]);
@@ -1211,8 +1211,12 @@ FunctionDeclaration	:	FUNCTION Identifier FormalParameterListInPare FunctionBody
 	$$ = new ast::FunctionDeclaration((ast::Identifier*)$2, $3, $4);
 }
 
-FunctionExpression	:	FUNCTION FormalParameterListInPare FunctionBody
-| FUNCTION Identifier FormalParameterListInPare FunctionBody
+FunctionExpression	:	FUNCTION FormalParameterListInPare FunctionBody {
+	$$ = new ast::FunctionDeclaration(nullptr, $2, $3);
+}
+| FUNCTION Identifier FormalParameterListInPare FunctionBody {
+	$$ = new ast::FunctionDeclaration((ast::Identifier*)$2, $3, $4);
+}
 
 FormalParameterList	:	Identifier {
 	$$ = new ast::ParameterList();
@@ -1254,7 +1258,7 @@ SourceElements	:	SourceElement {
 	//printf("To SourceElements\n");
 	debugOut<<"a new stmt"<<std::endl;
 	if (!parseError)
-	{	
+	{
 		extern int debugFlag;
 		if (debugFlag)
 			$1 -> print_node("", true, true);
@@ -1288,7 +1292,7 @@ SourceElements	:	SourceElement {
 	$$ = $1;
 	debugOut<<"a new stmt"<<std::endl;
 	if (!parseError)
-	{	
+	{
 		extern int debugFlag;
 		if (debugFlag)
 			$2 -> print_node("", true, true);

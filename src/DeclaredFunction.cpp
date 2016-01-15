@@ -24,6 +24,6 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         }
         debugOut << std::endl;
     }
-    function_body->run();
+    if (function_body) function_body->run();
     return TValue::undefined();
 }

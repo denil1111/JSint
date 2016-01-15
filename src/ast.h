@@ -150,16 +150,6 @@ public:
  	}
 };
 
-class FunctionDeclaration : public StatementList {
-public:
-    Identifier* function_name;
-    ParameterList* parameter_list;
-    FunctionBody* function_body;
-    FunctionDeclaration(Identifier* id, ParameterList* args, FunctionBody* body) : function_name(id), parameter_list(args), function_body(body) {}
-    virtual std::string toString(){ return "function_declaration"; }
-    virtual TValue run();
-};
-
 class Program : public Node {
 public:
     LabelDecl*      lable_part;
@@ -245,6 +235,16 @@ public:
     CallExpression(Expression* funcExp, ArgumentList* args) : funcExp(funcExp), argument_list(args) {}
     virtual std::string toString(){ return "function_called"; }
     virtual TValue run();
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> list;
+        list.push_back(funcExp);
+        if (argument_list) {
+            for (auto i : *argument_list) {
+                list.push_back(i);
+            }
+        }
+        return list;
+    }
 };
 
 class LabelDecl : public Statement {
@@ -334,6 +334,28 @@ public:
     Identifier(const char * ptr_s) : name(*(new std::string(ptr_s))) {}
     virtual std::string toString() { return "Identifier: " + name; }
     virtual TValue run();
+};
+
+
+class FunctionDeclaration : public Expression {
+public:
+    Identifier* function_name;
+    ParameterList* parameter_list;
+    FunctionBody* function_body;
+    FunctionDeclaration(Identifier* id, ParameterList* args, FunctionBody* body) : function_name(id), parameter_list(args), function_body(body) {}
+    virtual std::string toString(){ return "function_declaration"; }
+    virtual TValue run();
+    virtual std::vector<Node *> getChildren() {
+        std::vector<Node *> list;
+        list.push_back(function_name);
+        for (auto i : *parameter_list) {
+            list.push_back(i);
+        }
+        for (auto i : function_body->getChildren()) {
+            list.push_back(i);
+        }
+        return list;
+    }
 };
 
 class ArrayRef : public Expression {
@@ -880,7 +902,7 @@ public:
 	ElementList() {}
 ElementList(Expression* el): StatementList(el) {}
 ElementList(Expression* el, ElementList* elList): StatementList(el, elList) {}
-	
+
 	virtual std::string toString() { return "ElementList"; }
 	virtual std::vector<Node *> getChildren() { return StatementList::getChildren(); }
 	virtual TValue run();
@@ -898,7 +920,7 @@ ArrayType(ElementList* elList): elList(elList) {}
     virtual std::string toString() { return "Array"; }
     virtual std::vector<Node *> getChildren() {
 		return std::vector<Node *>{elList};
-	}	
+	}
     virtual TValue run();
 };
 
@@ -924,7 +946,7 @@ private:
 	MemberNameList* rightExpList;
 public:
 	MemberPropertyExpression() {}
-    MemberPropertyExpression(Expression* exp): leftExp(exp), rightExpList(nullptr) {}	
+    MemberPropertyExpression(Expression* exp): leftExp(exp), rightExpList(nullptr) {}
     MemberPropertyExpression(Expression* exp, MemberNameList* expList):
 	leftExp(exp), rightExpList(expList) {}
 

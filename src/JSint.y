@@ -1285,7 +1285,6 @@ SourceElements	:	SourceElement {
 		{
 			parseError = 0;
 		}
-
 	}
 }
 | SourceElements SourceElement {

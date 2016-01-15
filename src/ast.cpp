@@ -417,14 +417,14 @@ TValue ast::WhileStmt::run() {
 		loopStmt->run();
 	}
 
-	condition->run();
-	bool conditionBool=condition->value.toBoolean();
+	TValue res=condition->run();
+	bool conditionBool=res.toBoolean();
 	while(conditionBool){
 		// debugOut<<"in whilestmt::while:"<<condition->value.toString()<<std::endl;
 		try{
 			loopStmt->run();
-			condition->run();
-			conditionBool=condition->value.toBoolean();
+			res=condition->run();
+			conditionBool=res.toBoolean();
 		}catch(BreakException &brexception){
 			debugOut<<"while stmt brexception"<<std::endl;
 			if(brexception.label==""){
@@ -443,8 +443,8 @@ TValue ast::WhileStmt::run() {
 			return value;
 		}catch(ContinueException &cnexception){
 			debugOut<<"while stmt cnexception"<<std::endl;
-			condition->run();
-			conditionBool=condition->value.toBoolean();
+			res=condition->run();
+			conditionBool=res.toBoolean();
 			if(cnexception.label==""){
 				continue;
 			}else{
@@ -468,18 +468,19 @@ TValue ast::WhileStmt::run() {
 TValue ast::ForStmt::run() {
 
 	bool condition=false;
+	TValue res;
 
 	if(loopVar!=nullptr){
 		loopVar->run();
 	}
 	if(startExp!=nullptr){
-		startExp->run();
+		res=startExp->run();
 	}else{
 		condition=true;
 	}
 
 
-	while(condition||startExp->value.toBoolean()){
+	while(condition||res.toBoolean()){
 		try{
 			loopStmt->run();
 
@@ -488,7 +489,7 @@ TValue ast::ForStmt::run() {
 			}
 
 			if(startExp!=nullptr){
-				startExp->run();
+				res=startExp->run();
 			}
 		}catch(BreakException &brexception){
 			debugOut<<"for stmt brexception"<<std::endl;
@@ -512,7 +513,7 @@ TValue ast::ForStmt::run() {
 				endExp->run();
 			}
 			if(startExp!=nullptr){
-				startExp->run();
+				res=startExp->run();
 			}
 			if(cnexception.label==""){
 				continue;
@@ -549,9 +550,9 @@ TValue ast::CaseStmt::run() {
 }
 
 TValue ast::IfStmt::run() {
-	condition->run();
+	TValue res=condition->run();
 	debugOut <<"IfStmt::run::"<<condition->value.toBoolean()<<std::endl;
-	if(condition->value.toBoolean()){
+	if(res.toBoolean()){
 		thenStmt->run();
 	}else{
 		if(elseStmt!=nullptr){
@@ -566,6 +567,7 @@ TValue ast::SwitchStmt::run() {
 	CaseStmt* stmt;
 	bool firstFlag=true;
 	int defaultIndex=-1;
+	TValue res;
 	for(int i=0;i<list->size();i++){
 		try{
 			debugOut<<"for try::i="<<i<<std::endl;
@@ -582,14 +584,13 @@ TValue ast::SwitchStmt::run() {
 			}else{
 				if(!firstFlag){
 					stmt->run();
+					continue;
 				}
 
-				stmt->condition->run();
+				res=stmt->condition->run();
+				TValue expres=exp->run();
 
-				exp->run();
-				auto res=exp->value;
-
-				if(stmt->condition->value.toBoolean()){
+				if((res==expres).toBoolean()){
 
 					stmt->run();
 					firstFlag=false;
@@ -738,8 +739,8 @@ TValue ast::TryStmt::run() {
 	return value;
 }
 TValue ast::ThrowStmt::run() {
-	exp->run();
-	throw MyException(exp->value);
+	TValue res=exp->run();
+	throw MyException(res);
 	return value;
 }
 TValue ast::FinallyStmt::run() {

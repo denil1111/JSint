@@ -30,6 +30,7 @@ void myerror(std::string str) {
 */
 
 TValue ast::Identifier::run() {
+	TValue value = TValue::undefined();
     debugOut << "Creating identifier: " << name << std::endl;
 
 	value = nowStack.getVar(name);
@@ -38,34 +39,40 @@ TValue ast::Identifier::run() {
 }
 
 TValue ast::IntegerType::run() {
+	TValue value = TValue::undefined();
     debugOut << "Creating integer: " << val << std::endl;
     return value;
 }
 
 TValue ast::RealType::run() {
+	TValue value = TValue::undefined();
     debugOut << "Creating real: " << val << std::endl;
     value = TValue(val);
 	return value;
 }
 
 TValue ast::CharType::run() {
+	TValue value = TValue::undefined();
     debugOut << "Creating char: " << val << std::endl;
     return value;
 }
 
 TValue ast::StringType::run() {
+	TValue value = TValue::undefined();
     debugOut << "Creating String: " << val << std::endl;
 	value = TValue(val);
 	return value;
 }
 
 TValue ast::BooleanType::run() {
+	TValue value = TValue::undefined();
     debugOut << "Creating boolean: " << val << std::endl;
     value = TValue(val);
     return value;
 
 }
 TValue ast::RangeType::run() {
+	TValue value = TValue::undefined();
     debugOut << "Creating subscript range from " << this->low << " to " << this->high << std::endl;
     return value;
 
@@ -314,15 +321,18 @@ TValue ast::Operator::run() {
 }
 
 TValue ast::AssignmentStmt::run() {
+	TValue value = TValue::undefined();
 	return value;
 }
 
 TValue ast::ConstDecl::run() {
+	TValue value = TValue::undefined();
 	return value;
 }
 
 
 TValue ast::VarDecl::run() {
+	TValue value = TValue::undefined();
 	if (initial!=nullptr)
 	{
 		TValue val = initial->run();
@@ -336,14 +346,17 @@ TValue ast::VarDecl::run() {
 }
 
 TValue ast::Program::run() {
+	TValue value = TValue::undefined();
 	return value;
 }
 
 TValue ast::Routine::run() {
+	TValue value = TValue::undefined();
 	return value;
 }
 
 TValue ast::FunctionDeclaration::run() {
+	TValue value = TValue::undefined();
     if (function_name) {
         debugOut << "declaring function: " << function_name->name << std::endl;
         debugOut << "with parameters: ";
@@ -363,6 +376,7 @@ TValue ast::FunctionDeclaration::run() {
 }
 
 TValue ast::CallExpression::run() {
+	TValue value = TValue::undefined();
     debugOut<< "calling function: "<< std::endl;
     TValue val = funcExp->run();
     DeclaredFunction *function = val.function;
@@ -400,38 +414,45 @@ TValue ast::CallExpression::run() {
 }
 
 TValue ast::FuncCall::run() {
+	TValue value = TValue::undefined();
 
 
 	return value;
 }
 
 TValue ast::ProcCall::run() {
+	TValue value = TValue::undefined();
 
 
 	return value;
 }
 
 TValue ast::SysFuncCall::run() {
+	TValue value = TValue::undefined();
 	return value;
 }
 
 
 
 TValue ast::SysProcCall::run() {
+	TValue value = TValue::undefined();
 
 
 	return value;
 }
 
 TValue ast::TypeDecl::run() {
+	TValue value = TValue::undefined();
 	return value;
 }
 
 TValue ast::Expression::run() {
+	TValue value = TValue::undefined();
 	return value;
 }
 
 TValue ast::WhileStmt::run() {
+	TValue value = TValue::undefined();
 	if(ifDo){
 		loopStmt->run();
 	}
@@ -485,6 +506,7 @@ TValue ast::WhileStmt::run() {
 	return value;
 }
 TValue ast::ForStmt::run() {
+	TValue value = TValue::undefined();
 
 	bool condition=false;
 	TValue res;
@@ -559,6 +581,7 @@ TValue ast::ForStmt::run() {
 	return value;
 }
 TValue ast::CaseStmt::run() {
+	TValue value = TValue::undefined();
 	debugOut<<"CaseStmt::run"<<std::endl;
 	// try{
 		thenStmt->run();
@@ -569,8 +592,8 @@ TValue ast::CaseStmt::run() {
 }
 
 TValue ast::IfStmt::run() {
+	TValue value = TValue::undefined();
 	TValue res=condition->run();
-	debugOut <<"IfStmt::run::"<<condition->value.toBoolean()<<std::endl;
 	if(res.toBoolean()){
 		thenStmt->run();
 	}else{
@@ -582,6 +605,7 @@ TValue ast::IfStmt::run() {
 }
 
 TValue ast::SwitchStmt::run() {
+	TValue value = TValue::undefined();
 
 	CaseStmt* stmt;
 	bool firstFlag=true;
@@ -640,16 +664,19 @@ TValue ast::SwitchStmt::run() {
 	}
 }
 // TValue ast::ArrayType::run() {
+TValue value = TValue::undefined();
 
 // 	return value;
 // }
 
 TValue ast::ArrayRef::run() {
+	TValue value = TValue::undefined();
 
 
 	return value;
 }
 TValue ast::ReturnStmt::run() {
+	TValue value = TValue::undefined();
 	if (exp!=nullptr)
 	{
 		value = exp->run();
@@ -662,6 +689,7 @@ TValue ast::ReturnStmt::run() {
 	return value;
 }
 TValue ast::ContinueStmt::run() {
+	TValue value = TValue::undefined();
 	if(label!=nullptr){
 		throw ContinueException(label->name);
 	}else{
@@ -672,6 +700,7 @@ TValue ast::ContinueStmt::run() {
 }
 
 TValue ast::BreakStmt::run() {
+	TValue value = TValue::undefined();
     if(label!=nullptr){
 		throw BreakException(label->name);
 	}else{
@@ -682,12 +711,14 @@ TValue ast::BreakStmt::run() {
 }
 
 TValue ast::LabeledStmt::run() {
+	TValue value = TValue::undefined();
     labelMap[label->name]=stmt;
     stmt->run();
 	return value;
 }
 
 TValue ast::TryStmt::run() {
+	TValue value = TValue::undefined();
 
 	try{
 		debugOut<<"111"<<endl;
@@ -758,31 +789,34 @@ TValue ast::TryStmt::run() {
 	return value;
 }
 TValue ast::ThrowStmt::run() {
+	TValue value = TValue::undefined();
 	TValue res=exp->run();
 	throw MyException(res);
 	return value;
 }
 TValue ast::FinallyStmt::run() {
+	TValue value = TValue::undefined();
 
 	stmt->run();
 	return value;
 }
 TValue ast::CatchStmt::run() {
+	TValue value = TValue::undefined();
 	stmt->run();
 	return value;
 }
 
 
 TValue ast::ArrayType::run() {
+	TValue value = TValue::undefined();
 
-	elList->run();
 
 	std::vector<Statement*> stmtList = elList->list;
 
 	std::vector<TValue> values = std::vector<TValue>(stmtList.size());
 	for (int i=0; i<stmtList.size(); i++) {
 		Expression* exp = dynamic_cast<Expression*>(stmtList[i]);
-		values[i] = exp->value;
+		values[i] = exp->run();
 	}
 	Object* arrayValue = new Object(values);
 
@@ -794,13 +828,13 @@ TValue ast::ArrayType::run() {
 }
 
 TValue ast::ObjectType::run() {
-	propList->run();
+	TValue value = TValue::undefined();
 
 	std::map<std::string, TValue> props = std::map<std::string, TValue>();
 	for (auto stmt : propList->list) {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
 		debugOut<<property->name<<endl;
-		props[property->name] = property->valueExp->value;
+		props[property->name] = property->valueExp->run();
 	}
 
 	Object* objectValue = new Object(props);
@@ -811,6 +845,7 @@ TValue ast::ObjectType::run() {
 }
 
 TValue ast::StatementList::run() {
+	TValue value = TValue::undefined();
 	for (auto stmt: list){
 		value = stmt->run();
 
@@ -819,11 +854,13 @@ TValue ast::StatementList::run() {
 }
 
 TValue ast::PropertyNameAndValue::run() {
+	TValue value = TValue::undefined();
 	value = valueExp->run();
 	return value;
 }
 
 TValue ast::PropertyNameAndValueList::run() {
+	TValue value = TValue::undefined();
 	for (auto stmt: list) {
 		PropertyNameAndValue* property = dynamic_cast<PropertyNameAndValue*>(stmt);
 		value = property->run();
@@ -832,6 +869,7 @@ TValue ast::PropertyNameAndValueList::run() {
 }
 
 TValue ast::ElementList::run() {
+	TValue value = TValue::undefined();
 	for (auto stmt: list) {
 		Expression* exp = dynamic_cast<Expression*>(stmt);
 		value = exp->run();
@@ -864,6 +902,7 @@ std::pair<Object*, ast::MemberName*>* ast::MemberPropertyExpression::simplify() 
 }
 
 TValue ast::MemberPropertyExpression::run() {
+	TValue value = TValue::undefined();
 	std::pair<Object*, ast::MemberName*>* simPair = this->simplify();
 	TValue memberValue = simPair->second->run();
 	debugOut << "Member: " << memberValue.toString() << endl;
@@ -875,6 +914,7 @@ void ast::MemberPropertyExpression::assign(TValue value) {
 }
 
 TValue ast::MemberName::run() {
+	TValue value = TValue::undefined();
 	if (isIdentifier) {
 		Identifier* id = dynamic_cast<Identifier*>(exp);
 		value = TValue(id->name);
@@ -885,6 +925,7 @@ TValue ast::MemberName::run() {
 }
 
 TValue ast::Block::run() {
+	TValue value = TValue::undefined();
 	debugOut << "Enter new block!" << std::endl;
 	// nowStack.push_new();
 	this->stmtList->run();

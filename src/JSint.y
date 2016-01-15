@@ -261,7 +261,8 @@ PropertyName	:	Identifier
 	char a[200];
 	strcpy(a,$1+1);
 	a[strlen(a)-1] = 0;
-	$$ = new std::string($1);
+	$$ = new std::string(a);
+	debugOut<<*$$<<std::endl;
 }
 |	DECIMAL_LITERAL
 {

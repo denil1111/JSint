@@ -96,7 +96,7 @@ public:
 class Node {
 public:
     std::string     debug;
-	TValue	value;
+    // TValue value;
     void print_node(std::string prefix, bool tail, bool root) {
         std::string tailStr = "└── ";
         std::string branchStr = "├── ";
@@ -120,10 +120,10 @@ public:
 };
 class Statement : public Node {
 public:
-    Statement() { value = TValue::undefined(); };
+    Statement() {};
     virtual TValue run()
     {
-        return value;
+        return TValue::undefined();
     }
     virtual std::vector<Statement*> *getlist(){}
 	virtual std::string toString() { return "Statement"; }
@@ -883,7 +883,7 @@ public:
 	std::string name;
 	ast::Expression* valueExp;
 	PropertyNameAndValue() {}
-PropertyNameAndValue(std::string* name, ast::Expression* valueExp) : name(*name), valueExp(valueExp) {}
+    PropertyNameAndValue(std::string* name, ast::Expression* valueExp) : name(*name), valueExp(valueExp) {}
 	virtual std::string toString() { return "Property"; }
 	virtual std::vector<Node *> getChildren() { return std::vector<Node*>{valueExp}; }
 	virtual TValue run();

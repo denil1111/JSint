@@ -357,13 +357,21 @@ TValue ast::CallExpression::run() {
 	    	val.function->parent->print();
 	    	debugOut<<"run func"<<endl;
 	        nowStack.push_new(val.function->parent);
-	        value = function->execute(&valueList);
+	        try{
+	        	value = function->execute(&valueList);
+		    }catch(ast::ReturnException e){
+		        value = e.value;
+		    }
 	        nowStack.pop();
     	}
     	else
     	{
     		nowStack.push_new(val.function->parent);
-	        value = function->execute(nullptr);
+	        try{
+	        	value = function->execute(nullptr);
+		    }catch(ast::ReturnException e){
+		        value = e.value;
+		    }
 	        nowStack.pop();
     	}
 	    	

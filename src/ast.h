@@ -238,8 +238,10 @@ public:
     virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back(funcExp);
-        for (auto i : *argument_list) {
-            list.push_back(i);
+        if (argument_list) {
+            for (auto i : *argument_list) {
+                list.push_back(i);
+            }
         }
         return list;
     }

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <utility>
 #include <functional>
 #include <stdexcept>
 #include <cassert>
@@ -331,14 +332,21 @@ TValue ast::Routine::run() {
 }
 
 TValue ast::FunctionDeclaration::run() {
-    debugOut << "declaring function: " << function_name->name << std::endl;
-    debugOut << "with parameters: ";
+    if (function_name) {
+        debugOut << "declaring function: " << function_name->name << std::endl;
+        debugOut << "with parameters: ";
+    }
+    else {
+        debugOut << "declaring anonymous function with parameters: ";
+    }
 
     for (auto parameter : *parameter_list) {
         debugOut << parameter->name << " ";
     }
     value = TValue(new DeclaredFunction(function_name, parameter_list, function_body));
-    nowStack.assignAndNew(function_name->name, value);
+    if (function_name) {
+        nowStack.assignAndNew(function_name->name, value);
+    }
     return value;
 }
 
@@ -357,16 +365,23 @@ TValue ast::CallExpression::run() {
 	    	val.function->parent->print();
 	    	debugOut<<"run func"<<endl;
 	        nowStack.push_new(val.function->parent);
-	        value = function->execute(&valueList);
+	        try{
+	        	value = function->execute(&valueList);
+		    }catch(ast::ReturnException e){
+		        value = e.value;
+		    }
 	        nowStack.pop();
     	}
     	else
     	{
     		nowStack.push_new(val.function->parent);
-	        value = function->execute(nullptr);
+	        try{
+	        	value = function->execute(nullptr);
+		    }catch(ast::ReturnException e){
+		        value = e.value;
+		    }
 	        nowStack.pop();
     	}
-	    	
     }
     return value;
 }
@@ -629,7 +644,7 @@ TValue ast::ReturnStmt::run() {
 	{
 		throw ReturnException(TValue::undefined());
 	}
-	
+
 	return value;
 }
 TValue ast::ContinueStmt::run() {
@@ -725,7 +740,7 @@ TValue ast::TryStmt::run() {
 	if(finallystmt!=nullptr){
 		finallystmt->run();
 	}
-	
+
 	return value;
 }
 TValue ast::ThrowStmt::run() {
@@ -811,37 +826,38 @@ TValue ast::ElementList::run() {
 }
 
 
-TValue ast::MemberPropertyExpression::run() {
-	leftExp->run();
-	value = leftExp->value;
+std::pair<Object*, ast::MemberName*>* ast::MemberPropertyExpression::simplify() {
+	TValue value = leftExp->run();
 	debugOut<<"member pro"<<endl;
 
 	if (rightExpList != nullptr) {
 
-		Object* o;
-
-		for (MemberNameList::iterator iter=rightExpList->begin();
-			 iter!=rightExpList->end(); iter++) {
-			 (*iter)->run();
+		int i = 0;
+		for (; i<rightExpList->size()-1; i++) {			
+			TValue memberValue = rightExpList->at(i)->run();
+			
+			debugOut<<"Member: " << memberValue.toString()<<endl;
+			
+			value = value.object->get(memberValue.toString());
 		}
-
-		for (MemberNameList::iterator iter=rightExpList->begin();
-			 iter!=rightExpList->end(); iter++) {
-
-			if (value.object == nullptr) {
-				runerror("Not an object!");
-			} else {
-				o = value.object;
-			}
-			debugOut<<(*iter)->value.toString()<<endl;
-			value = o->get((*iter)->value.toString());
-		}
+		return new std::pair<Object*, ast::MemberName*>(value.object, rightExpList->at(i));
 		// debugOut << "check in" << value.function<<std::endl;
 		//debugOut << "check out!" << std::endl;
+	} else {
+		runerror("rightExpList is null!");
 	}
+	
+}
 
-	return value;
+TValue ast::MemberPropertyExpression::run() {
+	std::pair<Object*, ast::MemberName*>* simPair = this->simplify();
+	TValue memberValue = simPair->second->run();
+	debugOut << "Member: " << memberValue.toString() << endl;
+	return simPair->first->get(memberValue.toString());
+}
 
+void ast::MemberPropertyExpression::assign(TValue value) {
+	
 }
 
 TValue ast::MemberName::run() {

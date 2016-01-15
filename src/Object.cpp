@@ -4,7 +4,7 @@ TValue Object::get(std::string name) {
 	if (prop.find(name) == prop.end()) {
 		return TValue::undefined();
 	} else {
-        debugOut<<"finded"<<name<<std::endl;
+        debugOut<<"finded: "<<name<<std::endl;
         return prop[name];
     }
 }

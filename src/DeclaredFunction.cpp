@@ -24,10 +24,6 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         }
         debugOut << std::endl;
     }
-    try{
-        val = function_body->run();
-    }catch(ast::ReturnException e){
-        val = e.value;
-    }
-    return val;
+    if (function_body) function_body->run();
+    return TValue::undefined();
 }

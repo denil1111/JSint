@@ -9,11 +9,11 @@ int parseError = 0;
 int runFlag;
 MyStream debugOut;
 
-void runerror(char *s, ...) {
+void runerror(std::string str, ...) {
 	char errmsg[1000];
 	va_list args;
-	va_start(args, s);
-  	vsprintf(errmsg, s, args);
+	va_start(args, str.c_str());
+  	vsprintf(errmsg, str.c_str(), args);
   	va_end(args);
   	fprintf(stdout, "\033[1;31m Error \033[0m\033[1m: %s\033[0m\n", errmsg);
 	parseError = 1;

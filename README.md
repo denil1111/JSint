@@ -9,5 +9,5 @@
 [@Pascal](https://github.com/Gnnng/Pascal)
 
 # video
-[video](http://v.youku.com/v_show/id_XMTQ0NzUxOTUxMg==.html)
+[video](http://www.tudou.com/programs/view/MB1BNTZ7GRQ/)
 

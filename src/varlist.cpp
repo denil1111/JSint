@@ -137,37 +137,13 @@ TValue TValue::operator   +( TValue &rx){
 	{
 		return TValue::NaN();
 	}
-	if (this->type == TType::Tdouble)
+	if (this->type == TType::Tdouble && rx.type == TType::Tdouble)
 	{
-		switch (rx.type)
-		{
-			case TType::Tdouble: {
-				ret.type = TType::Tdouble;
-				ret.sValue.dou = this->sValue.dou + rx.sValue.dou;
-				break;
-			}
-			case TType::Tstring: {
-				return TValue(toString() + rx.sValue.str);
-			}
-		}
+		ret.type = TType::Tdouble;
+		ret.sValue.dou = this->sValue.dou + rx.sValue.dou;
+		return ret;
 	}
-	if (this->type == TType::Tstring)
-	{
-		switch (rx.type)
-		{
-
-			case TType::Tdouble: {
-				return TValue(this->sValue.str+ rx.toString());
-
-			}
-			case TType::Tstring: {
-				ret.type = TType::Tstring;
-				ret.sValue.str = this->sValue.str + rx.sValue.str;
-				break;
-			}
-		}
-	}
-	return ret;
+	return TValue(toString()+rx.toString());
 }
 TValue TValue::operator   -( TValue &rx){
 	TValue x = this->toDouble();

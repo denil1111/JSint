@@ -103,7 +103,7 @@ extern int parseError;
 %type <ast_Expression> AllocationExpression AllocationExpressionBody
 %type <ast_MemberNameList> MemberExpressionParts
 %type <ast_MemberName> MemberExpressionPart
-%type <ast_Expression> CallExpressionForIn CallExpressionParts CallExpressionPart
+
 %type <ast_CallExpression> CallExpression
 %type <ast_ArgumentList> Arguments ArgumentList
 %type <ast_Expression> LeftHandSideExpression LeftHandSideExpressionForIn
@@ -261,7 +261,8 @@ PropertyName	:	Identifier
 	char a[200];
 	strcpy(a,$1+1);
 	a[strlen(a)-1] = 0;
-	$$ = new std::string($1);
+	$$ = new std::string(a);
+	debugOut<<*$$<<std::endl;
 }
 |	DECIMAL_LITERAL
 {
@@ -274,6 +275,9 @@ MemberExpression	:  MemberPropertyExpression
 }
 |	AllocationExpression
 |   FunctionExpression
+{
+	$$ = $1;
+}
 |   PrimaryExpression
 {
 	$$ = $1;
@@ -316,19 +320,14 @@ MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
 	yyerror("unexpected literal \"%s\" here",yytext);
 }
 
-CallExpression	:	MemberExpression Arguments CallExpressionParts {
+CallExpression  :   MemberExpression Arguments {
 	$$ = new ast::CallExpression($1, $2);
 }
-
-CallExpressionForIn	:	MemberExpressionForIn Arguments CallExpressionParts
-
-CallExpressionParts :   CallExpressionParts CallExpressionPart
-| {
-	$$ = nullptr;
+| CallExpression Arguments {
+	$$ = new ast::CallExpression($1, $2);
 }
-CallExpressionPart	:	Arguments
-|   LEFT_BRACKET Expression RIGHT_BRACKET
-|	DOT Identifier
+| CallExpression LEFT_BRACKET Expression RIGHT_BRACKET
+| CallExpression DOT Identifier
 
 Arguments	:	LEFT_PARE ArgumentList RIGHT_PARE {
 	$$ = $2;
@@ -357,8 +356,7 @@ LeftHandSideExpression	:	CallExpression {
 	$$ = $1;
 /*	//printf("LeftHandExp\n");*/
 }
-LeftHandSideExpressionForIn	:	CallExpressionForIn
-|	MemberExpressionForIn {
+LeftHandSideExpressionForIn	: MemberExpressionForIn {
 
 }
 
@@ -825,11 +823,13 @@ ConditionalExpression	:	LogicalORExpression{
 	$$ = $1;
 }
 |LogicalORExpression QUES AssignmentExpression COLON AssignmentExpression {
+	$$ = new ast::Operator($1,$3,$5);
 }
 ConditionalExpressionNoIn	:	LogicalORExpressionNoIn {
 	$$ = $1;
 }
 |LogicalORExpressionNoIn QUES AssignmentExpression COLON AssignmentExpressionNoIn {
+	$$ = new ast::Operator($1,$3,$5);
 }
 AssignmentExpression	:	LeftHandSideExpression AssignmentOperator AssignmentExpression
 {
@@ -942,6 +942,9 @@ Statement	:	Block
 }
 |	JScriptVarStatement
 |	VariableStatement
+{
+	$$ = $1;
+}
 |	EmptyStatement
 {
 	$$ = new ast::Statement();
@@ -967,6 +970,9 @@ Statement	:	Block
 }
 |	ImportStatement
 |	ReturnStatement
+{
+	$$ = $1;
+}
 |	WithStatement
 |	SwitchStatement{
 	$$=$1;
@@ -978,7 +984,7 @@ Statement	:	Block
 	$$=$1;
 }
 Block	:	LEFT_BRACE RIGHT_BRACE{
-
+	$$ = new ast::Block();
 }
 |   LEFT_BRACE StatementList RIGHT_BRACE
 {

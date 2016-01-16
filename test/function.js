@@ -22,3 +22,18 @@ var h = function(i, j) {
     return k;
 }
 console.log(h(1,2));
+
+// recursive
+function fact(n) {
+    if (n == 1) return 1;
+    else return n * fact(n - 1);
+}
+console.log(fact(4));
+
+// return function
+function outer() {
+    return function inner() {
+        console.log("inner");
+    }
+}
+outer()();

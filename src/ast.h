@@ -96,7 +96,7 @@ public:
 class Node {
 public:
     std::string     debug;
-	TValue	value;
+    // TValue value;
     void print_node(std::string prefix, bool tail, bool root) {
         std::string tailStr = "└── ";
         std::string branchStr = "├── ";
@@ -120,10 +120,10 @@ public:
 };
 class Statement : public Node {
 public:
-    Statement() { value = TValue::undefined(); };
+    Statement() {};
     virtual TValue run()
     {
-        return value;
+        return TValue::undefined();
     }
     virtual std::vector<Statement*> *getlist(){}
 	virtual std::string toString() { return "Statement"; }
@@ -636,10 +636,11 @@ public:
         voido,
         type,
         del,
+        condition
 
     };
 
-    Expression *op1, *op2;
+    Expression *op1, *op2, *op3;
     OpType op;
 
     Operator(Expression* op1, OpType op, Expression* op2) :
@@ -647,7 +648,12 @@ public:
         op(op),
         op2(op2)
     {}
-
+    Operator(Expression* op1, Expression* op2, Expression* op3) :
+        op1(op1),
+        op2(op2),
+        op3(op3),
+        op(OpType::condition)
+    {}
     virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)op1);
@@ -703,7 +709,8 @@ public:
             { OpType::rmminus, "minus_minus_right"},
             { OpType::voido, "void"},
             { OpType::type, "type"},
-            { OpType::del, "delete"}
+            { OpType::del, "delete"},
+            { OpType::condition, "condition"}
         }[op];
     }
     virtual TValue run();
@@ -999,6 +1006,7 @@ MemberExpressionList(Expression* exp, ExpressionList* expList):
 class Block : public Statement {
 	StatementList* stmtList;
 public:
+    Block() : stmtList(new StatementList) {}
     Block(StatementList* stmtList) : stmtList(stmtList) {}
 	virtual std::string toString() { return "block"; }
     virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }

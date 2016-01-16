@@ -47,7 +47,8 @@ SPACE [ \t\n]
 COMPLEX "*"[^/]
 %s newstate
 %%
-"//"(.*[ \t]*.*)*[\n]+    {}
+
+"//".*  {}
 {START}                    {yymore();BEGIN newstate;}
  <newstate>{SIMPLE}        {yymore();BEGIN newstate;}
  <newstate>{COMPLEX}      {yymore();BEGIN newstate;}

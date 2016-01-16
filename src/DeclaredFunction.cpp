@@ -24,6 +24,28 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         }
         debugOut << std::endl;
     }
-    if (function_body) function_body->run();
+    if (function_body) {
+        for (auto i : function_body->getChildren()) {
+            traverse(i);
+        }
+        function_body->run();
+    }
     return TValue::undefined();
+}
+
+void DeclaredFunction::traverse(ast::Node* statement) {
+    ast::VarDecl* varDecl = dynamic_cast<ast::VarDecl*>(statement);
+    std::vector<ast::Node *> children = statement->getChildren();
+    if (varDecl) {
+        if (varDecl->initial) {
+            varDecl->usedFlag = false;
+        }
+        ast::Statement* statement = new ast::VarDecl(varDecl->name);
+        function_body->list.insert(function_body->list.begin(), statement);
+    }
+    if (children.size() > 0) {
+        for (auto i : children) {
+            DeclaredFunction::traverse(i);
+        }
+    }
 }

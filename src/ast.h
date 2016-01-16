@@ -436,7 +436,7 @@ class VarDecl : public Statement {
 public:
     Identifier*     name;
     Expression*     initial;
-
+    bool            usedFlag = true;
     VarDecl(Identifier* name, Expression* initial) : name(name), initial(initial) {}
     VarDecl(Identifier* name) : name(name), initial(nullptr) {}
     virtual std::vector<Node *> getChildren() {

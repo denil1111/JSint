@@ -83,7 +83,7 @@ TValue ast::Operator::run() {
 	{
 		if (op1->run().toBoolean())
 		{
-			return op2->run(); 
+			return op2->run();
 		}
 		else
 		{
@@ -333,7 +333,11 @@ TValue ast::ConstDecl::run() {
 
 TValue ast::VarDecl::run() {
 	TValue value = TValue::undefined();
-	if (initial!=nullptr)
+	if (!usedFlag) {
+		Operator* replace = new Operator(name, Operator::OpType::assign, initial);
+		return replace->run();
+	}
+	else if (initial!=nullptr)
 	{
 		TValue val = initial->run();
 		nowStack.newVar(name->name,val);
@@ -408,7 +412,7 @@ TValue ast::CallExpression::run() {
 		    }
 	        nowStack.pop();
     	}
-	    	
+
     }
     return value;
 }
@@ -685,7 +689,7 @@ TValue ast::ReturnStmt::run() {
 	{
 		throw ReturnException(TValue::undefined());
 	}
-	
+
 	return value;
 }
 TValue ast::ContinueStmt::run() {
@@ -785,7 +789,7 @@ TValue ast::TryStmt::run() {
 	if(finallystmt!=nullptr){
 		finallystmt->run();
 	}
-	
+
 	return value;
 }
 TValue ast::ThrowStmt::run() {
@@ -885,11 +889,11 @@ std::pair<Object*, ast::MemberName*>* ast::MemberPropertyExpression::simplify() 
 	if (rightExpList != nullptr) {
 
 		int i = 0;
-		for (; i<rightExpList->size()-1; i++) {			
+		for (; i<rightExpList->size()-1; i++) {
 			TValue memberValue = rightExpList->at(i)->run();
-			
+
 			debugOut<<"Member: " << memberValue.toString()<<endl;
-			
+
 			value = value.object->get(memberValue.toString());
 		}
 		return new std::pair<Object*, ast::MemberName*>(value.object, rightExpList->at(i));
@@ -898,7 +902,7 @@ std::pair<Object*, ast::MemberName*>* ast::MemberPropertyExpression::simplify() 
 	} else {
 		runerror("rightExpList is null!");
 	}
-	
+
 }
 
 TValue ast::MemberPropertyExpression::run() {
@@ -910,7 +914,7 @@ TValue ast::MemberPropertyExpression::run() {
 }
 
 void ast::MemberPropertyExpression::assign(TValue value) {
-	
+
 }
 
 TValue ast::MemberName::run() {

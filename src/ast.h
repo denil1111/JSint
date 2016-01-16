@@ -336,8 +336,13 @@ public:
     Identifier(const char * ptr_s) : name(*(new std::string(ptr_s))) {}
     virtual std::string toString() { return "Identifier: " + name; }
     virtual TValue run();
+	virtual void assign(TValue val);
 };
 
+class ThisFlag : public Identifier {
+public:
+    ThisFlag():Identifier("this"){};
+};
 
 class FunctionDeclaration : public Expression {
 public:

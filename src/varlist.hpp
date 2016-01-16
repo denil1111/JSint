@@ -107,12 +107,10 @@ public:
 		if (type != TType::Tstring) {
 			std::cout<<green(this->toString())<<std::endl;
 		} else {
-			std::cout<<"\"" << green(this->toString()) << "\"" << std::endl;
+			std::cout<< "'" << green(this->toString()) << "'" << std::endl;
 		}
 	}
-	void output() {
-		std::cout<<this->toString()<<std::endl;
-	}
+	void output();
 
 	TValue operator   +( TValue &rx);
 	TValue operator   -( TValue &rx);
@@ -138,16 +136,25 @@ public:
 	TValue operator   ~();
 
 };
+
+struct MemoryItem {
+	TValue value;
+	int number;
+};
+
 class VarList {
-	std::map<std::string,TValue> list;
+	std::map<std::string, TValue> list;
 public:
 	VarList* parent = nullptr;
-	VarList() : list(std::map<std::string, TValue>()) {}
+	VarList() : list(std::map<std::string, TValue>()) {		
+	}
 	void assignAndNew(std::string idname, TValue val){
+		int newNumber = list.size() + 1;
 		list[idname] = val;
 	};
+	
 	void removeVar(std::string idname){
-		std::map<std::string,TValue>::iterator it;
+		std::map<std::string, TValue>::iterator it;
 		it=list.find(idname);
 		if (it == list.end()){
 			return;
@@ -155,11 +162,13 @@ public:
 			list.erase(it);
 		}
 	}
+	
 	bool hasVar(std::string idname) {
 		if (list.find(idname) == list.end())
 			return false;
 		else return true;
 	}
+	
 	TValue getVar(std::string idname) {
 		if (hasVar(idname)) return list[idname];
 		else {
@@ -193,7 +202,29 @@ public:
 	void push(VarList *varList);
 	void push_new(VarList* parent);
 	void pop();
-	VarList* front();
+	VarList* back();
 	void print();
+	bool isMain();
 };
 #endif
+
+/*
+class VarMemory {
+private:	
+	std::vector<memoryItem> memory;
+	
+public:
+
+	VarMemory() {}
+	void addItem(TValue value) {
+		addItem(MemoryItem(varlist, name, false));
+	}
+
+	void mark() {
+		
+	}
+
+	void sweep() {
+	}
+}
+*/

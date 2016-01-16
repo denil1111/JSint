@@ -107,7 +107,7 @@ public:
 		if (type != TType::Tstring) {
 			std::cout<<green(this->toString())<<std::endl;
 		} else {
-			std::cout<<"\"" << green(this->toString()) << "\"" << std::endl;
+			std::cout<< "'" << green(this->toString()) << "'" << std::endl;
 		}
 	}
 	void output() {

@@ -292,7 +292,7 @@ TValue ast::Operator::run() {
         }
     }
     if (asgFlag) {
-		op1->assign(value2);
+		op1->assign(value);
 	}
 
 	return value;
@@ -860,7 +860,6 @@ void ast::MemberPropertyExpression::assign(TValue assignValue) {
 	TValue memberValue = simPair->second->run();
 	Object* o = simPair->first;
 	o->set(memberValue.toString(), assignValue);
-	return TValue(o);
 }
 
 TValue ast::MemberName::run() {

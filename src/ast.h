@@ -336,7 +336,7 @@ public:
     Identifier(const char * ptr_s) : name(*(new std::string(ptr_s))) {}
     virtual std::string toString() { return "Identifier: " + name; }
     virtual TValue run();
-	virtual void assign();
+	virtual void assign(TValue val);
 };
 
 
@@ -877,7 +877,7 @@ public:
 	std::string name;
 	ast::Expression* valueExp;
 	PropertyNameAndValue() {}
-PropertyNameAndValue(std::string* name, ast::Expression* valueExp) : name(*name), valueExp(valueExp) {}
+    PropertyNameAndValue(std::string* name, ast::Expression* valueExp) : name(*name), valueExp(valueExp) {}
 	virtual std::string toString() { return "Property"; }
 	virtual std::vector<Node *> getChildren() { return std::vector<Node*>{valueExp}; }
 	virtual TValue run();

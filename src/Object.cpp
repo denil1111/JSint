@@ -1,4 +1,5 @@
 #include "Object.h"
+#include <regex>
 
 TValue Object::get(std::string name) {
 	if (prop.find(name) == prop.end()) {
@@ -28,12 +29,27 @@ bool Object::toBoolean() {
 }
 
 std::string Object::toString() {
-    std::string str = "";
+    std::string str;
     if (isArr) {
+		str = "[ ";		
         for (int i=0; i<prop.size(); i++) {
             str = str + prop[std::to_string(i)].toString();
-            if (i!=prop.size()-1) str = str + ",";
+            if (i!=prop.size()-1) str = str + ", ";
         }
-    } else str = "[object Object]";
+		str = str + " ]";
+	} else {
+		str = "{ ";
+		for (std::map<std::string, TValue>::iterator iter=prop.begin();
+			 iter!=prop.end(); iter++) {
+			if (std::regex_match(iter->first, std::regex("[$_a-zA-Z][$_a-zA-Z0-9]*"))) {
+				str += iter->first + ": " + iter->second.toString();
+			} else {
+				str += "'" + iter->first + "': " + iter->second.toString();				
+			}
+			if (++iter!=prop.end()) str = str + ", ";
+			iter--;
+		}
+		str = str + " }";
+	}	
     return str;
 }

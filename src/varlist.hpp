@@ -6,6 +6,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <regex>
 #include "utils.h"
 class Object;
 class DeclaredFunction;
@@ -110,6 +111,13 @@ public:
 			std::cout<< "'" << green(this->toString()) << "'" << std::endl;
 		}
 	}
+
+
+	std::string toOutput() {
+		if (type != TType::Tstring) return toString();
+		else return "'" + toString() + "'";
+	}
+	
 	void output();
 
 	TValue operator   +( TValue &rx);
@@ -137,19 +145,14 @@ public:
 
 };
 
-struct MemoryItem {
-	TValue value;
-	int number;
-};
-
 class VarList {
 	std::map<std::string, TValue> list;
 public:
 	VarList* parent = nullptr;
 	VarList() : list(std::map<std::string, TValue>()) {		
 	}
+	VarList(std::map<std::string, TValue> listmap): list(listmap) {}
 	void assignAndNew(std::string idname, TValue val){
-		int newNumber = list.size() + 1;
 		list[idname] = val;
 	};
 	
@@ -175,6 +178,38 @@ public:
 			runerror("Not exist in variable list!");
 		}
 	}
+
+	int getSize() {
+		return list.size();
+	}	
+	
+	std::string joinValue(std::string separator) {
+		std::string str;
+		for (std::map<std::string, TValue>::iterator iter=list.begin();
+			 iter!=list.end(); iter++) {
+			
+            str = str + iter->second.toOutput() + separator;
+        }
+		for(int i=0; i<separator.length(); i++)		
+			str.pop_back();
+		return str;	   
+	}
+
+	std::string joinKeyValue(std::string separator) {
+		std::string str;
+		for (std::map<std::string, TValue>::iterator iter=list.begin();
+			 iter!=list.end(); iter++) {
+			if (std::regex_match(iter->first, std::regex("[$_a-zA-Z][$_a-zA-Z0-9]*")))
+				str += iter->first + ": " + iter->second.toString();
+			else
+				str += "'" + iter->first + "': " + iter->second.toString();
+            str = str + separator;
+        }
+		for(int i=0; i<separator.length(); i++)
+			str.pop_back();
+		return str;	   		
+	}
+	
 	void print() {
 		debugOut << "VarList(";
 		for (auto& kv : list) {
@@ -206,24 +241,3 @@ public:
 	void print();
 };
 #endif
-
-/*
-class VarMemory {
-private:	
-	std::vector<memoryItem> memory;
-	
-public:
-
-	VarMemory() {}
-	void addItem(TValue value) {
-		addItem(MemoryItem(varlist, name, false));
-	}
-
-	void mark() {
-		
-	}
-
-	void sweep() {
-	}
-}
-*/

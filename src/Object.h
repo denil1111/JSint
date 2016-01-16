@@ -8,18 +8,18 @@
 
 class Object {
 private:
-	std::map<std::string, TValue> prop;
+	VarList prop;
 	bool isArr;
 public:
-	Object() {}
+Object(): prop(VarList()), isArr(false) {}
     Object(std::vector<TValue> arr): isArr(true) {
-		prop = std::map<std::string, TValue>();
+		prop = VarList();
 		for (int i=0; i<arr.size(); i++) {
-			prop[std::to_string(i)] = arr[i];
+			prop.assignAndNew(std::to_string(i), arr[i]);
 		}
 	}
-	Object(std::map<std::string, TValue> prop): prop(prop), isArr(false) { }
-	void changeProp(std::string name, TValue val);
+    Object(std::map<std::string, TValue> propMap): prop(VarList(propMap)), isArr(false) {}
+    Object(VarList prop): prop(prop) {}
 	virtual TValue toDouble();
 	virtual bool toBoolean();
 	virtual std::string toString();

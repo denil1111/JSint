@@ -26,7 +26,7 @@ public:
 	Console() {
 		LogFunction *logfuc = new LogFunction;
 		TValue val(logfuc);
-		changeProp("log",val);
+		this->set("log",val);
 	}
 };
 void initSystem();

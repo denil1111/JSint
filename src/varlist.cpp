@@ -336,8 +336,13 @@ TValue TValue::operator  ~(){
 	return TValue(~(int)x.sValue.dou);
 }
 
-
-
+void TValue::output() {
+	if (this->type != TType::Tobject) {
+		std::cout<<this->toString()<<std::endl;
+	} else {
+		std::cout << this->object->toOutput() << std::endl;
+	}
+}
 
 
 //varStack

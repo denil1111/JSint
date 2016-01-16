@@ -19,14 +19,12 @@ public:
 		}
 	}
 	Object(std::map<std::string, TValue> prop): prop(prop), isArr(false) { }
-	void changeProp(std::string name, TValue val)
-	{
-		prop[name] = val;
-	}
+	void changeProp(std::string name, TValue val);
 	virtual TValue toDouble();
 	virtual bool toBoolean();
 	virtual std::string toString();
-
+	virtual std::string toOutput();
+	
 	TValue get(std::string name);
 	TValue get(int index);
 	void set(std::string name, TValue value);

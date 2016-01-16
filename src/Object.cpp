@@ -1,4 +1,5 @@
 #include "Object.h"
+#include <regex>
 
 TValue Object::get(std::string name) {
 	if (!prop.hasVar(name)) {

@@ -14,6 +14,8 @@
 using namespace std;
 extern VarStack nowStack;
 extern ast::LabelMap labelMap;
+TValue thisValue;
+TValue changeThis;
 
 /*
 void debugSet() {
@@ -28,17 +30,24 @@ void myerror(std::string str) {
 	runerror(str.c_str());
 }
 */
+TValue ast::ThisFlag::run() {
+	return thisValue;
+}
 
 TValue ast::Identifier::run() {
 	TValue value = TValue::undefined();
     debugOut << "Creating identifier: " << name << std::endl;
 
 	value = nowStack.getVar(name);
-
 	return value;
 }
 
 void ast::Identifier::assign(TValue val) {
+	debugOut << "assign identifier: " << name << std::endl;
+	debugOut<< val.type<<endl;
+	debugOut<<"obj :"<<val.object<<endl;
+
+	debugOut<<"suc :"<<val.object<<endl;
 	nowStack.assignAndNew(name, val);
 }
 
@@ -87,7 +96,7 @@ TValue ast::Operator::run() {
 	{
 		if (op1->run().toBoolean())
 		{
-			return op2->run(); 
+			return op2->run();
 		}
 		else
 		{
@@ -331,12 +340,19 @@ TValue ast::VarDecl::run() {
 	TValue value = TValue::undefined();
 	if (initial!=nullptr)
 	{
-		TValue val = initial->run();
-		nowStack.newVar(name->name,val);
+		if (usedFlag) {
+			TValue val = initial->run();
+			nowStack.newVar(name->name,val);
+		} else {
+			Operator* replace = new Operator(name, Operator::OpType::assign, initial);
+			return replace->run();
+		}
 	}
 	else
 	{
-		nowStack.newVar(name->name,TValue::undefined());
+		if (usedFlag) {
+			nowStack.newVar(name->name,TValue::undefined());
+		}
 	}
 	return value;
 }
@@ -365,6 +381,12 @@ TValue ast::FunctionDeclaration::run() {
         debugOut << parameter->name << " ";
     }
     value = TValue(new DeclaredFunction(function_name, parameter_list, function_body));
+    Object* prototype = new Object;
+    prototype->set("_constructor",value);
+    TValue prototypeV = TValue(prototype);
+    Object* o = new Object;
+    o->set("prototype",prototypeV);
+    value.object = o;
     if (function_name) {
         nowStack.assignAndNew(function_name->name, value);
     }
@@ -384,27 +406,45 @@ TValue ast::CallExpression::run() {
     		for (auto arg : *argument_list) {
 	            valueList.push_back(arg->run());
 	        }
-	    	val.function->parent->print();
+	    	// val.function->parent->print();
 	    	debugOut<<"run func"<<endl;
+
+	    	TValue oldthisValue = thisValue;
+    		thisValue = changeThis;
+    		debugOut<<"console this!"<<changeThis.object<<endl;
 	        nowStack.push_new(val.function->parent);
 	        try{
 	        	value = function->execute(&valueList);
 		    }catch(ast::ReturnException e){
 		        value = e.value;
 		    }
+		    thisValue = oldthisValue;
+		    changeThis = oldthisValue;
 	        nowStack.pop();
     	}
     	else
     	{
     		nowStack.push_new(val.function->parent);
+    		TValue oldthisValue = thisValue;
+    		thisValue = changeThis;
+    		debugOut<<"y() this!"<<changeThis.object<<endl;
 	        try{
+	        	debugOut<<"run funct at "<<function<<std::endl;
+	        	nowStack.print();
+	        	// debugOut<<"The parent list is"<<std::endl;
+	        	// if (val.function->parent)
+	        	// 	val.function->parent->print();
 	        	value = function->execute(nullptr);
 		    }catch(ast::ReturnException e){
 		        value = e.value;
 		    }
+		    debugOut<<"end funct at"<<std::endl;
+	        nowStack.print();
+	        thisValue = oldthisValue;
+	        changeThis = oldthisValue;
 	        nowStack.pop();
     	}
-	    	
+
     }
     return value;
 }
@@ -681,7 +721,7 @@ TValue ast::ReturnStmt::run() {
 	{
 		throw ReturnException(TValue::undefined());
 	}
-	
+
 	return value;
 }
 TValue ast::ContinueStmt::run() {
@@ -781,7 +821,7 @@ TValue ast::TryStmt::run() {
 	if(finallystmt!=nullptr){
 		finallystmt->run();
 	}
-	
+
 	return value;
 }
 TValue ast::ThrowStmt::run() {
@@ -876,16 +916,17 @@ TValue ast::ElementList::run() {
 
 std::pair<Object*, ast::MemberName*>* ast::MemberPropertyExpression::simplify() {
 	TValue value = leftExp->run();
-	debugOut<<"member pro"<<endl;
+	debugOut<<"Member pro"<<endl;
+	debugOut<<value.object<<endl;
 
 	if (rightExpList != nullptr) {
 
 		int i = 0;
-		for (; i<rightExpList->size()-1; i++) {			
+		for (; i<rightExpList->size()-1; i++) {
 			TValue memberValue = rightExpList->at(i)->run();
-			
+
 			debugOut<<"Member: " << memberValue.toString()<<endl;
-			
+
 			value = value.object->get(memberValue.toString());
 		}
 		return new std::pair<Object*, ast::MemberName*>(value.object, rightExpList->at(i));
@@ -894,12 +935,13 @@ std::pair<Object*, ast::MemberName*>* ast::MemberPropertyExpression::simplify() 
 	} else {
 		runerror("rightExpList is null!");
 	}
-	
+
 }
 
 TValue ast::MemberPropertyExpression::run() {
 	TValue value = TValue::undefined();
 	std::pair<Object*, ast::MemberName*>* simPair = this->simplify();
+	changeThis = TValue(simPair->first);
 	TValue memberValue = simPair->second->run();
 	debugOut << "Member: " << memberValue.toString() << endl;
 	return simPair->first->get(memberValue.toString());
@@ -933,4 +975,40 @@ TValue ast::Block::run() {
 	debugOut << "Exit from block!" << std::endl;
 	// nowStack.print();
 	return value;
+}
+
+TValue ast::AllocationExpression::run() {
+	debugOut<<"AllocationExpression!"<<endl;
+	TValue value = TValue::undefined();
+	TValue val = proto->run();
+	if (val.type == TValue::TType::Tfunction)
+	{
+		debugOut<<"run right!"<<std::endl;
+		TValue prototype = val.object->get("prototype");
+		if (prototype.type == TValue::TType::Tobject)
+		{
+			debugOut<<"has prototype!"<<std::endl;
+			TValue cons = prototype.object->get("_constructor");
+			Object* o = new Object;
+			debugOut<<"new obj is "<<o<<endl;
+			value =  TValue(o);
+			TValue oldthisValue = thisValue;
+			thisValue = value;
+			nowStack.push_new(cons.function->parent);
+	        try{
+	        	debugOut<<"run funct at"<<std::endl;
+	        	nowStack.print();
+	        	debugOut<<"The parent list is"<<std::endl;
+	        	cons.function->parent->print();
+	        	cons.function->execute(nullptr);
+		    }catch(ast::ReturnException e){
+		    }
+		    debugOut<<"end funct at"<<std::endl;
+	        nowStack.print();
+	        nowStack.pop();
+	        thisValue = oldthisValue;
+		}
+		debugOut<<"end of new"<<std::endl;
+		return value;	
+	}
 }

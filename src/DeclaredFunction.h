@@ -14,6 +14,9 @@ class VarList;
 
 
 namespace ast {
+    class Node;
+    class Operator;
+    class VarDecl;
     class Identifier;
     class Expression;
     class StatementList;
@@ -31,8 +34,10 @@ public:
     ParameterList *parameter_list;
     FunctionBody *function_body;
     VarList *parent;
+
     DeclaredFunction(){}
-    DeclaredFunction(ast::Identifier* id, ParameterList* parameters, FunctionBody* body) : function_name(id), parameter_list(parameters), function_body(body),parent(nowStack.front()) { }
+    void traverse(ast::Node* statement);
+    DeclaredFunction(ast::Identifier* id, ParameterList* parameters, FunctionBody* body) : function_name(id), parameter_list(parameters), function_body(body),parent(nowStack.back()) { }
 
     virtual TValue execute(ArgumentList *args);
 };

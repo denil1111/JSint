@@ -339,6 +339,11 @@ public:
 	virtual void assign(TValue val);
 };
 
+class ThisFlag : public Identifier {
+public:
+    ThisFlag():Identifier("this"){};
+    virtual TValue run();
+};
 
 class FunctionDeclaration : public Expression {
 public:
@@ -354,9 +359,7 @@ public:
         for (auto i : *parameter_list) {
             list.push_back(i);
         }
-        for (auto i : function_body->getChildren()) {
-            list.push_back(i);
-        }
+        list.push_back(function_body);
         return list;
     }
 };
@@ -437,9 +440,9 @@ class VarDecl : public Statement {
 public:
     Identifier*     name;
     Expression*     initial;
-
-    VarDecl(Identifier* name, Expression* initial) : name(name), initial(initial) {}
-    VarDecl(Identifier* name) : name(name), initial(nullptr) {}
+    bool            usedFlag;
+    VarDecl(Identifier* name, Expression* initial) : name(name), initial(initial), usedFlag(true) {}
+    VarDecl(Identifier* name) : name(name), initial(nullptr), usedFlag(true) {}
     virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)name);
@@ -1011,6 +1014,19 @@ public:
 	virtual std::string toString() { return "block"; }
     virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }
 	virtual TValue run();
+};
+
+class AllocationExpression: public Expression {
+    Expression* proto;
+public:
+    AllocationExpression(Expression* proto):proto(proto){}
+    virtual std::string toString() { return "AllocationExpression"; }
+    virtual std::vector<Node*> getChildren() {
+        std::vector<Node*> v;
+        v.push_back(proto);
+        return v;
+    }
+    virtual TValue run();
 };
 
 }

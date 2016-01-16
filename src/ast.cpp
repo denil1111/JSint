@@ -368,6 +368,12 @@ TValue ast::FunctionDeclaration::run() {
     if (function_name) {
         nowStack.assignAndNew(function_name->name, value);
     }
+    Object* prototype = new Object;
+    prototype->set("_constructor",value);
+    TValue prototypeV = TValue(prototype);
+    Object* o = new Object;
+    o->set("prototype",prototypeV);
+    value.object = o;
     return value;
 }
 
@@ -398,10 +404,16 @@ TValue ast::CallExpression::run() {
     	{
     		nowStack.push_new(val.function->parent);
 	        try{
+	        	debugOut<<"run funct at"<<std::endl;
+	        	nowStack.print();
+	        	debugOut<<"The parent list is"<<std::endl;
+	        	val.function->parent->print();
 	        	value = function->execute(nullptr);
 		    }catch(ast::ReturnException e){
 		        value = e.value;
 		    }
+		    debugOut<<"end funct at"<<std::endl;
+	        	nowStack.print();
 	        nowStack.pop();
     	}
 	    	

@@ -349,9 +349,6 @@ void VarStack::setVar(std::string idname,TValue val) {
 	VarList *nowList = (vstack.back());
 	do
 	{
-		debugOut<<"now Finding";
-		nowList->print();
-
 		if (nowList->hasVar(idname))
 		{
 			nowList->assignAndNew(idname,val);
@@ -407,13 +404,8 @@ bool VarStack::hasVar(std::string idname) {
 
 TValue VarStack::getVar(std::string idname) {
 	VarList *nowList = (vstack.back());
-	debugOut<<nowList->parent<<std::endl;
-	if (nowList->parent)
-	nowList->parent->print();
 	do
 	{
-		debugOut<<"now Finding";
-		nowList->print();
 		if (nowList->hasVar(idname))
 		{
 			return nowList->getVar(idname);
@@ -422,7 +414,6 @@ TValue VarStack::getVar(std::string idname) {
 		{
 			if (nowList->parent != nullptr)
 			{
-				nowList->parent->print();
 				nowList = nowList->parent;
 			}
 				
@@ -457,7 +448,6 @@ void VarStack::push(VarList *varList) {
 	vstack.push_back(varList);
 }
 void VarStack::push_new(VarList* parent) {
-	debugOut<<"pushing new list"<<std::endl;
 	VarList *newList = new VarList;
 	newList->parent =parent;
 	this->push(newList);
@@ -465,13 +455,23 @@ void VarStack::push_new(VarList* parent) {
 void VarStack::pop() {
 	vstack.pop_back();
 }
-VarList* VarStack::front() {
+VarList* VarStack::back() {
 
-	return vstack.front();
+	return vstack.back();
 }
 void VarStack::print() {
 	for (int lv = vstack.size()-1; lv>=0; lv--) {
 		debugOut << "level " << lv << " : ";
 		vstack[lv]->print();
+	}
+}
+bool VarStack::isMain() {
+	if (vstack.size() == 1)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }

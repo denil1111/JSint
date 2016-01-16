@@ -193,7 +193,8 @@ public:
 	void push(VarList *varList);
 	void push_new(VarList* parent);
 	void pop();
-	VarList* front();
+	VarList* back();
 	void print();
+	bool isMain();
 };
 #endif

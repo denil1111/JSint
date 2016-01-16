@@ -339,6 +339,10 @@ public:
 	virtual void assign(TValue val);
 };
 
+class ThisFlag : public Identifier {
+public:
+    ThisFlag():Identifier("this"){};
+};
 
 class FunctionDeclaration : public Expression {
 public:

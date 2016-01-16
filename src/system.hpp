@@ -9,9 +9,7 @@ public:
 	{
 		parameter_list = new ParameterList;
 		parameter_list->push_back(new ast::Identifier("x"));
-		parent = nowStack.front();
-		debugOut<<"PARENT!"<<std::endl;
-		parent->print();
+		parent = nowStack.back();
 	}
 	virtual TValue execute(ArgumentList *args)
 	{
@@ -23,11 +21,17 @@ public:
 class Console: public Object
 {
 public:
-	Console() {
+	Console() 
+	{
 		LogFunction *logfuc = new LogFunction;
 		TValue val(logfuc);
-		changeProp("log",val);
+		set("log",val);
 	}
 };
 void initSystem();
+
+class Prototype: public Object
+{
+
+};
 #endif

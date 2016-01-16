@@ -161,6 +161,9 @@ extern int parseError;
 %%
 //张宇昊
 PrimaryExpression	:	THIS
+{
+	$$ = new ast::ThisFlag();
+}
 |	ObjectLiteral
 {
 	$$ = $1;

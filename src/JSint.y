@@ -103,7 +103,7 @@ extern int parseError;
 %type <ast_Expression> AllocationExpression AllocationExpressionBody
 %type <ast_MemberNameList> MemberExpressionParts
 %type <ast_MemberName> MemberExpressionPart
-%type <ast_Expression> CallExpressionForIn CallExpressionParts CallExpressionPart
+
 %type <ast_CallExpression> CallExpression
 %type <ast_ArgumentList> Arguments ArgumentList
 %type <ast_Expression> LeftHandSideExpression LeftHandSideExpressionForIn
@@ -320,22 +320,14 @@ MemberExpressionPart    :   LEFT_BRACKET Expression RIGHT_BRACKET
 	yyerror("unexpected literal \"%s\" here",yytext);
 }
 
-CallExpression	:	MemberExpression Arguments CallExpressionParts {
+CallExpression  :   MemberExpression Arguments {
 	$$ = new ast::CallExpression($1, $2);
 }
-
-CallExpressionForIn	:	MemberExpressionForIn Arguments CallExpressionParts
-
-CallExpressionParts :   CallExpressionParts CallExpressionPart
-{
-	
+| CallExpression Arguments {
+	$$ = new ast::CallExpression($1, $2);
 }
-| {
-	$$ = nullptr;
-}
-CallExpressionPart	:	Arguments
-|   LEFT_BRACKET Expression RIGHT_BRACKET
-|	DOT Identifier
+| CallExpression LEFT_BRACKET Expression RIGHT_BRACKET
+| CallExpression DOT Identifier
 
 Arguments	:	LEFT_PARE ArgumentList RIGHT_PARE {
 	$$ = $2;
@@ -364,8 +356,7 @@ LeftHandSideExpression	:	CallExpression {
 	$$ = $1;
 /*	//printf("LeftHandExp\n");*/
 }
-LeftHandSideExpressionForIn	:	CallExpressionForIn
-|	MemberExpressionForIn {
+LeftHandSideExpressionForIn	: MemberExpressionForIn {
 
 }
 

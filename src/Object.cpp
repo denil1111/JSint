@@ -28,16 +28,16 @@ bool Object::toBoolean() {
 }
 
 std::string Object::toString() {
-    if (isArr) {
-		std:: string str;
-        for (int i=0; i<prop.size(); i++) {
-            str = str + prop[std::to_string(i)].toString();
-            if (i!=prop.size()-1) str = str + ",";
-        }
-		return str;
-	} else {
+ //    if (isArr) {
+	// 	std:: string str;
+ //        for (int i=0; i<prop.size(); i++) {
+ //            str = str + prop[std::to_string(i)].toString();
+ //            if (i!=prop.size()-1) str = str + ",";
+ //        }
+	// 	return str;
+	// } else {
 		return "[object Object]";
-	}
+	// }
 }
 
 std::string Object::toOutput() {

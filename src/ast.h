@@ -342,6 +342,7 @@ public:
 class ThisFlag : public Identifier {
 public:
     ThisFlag():Identifier("this"){};
+    virtual TValue run();
 };
 
 class FunctionDeclaration : public Expression {
@@ -1013,6 +1014,19 @@ public:
 	virtual std::string toString() { return "block"; }
     virtual std::vector<Node *> getChildren() { return std::vector<Node* >{stmtList}; }
 	virtual TValue run();
+};
+
+class AllocationExpression: public Expression {
+    Expression* proto;
+public:
+    AllocationExpression(Expression* proto):proto(proto){}
+    virtual std::string toString() { return "AllocationExpression"; }
+    virtual std::vector<Node*> getChildren() {
+        std::vector<Node*> v;
+        v.push_back(proto);
+        return v;
+    }
+    virtual TValue run();
 };
 
 }

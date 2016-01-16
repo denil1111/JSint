@@ -277,6 +277,9 @@ MemberExpression	:  MemberPropertyExpression
 	$$ =$1;
 }
 |	AllocationExpression
+{
+	$$ = $1;
+}
 |   FunctionExpression
 {
 	$$ = $1;
@@ -298,8 +301,20 @@ MemberExpressionForIn	:	FunctionExpression MemberExpressionParts
 }
 
 AllocationExpression    :   NEW MemberExpression AllocationExpressionBody
+{
+	if ($3 == nullptr)
+	{
+		$$ = new ast::AllocationExpression($2);
+	}
+}
 AllocationExpressionBody    :   AllocationExpressionBody Arguments MemberExpressionParts
+{
+
+}
 |
+{
+	$$ = nullptr;
+}
 MemberExpressionParts   :   MemberExpressionParts MemberExpressionPart
 {
 	$1->push_back($2);

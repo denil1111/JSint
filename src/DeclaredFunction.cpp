@@ -24,12 +24,14 @@ TValue DeclaredFunction::execute(ArgumentList *args) {
         }
         debugOut << std::endl;
     }
+    debugOut<<"run func now!"<<std::endl;
     if (function_body) {
         if (function_body->getChildren().size() > 0) {
             for (auto i : function_body->getChildren()) {
                 traverse(i);
             }
         }
+        debugOut<<"run func now!"<<std::endl;
         function_body->run();
     }
     return TValue::undefined();

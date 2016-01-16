@@ -329,18 +329,21 @@ TValue ast::ConstDecl::run() {
 
 TValue ast::VarDecl::run() {
 	TValue value = TValue::undefined();
-	if (!usedFlag) {
-		Operator* replace = new Operator(name, Operator::OpType::assign, initial);
-		return replace->run();
-	}
-	else if (initial!=nullptr)
+	if (initial!=nullptr)
 	{
-		TValue val = initial->run();
-		nowStack.newVar(name->name,val);
+		if (usedFlag) {
+			TValue val = initial->run();
+			nowStack.newVar(name->name,val);
+		} else {
+			Operator* replace = new Operator(name, Operator::OpType::assign, initial);
+			return replace->run();
+		}
 	}
 	else
 	{
-		nowStack.newVar(name->name,TValue::undefined());
+		if (usedFlag) {
+			nowStack.newVar(name->name,TValue::undefined());
+		}
 	}
 	return value;
 }

@@ -358,9 +358,7 @@ public:
         for (auto i : *parameter_list) {
             list.push_back(i);
         }
-        for (auto i : function_body->getChildren()) {
-            list.push_back(i);
-        }
+        list.push_back(function_body);
         return list;
     }
 };
@@ -441,9 +439,9 @@ class VarDecl : public Statement {
 public:
     Identifier*     name;
     Expression*     initial;
-    bool            usedFlag = true;
-    VarDecl(Identifier* name, Expression* initial) : name(name), initial(initial) {}
-    VarDecl(Identifier* name) : name(name), initial(nullptr) {}
+    bool            usedFlag;
+    VarDecl(Identifier* name, Expression* initial) : name(name), initial(initial), usedFlag(true) {}
+    VarDecl(Identifier* name) : name(name), initial(nullptr), usedFlag(true) {}
     virtual std::vector<Node *> getChildren() {
         std::vector<Node *> list;
         list.push_back((Node *)name);

@@ -10,30 +10,39 @@ function foo2(a, b) {
 console.log(foo2(1,2));
 
 // function expression
-var d = function foo3(e, f) {
-    var g = e - f;
-    return g;
+var foo4 = function foo3(a, b) {
+    var c = a - b;
+    return c;
 }
-console.log(d(1,2));
+console.log(foo4(1,2));
 
-// anonymous
-var h = function(i, j) {
-    var k = i * j;
-    return k;
+// anonymous function
+var foo5 = function(a, b) {
+    var c = a * b;
+    return c;
 }
-console.log(h(1,2));
+console.log(foo5(1,2));
 
-// recursive
+// recursion
 function fact(n) {
     if (n == 1) return 1;
     else return n * fact(n - 1);
 }
 console.log(fact(4));
 
-// return function
+// function as return value
 function outer() {
     return function inner() {
         console.log("inner");
     }
 }
 outer()();
+
+// var hoisting
+a = 1;
+function foo6() {
+    a = 2;
+    var a = 3;
+}
+foo6();
+console.log(a);
